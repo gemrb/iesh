@@ -1,0 +1,67 @@
+ie_shell.py - Simple shell for Infinity Engine-based game files
+===============================================================
+
+
+Installation:
+-------------
+None at present, just untar it somewhere
+
+Configuration:
+--------------
+
+Edit ie_shell.py:
+
+game_dir 
+    - directory where the game you are interested in is installed
+
+chitin_file
+dialog_file 
+    - names of RESREF and STRREF index files, located in game_dir.
+      Edit the names if the case does not match
+
+
+Running:
+--------
+Just type ./ie_shell.py or python ./ie_shell.py and you should see 
+dots marking progress as the program loads CHITIN.KEY and DIALOG.TLK.
+
+!!! This might take *extremely* long time on a slow computer and
+a significant portion of memory. If it's too slow or too big, then
+this proggie just is not for you :( !!! 
+
+Once the files are loaded, you get Cmd: prompt, where you can type
+python statements (only those fitting on one line atm).
+
+Now you can load files, inspect their contents, search them and export
+objects out of them.
+
+The following resource formats are recognized in this version:
+  KEY
+  TLK
+  BIFF (only file records)
+  WMAP
+  CHUI
+
+Type `?' or `help' to get some online help and `q', `quit' or ^D
+to exit the program.
+
+
+
+License, disclaimer and similar stuff:
+--------------------------------------
+
+Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
