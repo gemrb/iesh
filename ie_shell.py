@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: ie_shell.py,v 1.1 2005/03/02 20:44:21 edheldil Exp $
+# RCS: $Id: ie_shell.py,v 1.2 2005/03/02 21:26:51 edheldil Exp $
 
 import atexit
 #import os
@@ -48,6 +48,10 @@ def help_on_shell ():
     This is a python shell, meaning that the commands you enter
     are python commands and statements (only single-line at the moment).
 
+    Use TAB to complete commands, object, attribute or method names, etc.
+    Use UP or DOWN cursor keys to navigate in command history
+    Use LEFT or RIGHT cursor keys to edit current command
+
     Some notable commands:
     
       find_str ("^(?i)gemrb")
@@ -58,7 +62,26 @@ def help_on_shell ():
           Try to find resource GUICG and export it to file GUICG.chu.
           If the name is not unique, add third parameter,
           e.g. type=0x03ea to restrict the resource type
-          
+
+      c = chui.CHUI_Format ("GUISAVE.chu")
+      c.decode_file ()
+      c.print_file ()
+           loads file GUISAVE.chu from the current dir, decodes it
+           and prints its contents
+
+           key.KEY_Format
+           tlk.TLK_Format
+           biff.BIFF_Format
+
+           bam.BAM_Format
+           chui.CHUI_Format
+           itm.ITM_Format
+           spl.SPL_Format   (NOT WORKING!)
+           wmap.WMAP_Format
+
+      core.keys.print_strref_record (core.keys.key_list[0])
+      core.strrefs.print_strref_record (core.strrefs.strref_list[0])
+           print first records from chitin.key or dialog.tlk file
     """
 
 
