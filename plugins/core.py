@@ -12,10 +12,24 @@ strrefs = None
 global keys
 keys = None
 
-
 global slash_trans
 slash_trans = string.maketrans ('\\', '/')
 
+t_cp1250 = 'áèïéìíòóøšúùıÁÈÏÉÌÍÒÓØŠÚÙİ'
+t_iso8859_2 = 'áèïéìíòóø¹»úùı¾ÁÈÏÉÌÍÒÓØ©«ÚÙİ®'
+
+global lang_trans
+lang_trans = string.maketrans (t_cp1250, t_iso8859_2)
+
+def translate_to_iso (s):
+    return string.translate (s, lang_trans)
+
+def cond (c, a, b):
+    if c: return a
+    else: return b
+
+def translate_to_ord (s):
+    return map (lambda c: (cond (ord (c) < 128, c, "\\x%02X" %(ord (c))), s))
 
 restype_list = [
     [0x0001, 'BMP', ''],

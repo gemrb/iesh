@@ -11,7 +11,6 @@ def find_str (text):
     for o in core.strrefs.get_strref_by_str_re(text):
         print core.strrefs.strref_list.index(o), o['string']
 
-
 # Export resource `name' into file `filename'. If the `name' is not unique
 #   specify resource type with `type'
 def export_obj (name, filename, type = 0):

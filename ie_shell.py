@@ -16,10 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: ie_shell.py,v 1.2 2005/03/02 21:26:51 edheldil Exp $
+# RCS: $Id: ie_shell.py,v 1.3 2005/03/06 22:05:41 edheldil Exp $
 
 import atexit
-#import os
+import os
 import os.path
 import rlcompleter
 import readline
@@ -53,6 +53,9 @@ def help_on_shell ():
     Use LEFT or RIGHT cursor keys to edit current command
 
     Some notable commands:
+      !shell_cmd
+          Runs command shell_cmd in your native shell. Useful to list
+          files on disk, for example.
     
       find_str ("^(?i)gemrb")
           List strrefs for all strings starting with word GemRB, regardless
@@ -132,6 +135,9 @@ while 1:
         break
     if s == '?' or s == 'help':
         help_on_shell ()
+        continue
+    if s != '' and s[0] == '!':
+        os.system (s[1:])
         continue
     
     try:

@@ -16,12 +16,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: tlk.py,v 1.1 2005/03/02 20:44:23 edheldil Exp $
+# RCS: $Id: tlk.py,v 1.2 2005/03/06 22:05:45 edheldil Exp $
 
 import re
 import string
 import sys
 
+from plugins import core
 from format import Format, register_format, TICK_SIZE, TACK_SIZE
 
 class TLK_Format (Format):
@@ -30,13 +31,6 @@ class TLK_Format (Format):
         self.expect_signature = 'TLK'
 
         self.strref_list = []
-
-        
-
-        t_cp1250 = 'áèïéìíòóøšúùıÁÈÏÉÌÍÒÓØŠÚÙİ'
-        t_iso8859_2 = 'áèïéìíòóø¹»úùı¾ÁÈÏÉÌÍÒÓØ©«ÚÙİ®'
-
-        self.xlat = string.maketrans (t_cp1250, t_iso8859_2)
         
         self.header_desc = (
             { 'key': 'signature',
@@ -146,7 +140,10 @@ class TLK_Format (Format):
 
     def decode_strref_record (self, offset, obj):
         self.decode_by_desc (offset, self.strref_record_desc, obj)
-        obj['string'] = string.translate (self.decode_sized_string (self.header['string_offset'] + obj['string_offset'], obj['string_len']), self.xlat)
+        obj['string'] = self.decode_sized_string (self.header['string_offset'] + obj['string_offset'], obj['string_len'])
+        obj['string_raw'] = obj['string']
+        if core.lang_trans:
+            obj['string'] = string.translate (obj['string'], core.lang_trans)
         
     def print_strref_record (self, obj):
         self.print_by_desc (obj, self.strref_record_desc)
