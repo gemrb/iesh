@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: biff.py,v 1.1 2005/03/02 20:44:22 edheldil Exp $
+# RCS: $Id: biff.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
 
 from format import Format, register_format
 
@@ -153,7 +153,7 @@ class BIFF_Format (Format):
 
 
     def get_file_res_data (self, obj):
-        obj['data'] = self.decode_blob (obj['data_offset'], obj['data_size'])
+        obj['data'] = self.stream.decode_blob (obj['data_offset'], obj['data_size'])
 
     def save_file_res (self, filename, obj):
         self.get_file_res_data (obj)

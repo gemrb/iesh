@@ -12,6 +12,10 @@ strrefs = None
 global keys
 keys = None
 
+game_dir = None
+chitin_file = 'CHITIN.KEY'
+dialog_file = 'dialog.tlk'
+
 global slash_trans
 slash_trans = string.maketrans ('\\', '/')
 
@@ -103,4 +107,15 @@ restype_hash = {
     0x0803 : 'SRC',
     }
 
+
+def register_format (signature, version, klass):
+    #core.formats[(signature, version)] = klass
+    formats[signature] = klass
+
+
+def get_format (signature, version = None):
+    try:
+        return formats[signature]
+    except:
+        return None
 

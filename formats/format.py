@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: format.py,v 1.1 2005/03/02 20:44:23 edheldil Exp $
+# RCS: $Id: format.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
 
 import os.path
 import re
@@ -24,7 +24,7 @@ import string
 import struct
 
 from plugins import core
-
+from stream import Stream, FileStream
  
 PAGE_SIZE = 4096
 
@@ -39,7 +39,7 @@ def ResolveFilePath (filename):
 
 
 class Format:
-    def __init__ (self, filename):
+    def __init__ (self, source):
         self.header_size = 0
         self.bitmask_cache = {}
 
@@ -47,53 +47,11 @@ class Format:
 
         self.options['debug_decode'] = 0
 
-        self.open_file (filename)
+        if not isinstance (source, Stream):
+            source = FileStream (source)
 
-    def open_file (self, filename):
-        self.fh = open (filename, "r")        
-        self.offset = 0
-
-    def close_file (self):
-        self.fh.close ()
-
-    def get_char (self, offset):
-        self.fh.seek (offset)
-        return self.fh.read (1)
-
-    def decode_word (self, offset):
-        self.fh.seek (offset)
-        v = self.fh.read (2)
-        return struct.unpack ('H', v)[0]
-
-    def decode_dword (self, offset):
-        self.fh.seek (offset)
-        v = self.fh.read (4)
-        return struct.unpack ('I', v)[0]
-
-    def decode_sized_string (self, offset, size):
-        self.fh.seek (offset)
-        v = self.fh.read (size)
-        return struct.unpack ('%ds' %size, v)[0]
-
-    def decode_asciiz_string (self, off):
-        s = ''
-        
-        while 1:
-            c = self.get_char (off)
-            if c == '\0': break
-            s = s + c
-            off = off + 1
-            
-        return s
-
-    def decode_resref (self, off):
-        return self.decode_sized_string (off, 8)
-
-    def decode_blob (self, offset, size):
-        self.fh.seek (offset)
-        return self.fh.read (size)
-
-
+        self.stream = source
+        self.stream.open ()
 
     def get_masked_bits (self, value, mask, bl):
         return (value & mask) >> bl
@@ -108,9 +66,9 @@ class Format:
                 print "warning: bh < bl:", bits
                 bh, bl = bl, bh
 
-            mask = 0
+            mask = 0L
             for i in range (bl, bh + 1):
-                mask = mask | (1 << i)
+                mask = mask | (1L << i)
 
             #print "MASK: 0x%08x\n" %mask
 
@@ -126,40 +84,42 @@ class Format:
             type = d['type']
             local_offset = d['off']
 
+            stream = self.stream
+
             if self.options['debug_decode']:
                 print d
 
             if type == 'BYTE':
-                value = ord (self.get_char (offset + local_offset))
+                value = ord (stream.get_char (offset + local_offset))
             elif type == 'CTLTYPE':
-                value = ord (self.get_char (offset + local_offset))
+                value = ord (stream.get_char (offset + local_offset))
             elif type == 'WORD':
-                value = self.decode_word (offset + local_offset)
+                value = stream.decode_word (offset + local_offset)
             elif type == 'DWORD':
-                value = self.decode_dword (offset + local_offset)
+                value = stream.decode_dword (offset + local_offset)
             elif type == 'CTLID':
-                value = self.decode_dword (offset + local_offset)
+                value = stream.decode_dword (offset + local_offset)
             elif type == 'RGBA':
-                value = self.decode_dword (offset + local_offset)
+                value = stream.decode_dword (offset + local_offset)
             elif type == 'STR2':
-                value = self.decode_sized_string (offset + local_offset, 2)
+                value = stream.decode_sized_string (offset + local_offset, 2)
             elif type == 'STR4':
-                value = self.decode_sized_string (offset + local_offset, 4)
+                value = stream.decode_sized_string (offset + local_offset, 4)
             elif type == 'STR32':
-                value = self.decode_sized_string (offset + local_offset, 32)
+                value = stream.decode_sized_string (offset + local_offset, 32)
             elif type == 'RESREF':
-                value = self.decode_resref (offset + local_offset)
+                value = stream.decode_resref (offset + local_offset)
                 value = string.translate (value, core.slash_trans, '\x00')
             elif type == 'STRREF':
-                value = self.decode_dword (offset + local_offset)
+                value = stream.decode_dword (offset + local_offset)
             elif type == 'RESTYPE':
-                value = self.decode_word (offset + local_offset)
+                value = stream.decode_word (offset + local_offset)
             elif type == 'STROFF':
-                stroff = self.decode_dword (offset + local_offset)
-                value = self.decode_asciiz_string (stroff)
+                stroff = stream.decode_dword (offset + local_offset)
+                value = stream.decode_asciiz_string (stroff)
                 value = string.translate (value, core.slash_trans, '\x00')
             elif type == 'BYTES':
-                value = self.decode_blob (offset + local_offset, d['size'])
+                value = stream.decode_blob (offset + local_offset, d['size'])
             elif type == '_STRING':
                 value = ''
             elif type == '_BYTE':
@@ -231,6 +191,6 @@ ctltype_hash = {
     }
 
 
+
 def register_format (signature, version, klass):
-    #core.formats[(signature, version)] = klass
-    core.formats[signature] = klass
+    core.register_format (signature, version, klass)

@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: tlk.py,v 1.2 2005/03/06 22:05:45 edheldil Exp $
+# RCS: $Id: tlk.py,v 1.3 2006/01/03 21:18:05 edheldil Exp $
 
 import re
 import string
@@ -140,7 +140,7 @@ class TLK_Format (Format):
 
     def decode_strref_record (self, offset, obj):
         self.decode_by_desc (offset, self.strref_record_desc, obj)
-        obj['string'] = self.decode_sized_string (self.header['string_offset'] + obj['string_offset'], obj['string_len'])
+        obj['string'] = self.stream.decode_sized_string (self.header['string_offset'] + obj['string_offset'], obj['string_len'])
         obj['string_raw'] = obj['string']
         if core.lang_trans:
             obj['string'] = string.translate (obj['string'], core.lang_trans)

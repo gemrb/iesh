@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2006 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: ie_shell.py,v 1.3 2005/03/06 22:05:41 edheldil Exp $
+# RCS: $Id: ie_shell.py,v 1.4 2006/01/03 21:18:02 edheldil Exp $
 
 import atexit
 import os
@@ -29,18 +29,8 @@ from plugins import core
 #from plugins.core import *
 
 from formats import *
+from formats.stream import *
 from plugins import *
-
-###################################################
-# Directory where an IE game is installed
-#core.game_dir = "/home/benkovsk/dos/iwd2"
-core.game_dir = "/home/benkovsk/dos/pst"
-#core.game_dir = "/home/benkovsk/dos/bg2"
-
-# Case sensitive names of the central files
-core.chitin_file = "CHITIN.KEY"
-#core.chitin_file = "Chitin.key"
-core.dialog_file = "dialog.tlk"
 
 ###################################################
 def help_on_shell ():
@@ -51,11 +41,20 @@ def help_on_shell ():
     Use TAB to complete commands, object, attribute or method names, etc.
     Use UP or DOWN cursor keys to navigate in command history
     Use LEFT or RIGHT cursor keys to edit current command
+    Use ^R to search in command history
 
     Some notable commands:
-      !shell_cmd
-          Runs command shell_cmd in your native shell. Useful to list
-          files on disk, for example.
+      load_game ("/home/ed/pst", "CHITIN.KEY", "dialog.tlk")
+          Loads key and dialog files from the specified directory.
+          The directory parameter is mandatory, the others are optional.
+          Most of the other commands assume that these two files are
+          already loaded. The loaded objects are stored in core.keys and
+          core.strrefs.
+
+      load_object ("data/AGOODY.itm")
+      load_object ("AGOODY")
+          tries to find and load object from a file or resources.
+          Returns format object, so the object type has to be supported
     
       find_str ("^(?i)gemrb")
           List strrefs for all strings starting with word GemRB, regardless
@@ -82,9 +81,14 @@ def help_on_shell ():
            spl.SPL_Format   (NOT WORKING!)
            wmap.WMAP_Format
 
-      core.keys.print_strref_record (core.keys.key_list[0])
+      core.keys.print_bif_record (core.keys.bif_list[0])
       core.strrefs.print_strref_record (core.strrefs.strref_list[0])
            print first records from chitin.key or dialog.tlk file
+
+      !shell_cmd
+          Runs command shell_cmd in your native shell. Useful to list
+          files on disk, for example.
+
     """
 
 
@@ -100,32 +104,6 @@ except IOError:
 
 atexit.register (readline.write_history_file, histfile)
 del histfile
-
-
-# Load RESREF index file (CHITIN.KEY)
-core.keys = key.KEY_Format (os.path.join (core.game_dir, core.chitin_file))
-core.keys.decode_header ()
-print "Loading %d file refs and %d RESREFs. This may take ages" %(core.keys.header['num_of_bifs'], core.keys.header['num_of_resrefs'])
-core.keys.decode_file ()
-
-
-# LOAD STRREF index file (DIALOG.TLK)
-core.strrefs = tlk.TLK_Format (os.path.join (core.game_dir, core.dialog_file))
-core.strrefs.decode_header ()
-print "Loading %d STRREFs. This may take eternity" %(core.strrefs.header['num_of_strrefs'])
-core.strrefs.decode_file ()
-
-
-
-#f = biff.BIFF_Format (os.path.join (game_dir, "Data/Default.bif"))
-#f.decode_file ()
-#f.print_file ()
-
-#w = wmap.WMAP_Format ("xoxo152")
-#w.decode_file ()
-
-#c = chui.CHUI_Format ("GUISAVE.chu")
-#c.decode_file ()
 
 print "\nType `help' to print a short help, `quit' or ^D to exit the shell\n"
 

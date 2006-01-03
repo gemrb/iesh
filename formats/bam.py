@@ -16,9 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: bam.py,v 1.1 2005/03/02 20:44:22 edheldil Exp $
+# RCS: $Id: bam.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
 
 import struct
+import sys
 
 from format import Format, register_format
 
@@ -272,7 +273,7 @@ class BAM_Format (Format):
 
     def decode_frame_data (self, obj):
         size = obj['width'] * obj['height']
-        bin_data = self.decode_blob (obj['frame_data_off'], size)
+        bin_data = self.stream.decode_blob (obj['frame_data_off'], size)
         obj['frame_data'] = struct.unpack ('%dB' %size, bin_data)
 
     def decode_rle_frame_data (self, obj):
@@ -282,10 +283,10 @@ class BAM_Format (Format):
 
         data = []
         while len (data) < size:
-            pix = struct.unpack ('B', self.get_char (off))[0]
+            pix = struct.unpack ('B', self.stream.get_char (off))[0]
             if pix == compressed_color:
                 off = off + 1
-                cnt = struct.unpack ('B', self.get_char (off))[0]
+                cnt = struct.unpack ('B', self.stream.get_char (off))[0]
                 for j in range (cnt + 1):
                     data.append (compressed_color)
             else:
@@ -319,7 +320,9 @@ class BAM_Format (Format):
                     gr = 1 + (p['r'] + p['g'] + p['b']) / (3 * (255 / grsz))
                     if gr >= grsz:
                         gr = grsz - 1
-                print gray[gr],
+                sys.stdout.write (gray[gr])
+                #sys.stdout.write (gray[gr])
+                #print gray[gr],
                 ndx = ndx + 1
             print
         print

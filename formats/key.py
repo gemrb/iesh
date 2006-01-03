@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: key.py,v 1.1 2005/03/02 20:44:23 edheldil Exp $
+# RCS: $Id: key.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
 
 import re
 import sys
@@ -209,5 +209,8 @@ class KEY_Format (Format):
     def get_resref_by_name_re (self, name):
         rx = re.compile (name)
         return filter (lambda s, rx=rx: rx.search (s['resref_name']), self.resref_list)
-    
+
+    def get_resref_by_name (self, name):
+        return filter (lambda s, name=name: s['resref_name'] == name, self.resref_list)
+
 register_format ('KEY', 'V1', KEY_Format)
