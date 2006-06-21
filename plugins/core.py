@@ -12,6 +12,9 @@ strrefs = None
 global keys
 keys = None
 
+global options
+options = {}
+
 game_dir = None
 chitin_file = 'CHITIN.KEY'
 dialog_file = 'dialog.tlk'

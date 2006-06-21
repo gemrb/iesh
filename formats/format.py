@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: format.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
+# RCS: $Id: format.py,v 1.3 2006/06/21 08:17:31 edheldil Exp $
 
 import os.path
 import re
@@ -39,13 +39,15 @@ def ResolveFilePath (filename):
 
 
 class Format:
+    
+    default_options = {}
+    
     def __init__ (self, source):
         self.header_size = 0
         self.bitmask_cache = {}
 
         self.options = {}
 
-        self.options['debug_decode'] = 0
 
         if not isinstance (source, Stream):
             source = FileStream (source)
@@ -86,7 +88,7 @@ class Format:
 
             stream = self.stream
 
-            if self.options['debug_decode']:
+            if self.get_option ('debug_decode'):
                 print d
 
             if type == 'BYTE':
@@ -134,7 +136,7 @@ class Format:
 
             obj[key] = value
 
-            if self.options['debug_decode']:
+            if self.get_option ('debug_decode'):
                 self.print_date_by_desc (obj, d)
 
                 
@@ -179,6 +181,24 @@ class Format:
             value2 = '(' + string.join (map (lambda m, mask=mask: mask[m], filter (lambda m, v=value: (m & v) == m, mask.keys ())), '|') + ')'
 
         print label + ':', value, value2
+
+    def set_option_default (key, value):
+        Format.default_options[key] = value
+
+    def set_option (self, key, value):
+        self.options[key] = value
+
+    def get_option (self, key):
+        if self.options.has_key (key):
+            return self.options[key]
+        elif core.options.has_key (key):
+            return core.options[key]
+        else:
+            return Format.default_options[key]
+
+
+Format.default_options['debug_decode'] = 0
+
 
 
 ctltype_hash = {

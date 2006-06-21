@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: tlk.py,v 1.3 2006/01/03 21:18:05 edheldil Exp $
+# RCS: $Id: tlk.py,v 1.4 2006/06/21 08:17:31 edheldil Exp $
 
 import re
 import string
@@ -26,8 +26,10 @@ from plugins import core
 from format import Format, register_format, TICK_SIZE, TACK_SIZE
 
 class TLK_Format (Format):
+    
     def __init__ (self, filename):
         Format.__init__ (self, filename)
+        
         self.expect_signature = 'TLK'
 
         self.strref_list = []
@@ -154,5 +156,7 @@ class TLK_Format (Format):
         rx = re.compile (text)
         return filter (lambda s, rx=rx: rx.search (s['string']), self.strref_list)
 
+
+TLK_Format.default_options['max_read_strrefs'] = 0
         
 register_format ('TLK', 'V1', TLK_Format)

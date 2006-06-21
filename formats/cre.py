@@ -16,9 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: cre.py,v 1.1 2005/03/02 20:44:22 edheldil Exp $
+# RCS: $Id: cre.py,v 1.2 2006/06/21 08:17:31 edheldil Exp $
 
 from format import Format, register_format
+
+# FIXME: incomplete!
 
 class CRE_Format (Format):
     def __init__ (self, filename):
@@ -39,20 +41,56 @@ class CRE_Format (Format):
               'off':0x0004,
               'label': 'Version'},
             
-            { 'key': 'num_of_windows',
-              'type': 'DWORD',
+            { 'key': 'long_name',
+              'type': 'STRREF',
               'off': 0x0008,
-              'label': '# of windows'},
+              'label': 'Long creature name'},
             
-            { 'key': 'control_table_offset',
-              'type': 'DWORD',
+            { 'key': 'short_name',
+              'type': 'STRREF',
               'off': 0x000C,
-              'label': 'Control table offset'},
+              'label': 'Short creature name'},
 
-            { 'key': 'window_offset',
+            { 'key': 'flags',
               'type': 'DWORD',
               'off': 0x0010,
-              'label': 'First window offset'},
+              'label': 'Creature flags'},
+
+            { 'key': 'xp',
+              'type': 'DWORD',
+              'off': 0x0014,
+              'label': 'XP'},
+
+            { 'key': 'power_level',
+              'type': 'DWORD',
+              'off': 0x0018,
+              'label': 'Creature power level'},
+
+            { 'key': 'gold',
+              'type': 'DWORD',
+              'off': 0x001C,
+              'label': 'Gold carried'},
+
+            { 'key': 'permanent_status_flags',
+              'type': 'DWORD',
+              'off': 0x0020,
+              'label': 'Permanent status flags'},  # as per STATE.IDS
+
+            { 'key': 'current_hp',
+              'type': 'WORD',
+              'off': 0x0024,
+              'label': 'Current HP'},
+
+            { 'key': 'max_hp',
+              'type': 'WORD',
+              'off': 0x0026,
+              'label': 'Maximum HP'},
+
+            { 'key': 'animation_id',
+              'type': 'WORD',
+              'off': 0x0028,
+              'label': 'Animation ID'},  # as per ANIMATE.IDS
+
             )
         
 
@@ -434,32 +472,34 @@ class CRE_Format (Format):
 
     def decode_file (self):
         self.decode_header ()
+        return self
 
-        off = self.header['window_offset']
-        for i in range (self.header['num_of_windows']):
-            obj = {}
-            self.decode_window_record (off, obj)
-            self.window_list.append (obj)
-            off = off + 28
+#         off = self.header['window_offset']
+#         for i in range (self.header['num_of_windows']):
+#             obj = {}
+#             self.decode_window_record (off, obj)
+#             self.window_list.append (obj)
+#             off = off + 28
 
-            off2 = self.header['control_table_offset'] + obj['control_ndx'] * 8
-            obj['control_list'] = []
+#             off2 = self.header['control_table_offset'] + obj['control_ndx'] * 8
+#             obj['control_list'] = []
 
-            for j in range (obj['num_of_controls']):
-                obj2 = {}
-                self.decode_control_record (off2, obj2)
-                obj['control_list'].append (obj2)
-                off2 = off2 + 8
+#             for j in range (obj['num_of_controls']):
+#                 obj2 = {}
+#                 self.decode_control_record (off2, obj2)
+#                 obj['control_list'].append (obj2)
+#                 off2 = off2 + 8
+
 
 
     def print_file (self):
         self.print_header ()
 
-        i = 0
-        for obj in self.window_list:
-            print '#%d' %i
-            self.print_window_record (obj)
-            i = i + 1
+#         i = 0
+#         for obj in self.window_list:
+#             print '#%d' %i
+#             self.print_window_record (obj)
+#             i = i + 1
 
 
     def decode_header (self):
@@ -517,4 +557,4 @@ class CRE_Format (Format):
         fh.write (obj['data'])
         fh.close ()
         
-register_format ('CHUI', 'V1', CHUI_Format)
+register_format ('CRE', 'V1.2', CRE_Format)

@@ -90,6 +90,17 @@ def iterate_objects_by_type (type, fn):
     
 
 ###################################################
+def sprintf (format_str, params):
+    return  format_str %(params)
+
+def printf (format_str, params):
+    printsprintf (format_str, params)
+
+def loaded_object (obj):
+    obj.decode_file ()
+    return obj
+
+###################################################
 def pok():
     def p (obj):
         obj.decode_file ()

@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: key.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
+# RCS: $Id: key.py,v 1.3 2006/06/21 08:17:31 edheldil Exp $
 
 import re
 import sys
@@ -32,6 +32,10 @@ class KEY_Format (Format):
 
         self.resref_list = []
         self.resref_hash = {}
+
+        # when set to some number, read that number of resources at most
+        #self.options['max_read_bifs'] = None
+        self.options['max_read_resrefs'] = None
 
         self.header_desc = (
             { 'key': 'signature',
@@ -140,7 +144,11 @@ class KEY_Format (Format):
             off = off + 12
 
         off = self.header['resref_offset']
-        for i in range (self.header['num_of_resrefs']):
+        max_read_resrefs = self.header['num_of_resrefs']
+        if self.options['max_read_resrefs']:
+            max_read_resrefs = min (max_read_resrefs, self.options['max_read_resrefs'])
+            
+        for i in range (max_read_resrefs):
             #if i == 1000:
             #    break
             
