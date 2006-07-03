@@ -15,6 +15,10 @@ keys = None
 global options
 options = {}
 
+# Loaded IDS files
+global ids
+ids = {}
+
 game_dir = None
 chitin_file = 'CHITIN.KEY'
 dialog_file = 'dialog.tlk'
@@ -110,6 +114,44 @@ restype_hash = {
     0x0803 : 'SRC',
     }
 
+restype_rev_hash = {
+    '2DA'  : 0x03f4,
+    'ARE'  : 0x03f2,
+    'BAH'  : 0x044c,
+    'BAM'  : 0x03e8,
+    'BAMC' : 0x03e8,
+    'BCS'  : 0x03ef,
+    'BIO'  : 0x03fe,
+    'BMP'  : 0x0001,
+    'BS'   : 0x03f9,
+    'CHR'  : 0x03fa,
+    #'CHR' : 0x03f8,
+    'CHUI' : 0x03ea,
+    'CRE'  : 0x03f1,
+    'DLG'  : 0x03f3,
+    'EFF'  : 0x03f8,
+    'GAME' : 0x03f5,
+    'IDS'  : 0x03f0,
+    'INI'  : 0x0802,
+    'ITM'  : 0x03ed,
+    'MOS'  : 0x03ec,
+    'MOSC' : 0x03ec,
+    'MVE'  : 0x0002,
+    'PLT'  : 0x0006,
+    'PRO'  : 0x03fd,
+    'SPL'  : 0x03ee,
+    'SRC'  : 0x0803,
+    'STOR' : 0x03f6,
+    'TIS'  : 0x03eb,
+    'VEF'  : 0x03fc,
+    'VVC'  : 0x03fb,
+    'WAV'  : 0x0004,
+    'WAVC' : 0x0004,
+    'WED'  : 0x03e9,
+    'WFX'  : 0x0005,
+    'WMAP' : 0x03f7,
+    }
+
 
 def register_format (signature, version, klass):
     #core.formats[(signature, version)] = klass
@@ -119,6 +161,14 @@ def register_format (signature, version, klass):
 def get_format (signature, version = None):
     try:
         return formats[signature]
+    except:
+        return None
+
+
+def get_format_by_type (type):
+    try:
+        signature = restype_hash[type]
+        return get_format (signature)
     except:
         return None
 

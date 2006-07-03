@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: stream.py,v 1.1 2006/01/03 21:18:05 edheldil Exp $
+# RCS: $Id: stream.py,v 1.2 2006/07/03 18:15:35 edheldil Exp $
 
 import os.path
 import re
@@ -28,7 +28,7 @@ from plugins import core
 class Stream:
     def __init__ (self):
         self.is_open = False
-
+        
     def open (self):
         pass
     
@@ -41,26 +41,41 @@ class Stream:
     def read (self, count):
         pass
 
+    def readline (self):
+        pass
 
 
     def get_char (self, offset):
-        self.seek (offset)
+        # offset == None means "current offset" here
+        if offset != None:
+            self.seek (offset)
+            
         return self.read (1)
         #v = self.read (1)
         #return struct.unpack ('c', v)[0]
 
+    def get_line (self):
+        #return self.readline ()
+        return self.decode_line_string ()
+
     def decode_word (self, offset):
-        self.seek (offset)
+        # offset == None means "current offset" here
+        if offset != None:
+            self.seek (offset)
         v = self.read (2)
         return struct.unpack ('H', v)[0]
 
     def decode_dword (self, offset):
-        self.seek (offset)
+        # offset == None means "current offset" here
+        if offset != None:
+            self.seek (offset)
         v = self.read (4)
         return struct.unpack ('I', v)[0]
 
     def decode_sized_string (self, offset, size):
-        self.seek (offset)
+        # offset == None means "current offset" here
+        if offset != None:
+            self.seek (offset)
         v = self.read (size)
         
         return struct.unpack ('%ds' %size, v)[0]
@@ -76,35 +91,64 @@ class Stream:
             
         return s
 
+    def decode_line_string (self):
+        s = ''
+        
+        while 1:
+            c = self.get_char (None)
+            if c == '\n': break
+            if c == '':
+                if s == '':
+                    s = None
+                break
+            
+            s = s + c
+            
+        return s
+
     def decode_resref (self, off):
         return self.decode_sized_string (off, 8)
 
     def decode_blob (self, offset, size):
-        self.seek (offset)
+        # offset == None means "current offset" here
+        if offset != None:
+            self.seek (offset)
         return self.read (size)
 
 
-    def get_format_signature (self):
+    def get_signature (self):
         was_open = self.is_open
         if not self.is_open:
             self.open ()
 
-        signature = self.decode_sized_string (0, 4).strip ()
-        version = self.decode_sized_string (4, 4).strip ()
+        s = self.decode_sized_string (0, 8)
 
         if not was_open:
             self.close ()
         else:
             self.seek (0)
 
+
+        if re.match ("[0-9]{1,4}[\r\n ]", s) or re.match ("0[xX][0-9A-Fa-f]{1,4} ", s) or re.match ("-1[\r\n]", s):
+            signature = "IDS"
+            version = ""
+        else:
+            signature = s[0:4].strip ()
+            version = s[4:8].strip ()
+
         return (signature, version)
 
-    def get_format (self):
-        signature, version = self.get_format_signature ()
-        return core.get_format (signature, version)
+    def get_format (self, type = 0):
+        signature, version = self.get_signature ()
+        fmt = core.get_format (signature, version)
+        
+        if fmt == None and type != 0:
+            fmt = core.get_format_by_type (type)
+
+        return fmt
 
 
-    def load_object (self):
+    def load_object (self, type = 0):
         fmt = self.get_format ()
         return fmt (self)
 
@@ -130,6 +174,9 @@ class FileStream (Stream):
     def read (self, size):
         return self.fh.read (size)
         
+
+    def __repr__ (self):
+        return "<FileStream: %s>" %self.filename
 
 
 class MemoryStream (Stream):
@@ -182,3 +229,10 @@ class ResourceStream (MemoryStream):
 
         self.buffer = obj['data']
         MemoryStream.open (self)
+
+    def load_object (self):
+        return Stream.load_object (self, self.type)
+
+
+    def __repr__ (self):
+        return "<ResStream: %s>" %self.resref

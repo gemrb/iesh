@@ -82,11 +82,14 @@ def iterate_objects_by_type (type, fn):
     #   object from it is accessed, so it's slow as hell. It should use
     #   some caching
 
-    def resref_to_obj (res):
-        print res['resref_name']
-        return ResourceStream (res['resref_name'], type).load_object ()
+    #def resref_to_obj (res):
+    #    print res['resref_name']
+    #    return ResourceStream (res['resref_name'], type).load_object ()
 
-    map (fn, map (lambda res: resref_to_obj (res), filter (lambda res: res['type'] == type, core.keys.resref_list)))
+    for res in filter (lambda res: res['type'] == type, core.keys.resref_list):
+        print res['resref_name']
+        obj = ResourceStream (res['resref_name'], type).load_object ()
+        fn (obj)
     
 
 ###################################################
@@ -94,7 +97,7 @@ def sprintf (format_str, params):
     return  format_str %(params)
 
 def printf (format_str, params):
-    printsprintf (format_str, params)
+    print sprintf (format_str, params)
 
 def loaded_object (obj):
     obj.decode_file ()
@@ -110,8 +113,12 @@ def pok():
 
 ###################################################
 def load_ids (name):
-    export_obj (name, "data/tmpobj.tmp", 0x03f0)
-    pass
+    def p (obj):
+        obj.decode_file ()
+        print obj.stream.resref
+        #obj.print_file ()
+        
+    iterate_objects_by_type (0x03f0, p)
 
 ###################################################
 def get_restype_stats ():

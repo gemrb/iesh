@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: cre.py,v 1.2 2006/06/21 08:17:31 edheldil Exp $
+# RCS: $Id: cre.py,v 1.3 2006/07/03 18:15:35 edheldil Exp $
 
 from format import Format, register_format
 
@@ -89,6 +89,7 @@ class CRE_Format (Format):
             { 'key': 'animation_id',
               'type': 'WORD',
               'off': 0x0028,
+              'enum': 'ANIMATE',
               'label': 'Animation ID'},  # as per ANIMATE.IDS
 
             )

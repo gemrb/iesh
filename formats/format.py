@@ -16,15 +16,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: format.py,v 1.3 2006/06/21 08:17:31 edheldil Exp $
+# RCS: $Id: format.py,v 1.4 2006/07/03 18:15:35 edheldil Exp $
 
 import os.path
 import re
 import string
 import struct
+import types
 
 from plugins import core
-from stream import Stream, FileStream
+from stream import Stream, FileStream, ResourceStream
  
 PAGE_SIZE = 4096
 
@@ -45,9 +46,7 @@ class Format:
     def __init__ (self, source):
         self.header_size = 0
         self.bitmask_cache = {}
-
         self.options = {}
-
 
         if not isinstance (source, Stream):
             source = FileStream (source)
@@ -147,7 +146,7 @@ class Format:
 
     def print_date_by_desc (self, obj, d):
         key = d['key']
-        type = d['type']
+        rec_type = d['type']
         label = d['label']
 
         try: enum = d['enum']
@@ -159,28 +158,44 @@ class Format:
         value = obj[key]
         value2 = ''
 
-        if type == 'RESTYPE':
+        if rec_type == 'RESTYPE':
             try: value2 = '(' + core.restype_hash[value] + ')'
             except: pass
-        elif type == 'CTLTYPE':
+        elif rec_type == 'CTLTYPE':
             try: value2 = '(' + ctltype_hash[value] + ')'
             except: pass
-        elif type == 'CTLID':
+        elif rec_type == 'CTLID':
             try: value2 = '(' + '0x%08x' %value + ')'
             except: pass
-        elif type == 'STRREF' and core.strrefs:
+        elif rec_type == 'STRREF' and core.strrefs:
             try: value2 = '(' + core.strrefs.strref_list[value]['string'] + ')'
             except: pass
-        elif type == 'RGBA':
+        elif rec_type == 'RGBA':
             try: value2 = '(' + '%08x' %value + ')'
             except: pass
         elif enum != None:
-            try: value2 = '(' + enum[value] + ')'
-            except: pass
+            if type (enum) == types.DictType:
+                try: value2 = '(' + enum[value] + ')'
+                except: pass
+
+            elif type (enum) == types.StringType:
+                if not core.ids.has_key (enum):
+                    try:
+                        ids = ResourceStream (enum).load_object ()
+                        ids.decode_file ()
+                        core.ids[enum] = ids
+                    except:
+                        pass
+
+                try: value2 = '(' + core.ids[enum].ids[value] + ')'
+                except: pass
+                    
+                
         elif mask != None:
             value2 = '(' + string.join (map (lambda m, mask=mask: mask[m], filter (lambda m, v=value: (m & v) == m, mask.keys ())), '|') + ')'
 
         print label + ':', value, value2
+
 
     def set_option_default (key, value):
         Format.default_options[key] = value
