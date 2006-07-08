@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: ids.py,v 1.1 2006/07/03 18:15:35 edheldil Exp $
+# RCS: $Id: ids.py,v 1.2 2006/07/08 14:29:26 edheldil Exp $
 
 import re
 import sys
@@ -46,7 +46,7 @@ class IDS_Format (Format):
             if s == '':
                 continue
 
-            if line_no == 1 and re.match ("^[0-9]+$", s):
+            if line_no == 1 and (re.match ("^[0-9]+$", s) or re.match ("^IDS", s)):
                 continue
 
             key, value = s.split (None, 1)

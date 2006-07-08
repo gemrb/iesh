@@ -16,8 +16,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: biff.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
+# RCS: $Id: biff.py,v 1.3 2006/07/08 14:29:26 edheldil Exp $
 
+import gzip
 from format import Format, register_format
 
 class BIFF_Format (Format):
@@ -26,6 +27,7 @@ class BIFF_Format (Format):
         self.expect_signature = 'BIFF'
 
         self.file_list = []
+        self.tileset_list = []
 
         self.header_desc = (
             { 'key': 'signature',
@@ -43,7 +45,7 @@ class BIFF_Format (Format):
               'off': 0x0008,
               'label': '# of files'},
             
-            { 'key': 'num_of_tsets',
+            { 'key': 'num_of_tilesets',
               'type': 'DWORD',
               'off': 0x000C,
               'label': '# of tilesets'},
@@ -82,13 +84,37 @@ class BIFF_Format (Format):
               'label': '???' },
             )
 
-        self.res_record_desc = (
-            { 'key': 'res_name', 'type': 'STRREF', 'off': 0x0000, 'label': 'res name strref' },
-            { 'key': 'type', 'type': 'WORD', 'off': 0x0008, 'label': 'res type' },
-            { 'key': 'locator', 'type': 'DWORD', 'off': 0x000A, 'label': 'res locator' },
-            { 'key': 'locator_src_ndx', 'type': 'DWORD', 'off': 0x000A, 'bits': '31-20', 'label': 'res locator (source index)' },
-            { 'key': 'locator_tset_ndx', 'type': 'DWORD', 'off': 0x000A, 'bits': '19-14', 'label': 'res locator (tileset index)' },
-            { 'key': 'locator_ntset_ndx', 'type': 'DWORD', 'off': 0x000A, 'bits': '13-0', 'label': 'res locator (non-tileset index)' },
+        self.tileset_record_desc = (
+            { 'key': 'locator',
+              'type': 'DWORD',
+              'off': 0x0000,
+              'label': 'Tileset resource locator' },
+            
+            { 'key': 'data_offset',
+              'type': 'DWORD',
+              'off': 0x0004,
+              'label': 'Tileset data offset' },
+            
+            { 'key': 'tile_cnt',
+              'type': 'DWORD',
+              'off': 0x0008,
+              'label': 'Number of tiles' },
+            
+            { 'key': 'tile_size',
+              'type': 'DWORD',
+              'off': 0x000C,
+              'label': 'Size of tile' },
+            
+            { 'key': 'type',
+              'type': 'RESTYPE',
+              'off': 0x0010,
+              'label': 'Tileset res type' },
+
+            { 'key': 'unknown_12',
+              'type': 'WORD',
+              'off': 0x0012,
+              'label': 'Unknown 12' },
+
             )
 
     def decode_file (self):
@@ -101,32 +127,27 @@ class BIFF_Format (Format):
             self.file_list.append (obj)
             off = off + 16
 
-        return
-    
-        obj = {}
-        off = self.header['res_offset']
-        for i in range (self.header['num_of_res']):
-            self.decode_res_record (off, obj)
-            off = off + 14
-            print '#%d' %i
-            self.print_res_record (obj)
+        for i in range (self.header['num_of_tilesets']):
+            obj = {}
+            self.decode_tileset_record (off, obj)
+            self.tileset_list.append (obj)
+            off = off + 20
+
 
     def print_file (self):
         self.print_header ()
 
         i = 0
         for obj in self.file_list:
-            print '#%d' %i
+            print 'File #%d' %i
             self.print_file_record (obj)
             i = i + 1
             
-        return
-    
-        for i in range (self.header['num_of_res']):
-            self.decode_res_record (off, obj)
-            off = off + 14
-            print '#%d' %i
-            self.print_res_record (obj)
+        i = 0
+        for obj in self.tileset_list:
+            print 'Tileset #%d' %i
+            self.print_tileset_record (obj)
+            i = i + 1
 
 
     def decode_header (self):
@@ -144,21 +165,98 @@ class BIFF_Format (Format):
         self.print_by_desc (obj, self.file_record_desc)
 
 
-    def decode_res_record (self, offset, obj):
-        self.decode_by_desc (offset, self.res_record_desc, obj)
+    def decode_tileset_record (self, offset, obj):
+        self.decode_by_desc (offset, self.tileset_record_desc, obj)
         
-    def print_res_record (self, obj):
-        self.print_by_desc (obj, self.res_record_desc)
+    def print_tileset_record (self, obj):
+        self.print_by_desc (obj, self.tileset_record_desc)
 
 
 
-    def get_file_res_data (self, obj):
+    def get_ntset_data (self, obj):
         obj['data'] = self.stream.decode_blob (obj['data_offset'], obj['data_size'])
 
-    def save_file_res (self, filename, obj):
-        self.get_file_res_data (obj)
+    def get_tileset_data (self, obj):
+        # FIXME: also add bytes for the TIS header
+        obj['data'] = self.stream.decode_blob (obj['data_offset'], obj['tile_size'] * obj['tile_cnt'])
+
+
+    def get_file_data (self, obj):
+        if obj.has_key ('tile_cnt'):
+            return self.get_tileset_data (obj)
+        else:
+            return self.get_ntset_data (obj)
+
+
+    def save_file_data (self, filename, obj):
+        self.get_file_data (obj)
         fh = open (filename, 'w')
         fh.write (obj['data'])
         fh.close ()
         
+
+class BIFC_V1_Format (Format):
+    def __init__ (self, filename):
+        Format.__init__ (self, filename)
+        self.expect_signature = 'BIF '
+
+        self.header_desc = (
+            { 'key': 'signature',
+              'type': 'STR4',
+              'off': 0x0000,
+              'label': 'Signature' },
+            
+            { 'key': 'version',
+              'type': 'STR4',
+              'off':0x0004,
+              'label': 'Version'},
+            
+           { 'key': 'filename_len',
+              'type': 'DWORD',
+              'off': 0x0008,
+              'label': 'Filename length'},
+            
+           { 'key': 'filename',
+              'type': 'STRSIZED',
+              'off': 0x0008,
+              'label': 'Filename'},
+            
+           { 'key': 'uncompressed_size',
+              'type': 'DWORD',
+              'off': 0x0000,
+              'label': 'Uncompressed size'},
+            
+           { 'key': 'compressed_size',
+              'type': 'DWORD',
+              'off': 0x0000,
+              'label': 'Compressed size'},
+            
+             )
+
+    def decode_file (self):
+        self.decode_header ()
+
+        self.decode_by_desc (0x000c + self.header['filename_len'], (self.header_desc[4], ), self.header)
+        self.decode_by_desc (0x0010 + self.header['filename_len'], ( self.header_desc[5], ), self.header)
+
+        #self.stream.seek (..)
+        data = self.stream.decode_blob (0x0014 + self.header['filename_len'], self.header['compressed_size'])
+        self.data = gzip.zlib.decompress (data)
+
+
+    def print_file (self):
+        self.print_header ()
+
+
+    def decode_header (self):
+        self.header = {}
+        self.decode_by_desc (0x0000, self.header_desc, self.header)
+        
+    def print_header (self):
+        self.print_by_desc (self.header, self.header_desc)
+        
+
+
+
 register_format ('BIFF', 'V1', BIFF_Format)
+register_format ('BIF ', 'V1.0', BIFC_V1_Format)

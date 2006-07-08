@@ -16,8 +16,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: stream.py,v 1.2 2006/07/03 18:15:35 edheldil Exp $
+# RCS: $Id: stream.py,v 1.3 2006/07/08 14:29:27 edheldil Exp $
 
+import gzip
 import os.path
 import re
 import string
@@ -38,7 +39,7 @@ class Stream:
     def seek (self, offset):
         pass
 
-    def read (self, count):
+    def read (self, count = None):
         pass
 
     def readline (self):
@@ -109,12 +110,14 @@ class Stream:
     def decode_resref (self, off):
         return self.decode_sized_string (off, 8)
 
-    def decode_blob (self, offset, size):
+    def decode_blob (self, offset, size = None):
         # offset == None means "current offset" here
+        # size == None means "till the end of stream"
         if offset != None:
             self.seek (offset)
-        return self.read (size)
 
+        return self.read (size)
+        
 
     def get_signature (self):
         was_open = self.is_open
@@ -171,8 +174,11 @@ class FileStream (Stream):
     def seek (self, offset):
         self.fh.seek (offset)
 
-    def read (self, size):
-        return self.fh.read (size)
+    def read (self, size = None):
+        if size != None:
+            return self.fh.read (size)
+        else:
+            return self.fh.read ()
         
 
     def __repr__ (self):
@@ -189,21 +195,29 @@ class MemoryStream (Stream):
         self.offset = 0
         self.is_open = True
 
+    def decrypt (self):
+        for i in range (len (self.buffer)):
+            print chr (ord (self.buffer[i]) ^ ord (core.xor_key[i]))
+
     def close (self):
         self.is_open = False
     
     def seek (self, offset):
         self.offset = offset
 
-    def read (self, count):
-        data = self.buffer[self.offset:self.offset+count]
-        self.offset = self.offset + count
+    def read (self, count = None):
+        if count != None:
+            data = self.buffer[self.offset:self.offset+count]
+        else:
+            data = self.buffer[self.offset:]
+            
+        self.offset = self.offset + len (data)
         return data
 
 
 
 class ResourceStream (MemoryStream):
-    def __init__ (self, name, type = 0):
+    def __init__ (self, name, type = None):
         MemoryStream.__init__ (self, '')
         self.resref = name
         self.type = type
@@ -213,10 +227,10 @@ class ResourceStream (MemoryStream):
             raise RuntimeError, "Core game files are not loaded. See load_game ()."
 
         oo = core.keys.get_resref_by_name_re (self.resref)
-        if self.type != 0:
+        if self.type != None:
             oo = filter (lambda o: o['type'] == self.type, oo)
 
-        if len (oo) > 1 and self.type == 0:
+        if len (oo) > 1 and self.type == None:
             raise RuntimeError, "More than one result"
 
         o = oo[0]
@@ -225,7 +239,7 @@ class ResourceStream (MemoryStream):
         b = core.formats['BIFF'] (os.path.join (core.game_dir, src_file['file_name']))
         b.decode_file ()
         obj = b.file_list[o['locator_ntset_ndx']]
-        b.get_file_res_data (obj)
+        b.get_file_data (obj)
 
         self.buffer = obj['data']
         MemoryStream.open (self)
@@ -236,3 +250,8 @@ class ResourceStream (MemoryStream):
 
     def __repr__ (self):
         return "<ResStream: %s>" %self.resref
+
+
+class CompressedStream (MemoryStream):
+    def __init__ (self, membuffer):
+        MemoryStream.__init__ (self, gzip.zlib.decompress (membuffer))

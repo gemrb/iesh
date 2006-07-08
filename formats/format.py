@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: format.py,v 1.4 2006/07/03 18:15:35 edheldil Exp $
+# RCS: $Id: format.py,v 1.5 2006/07/08 14:29:26 edheldil Exp $
 
 import os.path
 import re
@@ -119,6 +119,10 @@ class Format:
                 stroff = stream.decode_dword (offset + local_offset)
                 value = stream.decode_asciiz_string (stroff)
                 value = string.translate (value, core.slash_trans, '\x00')
+            elif type == 'STRSIZED':
+                length = stream.decode_dword (offset + local_offset)
+                # FIXME: asciiz or sized???
+                value = stream.decode_asciiz_string (offset + local_offset + 4)
             elif type == 'BYTES':
                 value = stream.decode_blob (offset + local_offset, d['size'])
             elif type == '_STRING':
@@ -181,7 +185,8 @@ class Format:
             elif type (enum) == types.StringType:
                 if not core.ids.has_key (enum):
                     try:
-                        ids = ResourceStream (enum).load_object ()
+                        # FIXME: ugly & should use 'IDS' instead of 0x3F0
+                        ids = ResourceStream (enum, 0x03F0).load_object ()
                         ids.decode_file ()
                         core.ids[enum] = ids
                     except:

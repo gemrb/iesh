@@ -16,12 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: bam.py,v 1.2 2006/01/03 21:18:05 edheldil Exp $
+# RCS: $Id: bam.py,v 1.3 2006/07/08 14:29:26 edheldil Exp $
 
 import struct
 import sys
 
 from format import Format, register_format
+from stream import CompressedStream
+
 
 class BAM_Format (Format):
     def __init__ (self, filename):
@@ -33,13 +35,6 @@ class BAM_Format (Format):
         self.palette_entry_list = []
         self.frame_lut_entry_list = []
 
-        # assume frame data is always RLE encoded
-        self.options['force_rle'] = 1
-
-        # decode and load frame data
-        self.options['decode_frame_data'] = 1
-        self.options['print_frame_bitmap'] = 1
-        self.options['print_palette'] = 1
 
         self.header_desc = (
             { 'key': 'signature',
@@ -193,17 +188,17 @@ class BAM_Format (Format):
 
         i = 0
         for obj in self.frame_list:
-            print '#%d' %i
+            print 'Frame #%d' %i
             self.print_frame (obj)
             i = i + 1
 
         i = 0
         for obj in self.cycle_list:
-            print '#%d' %i
+            print 'Cycle #%d' %i
             self.print_cycle (obj)
             i = i + 1
 
-        if self.options['print_palette']:
+        if self.get_option ('bam_print_palette'):
             self.print_palette ()
 
 
@@ -218,8 +213,8 @@ class BAM_Format (Format):
     def decode_frame (self, offset, obj):
         self.decode_by_desc (offset, self.frame_desc, obj)
 
-        if self.options['decode_frame_data']:
-            if self.options['force_rle'] or obj['rle_encoded']:
+        if self.get_option ('bam_decode_frame_data'):
+            if self.get_option ('bam_force_rle') or obj['rle_encoded']:
                 self.decode_rle_frame_data (obj)
             else:
                 self.decode_frame_data (obj)
@@ -227,7 +222,7 @@ class BAM_Format (Format):
     def print_frame (self, obj):
         self.print_by_desc (obj, self.frame_desc)
 
-        if self.options['print_frame_bitmap']:
+        if self.get_option ('bam_print_frame_bitmap'):
             self.print_frame_bitmap (obj)
 
     def decode_cycle (self, offset, obj):
@@ -327,4 +322,62 @@ class BAM_Format (Format):
             print
         print
         
+
+
+class BAMC_Format (BAM_Format):
+    def __init__ (self, filename):
+        BAM_Format.__init__ (self, filename)
+        self.expect_signature = 'BAMC'
+
+
+        self.envelope_desc = (
+            { 'key': 'signature',
+              'type': 'STR4',
+              'off': 0x0000,
+              'label': 'Signature' },
+            
+            { 'key': 'version',
+              'type': 'STR4',
+              'off':0x0004,
+              'label': 'Version'},
+            
+            { 'key': 'uncompressed_size',
+              'type': 'DWORD',
+              'off': 0x0008,
+              'label': 'Uncompressed size'},
+            
+            )
+
+    def decode_file (self):
+        self.decode_envelope ()
+        data = self.stream.decode_blob (0x0C)
+
+        self.stream.close ()
+        self.stream = CompressedStream (data)
+
+        BAM_Format.decode_file (self)
+
+    def print_file (self):
+        self.print_envelope ()
+        BAM_Format.print_file (self)
+
+    def decode_envelope (self):
+        self.envelope = {}
+        self.decode_by_desc (0x0000, self.envelope_desc, self.envelope)
+        
+    def print_envelope (self):
+        self.print_by_desc (self.envelope, self.envelope_desc)
+        
+
+
+# assume frame data is always RLE encoded
+BAM_Format.default_options['bam_force_rle'] = 1
+
+# decode and load frame data
+BAM_Format.default_options['bam_decode_frame_data'] = 1
+BAM_Format.default_options['bam_print_frame_bitmap'] = 1
+BAM_Format.default_options['bam_print_palette'] = 1
+
+
 register_format ('BAM', 'V1', BAM_Format)
+register_format ('BAMC', 'V1  ', BAMC_Format)

@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: tlk.py,v 1.5 2006/07/03 18:15:35 edheldil Exp $
+# RCS: $Id: tlk.py,v 1.6 2006/07/08 14:29:27 edheldil Exp $
 
 import re
 import string
@@ -105,11 +105,11 @@ class TLK_Format (Format):
         self.decode_header ()
 
         off = 0x0012
-        max_read_strrefs = self.header['num_of_strrefs']
-        if self.get_option ('max_read_strrefs'):
-            max_read_strrefs = min (max_read_strrefs, self.get_option ('max_read_strrefs'))
             
-        for i in range (max_read_strrefs):
+        if not self.get_option ('tlk_decode_strrefs'):
+            return
+        
+        for i in range (self.header['num_of_strrefs']):
             
             obj = {}
             self.decode_strref_record (off, obj)
@@ -159,6 +159,6 @@ class TLK_Format (Format):
         return filter (lambda s, rx=rx: rx.search (s['string']), self.strref_list)
 
 
-TLK_Format.default_options['max_read_strrefs'] = None
+TLK_Format.default_options['tlk_decode_strrefs'] = 1
         
 register_format ('TLK', 'V1', TLK_Format)

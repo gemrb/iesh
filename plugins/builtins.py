@@ -32,7 +32,7 @@ def load_game (game_dir, chitin_file = core.chitin_file, dialog_file = core.dial
 
 
 ###################################################
-def load_object (name):
+def load_object (name, type = None):
 
     try:
         fh = open (name)
@@ -43,7 +43,7 @@ def load_object (name):
         fh.close ()
         return FileStream(name).load_object ()
     else:
-        return ResourceStream(name).load_object ()
+        return ResourceStream(name, type).load_object ()
 
     
 ###################################################
@@ -55,24 +55,25 @@ def find_str (text):
         print core.strrefs.strref_list.index(o), o['string']
 
 ###################################################
-def export_obj (name, filename, type = 0):
+def export_obj (name, filename, type = None, index = 0):
     """Exports resource `name' into file `filename'. If the `name' is not
-    unique, specify resource type with `type'"""
+    unique, specify resource type with `type' and eventually `index' if
+    there's still more than one"""
     
     oo = core.keys.get_resref_by_name_re(name)
-    if type != 0:
+    if type != None:
         oo = filter (lambda o: o['type'] == type, oo)
 
-    if len (oo) > 1 and type == 0:
+    if len (oo) > 1 and type == None:
         print "More than one result"
         return
 
-    o = oo[0]
+    o = oo[index]
      
     src_file = core.keys.bif_list[o['locator_src_ndx']]
     b = core.formats['BIFF'] (os.path.join (core.game_dir, src_file['file_name']))
     b.decode_file ()
-    b.save_file_res (filename, b.file_list[o['locator_ntset_ndx']])
+    b.save_file_data (filename, b.file_list[o['locator_ntset_ndx']])
 
 
 ###################################################
@@ -112,7 +113,7 @@ def pok():
     iterate_objects_by_type (0x03ed, p)
 
 ###################################################
-def load_ids (name):
+def load_ids ():
     def p (obj):
         obj.decode_file ()
         print obj.stream.resref
