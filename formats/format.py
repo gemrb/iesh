@@ -106,6 +106,8 @@ class Format:
                 value = stream.decode_sized_string (offset + local_offset, 2)
             elif type == 'STR4':
                 value = stream.decode_sized_string (offset + local_offset, 4)
+            elif type == 'STR8':
+                value = stream.decode_sized_string (offset + local_offset, 8)
             elif type == 'STR32':
                 value = stream.decode_sized_string (offset + local_offset, 32)
             elif type == 'RESREF':
