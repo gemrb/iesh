@@ -64,14 +64,14 @@ class Stream:
         if offset != None:
             self.seek (offset)
         v = self.read (2)
-        return struct.unpack ('H', v)[0]
+        return struct.unpack ('<H', v)[0]
 
     def decode_dword (self, offset):
         # offset == None means "current offset" here
         if offset != None:
             self.seek (offset)
         v = self.read (4)
-        return struct.unpack ('I', v)[0]
+        return struct.unpack ('<I', v)[0]
 
     def decode_sized_string (self, offset, size):
         # offset == None means "current offset" here
