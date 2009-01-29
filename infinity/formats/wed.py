@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,20 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: wed.py,v 1.1 2006/07/08 14:29:27 edheldil Exp $
 
-from ie_shell.formats.format import Format, register_format, core
+from infinity import core
+from infinity.format import Format, register_format
 
 class WED_Format (Format):
-    def __init__ (self, filename):
-        Format.__init__ (self, filename)
-        self.expect_signature = 'WED'
-
-        self.secondary_header = {}
-        self.overlay_list = []
-        self.door_list = []
-
-        self.header_desc = (
+    header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
@@ -72,7 +64,7 @@ class WED_Format (Format):
 
             )
 
-        self.overlay_desc = (
+    overlay_desc = (
             { 'key': 'width',
               'type': 'WORD',
               'off': 0x0000,
@@ -105,7 +97,7 @@ class WED_Format (Format):
 
             )
         
-        self.secondary_header_desc = (
+    secondary_header_desc = (
             { 'key': 'polygon_cnt',
               'type': 'DWORD',
               'off': 0x0000,
@@ -133,7 +125,7 @@ class WED_Format (Format):
 
             )
 
-        self.door_desc = (
+    door_desc = (
             { 'key': 'door_name',
               'type': 'STR8',
               'off': 0x0000,
@@ -176,7 +168,7 @@ class WED_Format (Format):
 
             )
 
-        self.tilemap_desc = (
+    tilemap_desc = (
             { 'key': 'tile_index_lut_ndx',
               'type': 'WORD',
               'off': 0x0000,
@@ -209,7 +201,7 @@ class WED_Format (Format):
 
         # Tile index lookup table desc
 
-        self.wallgroup_desc = (
+    wallgroup_desc = (
             { 'key': 'polygon_ndx',
               'type': 'WORD',
               'off': 0x0000,
@@ -222,7 +214,7 @@ class WED_Format (Format):
 
             )
 
-        self.polygon_desc = (
+    polygon_desc = (
             { 'key': 'vertex_ndx',
               'type': 'DWORD',
               'off': 0x0000,
@@ -277,7 +269,7 @@ class WED_Format (Format):
 
         # Polygon index LUT desc
 
-        self.vertex_desc = (
+    vertex_desc = (
             { 'key': 'x',
               'type': 'WORD',
               'off': 0x0000,
@@ -290,27 +282,39 @@ class WED_Format (Format):
             
             )
 
-    def decode_file (self):
-        self.decode_header ()
-        self.decode_secondary_header (self.header['secondary_header_off'], self.secondary_header)
+    def __init__ (self):
+        Format.__init__ (self)
+        self.expect_signature = 'WED'
+
+        self.secondary_header = {}
+        self.overlay_list = []
+        self.door_list = []
+        self.polygon_list = []
+
+
+    def read (self, stream):
+        self.read_header (stream)
+        self.read_secondary_header (stream, self.header['secondary_header_off'], self.secondary_header)
+
 
         off = self.header['overlay_off']
         for i in range (self.header['overlay_cnt']):
             obj = {}
-            self.decode_overlay (off, obj)
+            self.read_overlay (stream, off, obj)
             self.overlay_list.append (obj)
             off = off + 24
 
+        # NOTE: door is nested, so we can't use read_list () here
         off = self.header['door_off']
         for i in range (self.header['door_cnt']):
             obj = {}
-            self.decode_door (off, obj)
+            self.read_door (stream, off, obj)
             self.door_list.append (obj)
             off = off + 26
 
 
 
-    def print_file (self):
+    def printme (self):
         self.print_header ()
         self.print_secondary_header ()
 
@@ -319,44 +323,77 @@ class WED_Format (Format):
             print 'Overlay #%d' %i
             self.print_overlay (obj)
             i = i + 1
-            
+
         i = 0
         for obj in self.door_list:
             print 'Door #%d' %i
             self.print_door (obj)
             i = i + 1
-            
 
-    def decode_header (self):
-        self.header = {}
-        self.decode_by_desc (0x0000, self.header_desc, self.header)
-        
-    def print_header (self):
-        self.print_by_desc (self.header, self.header_desc)
 
+    def read_secondary_header (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.secondary_header_desc, obj)
         
-    def decode_secondary_header (self, offset, obj):
-        self.decode_by_desc (offset, self.secondary_header_desc, obj)
-        
+        self.read_list (stream, 'polygon',  self.secondary_header,)
+        # vertices
+        # wallgroups
+        # polygon indices LUT
+
     def print_secondary_header (self):
-        self.print_by_desc (self.secondary_header, self.secondary_header_desc)
-        
+        self.print_struc (self.secondary_header, self.secondary_header_desc)
+        self.print_list ('polygon')
+        # vertices
+        # wallgroups
+        # polygon indices LUT
 
-    def decode_overlay (self, offset, obj):
-        self.decode_by_desc (offset, self.overlay_desc, obj)
         
+    def read_overlay (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.overlay_desc, obj)
+        obj['tilemap_list'] = []
+        cnt = obj['width'] * obj['height']
+        size = self.get_struc_size (self.tilemap_desc)
+
+        off2 = obj['tilemap_off']
+        tile_index_cnt = 0
+        
+        for i in range (cnt):
+            obj2 = {}
+            self.read_tilemap (stream, off2, obj2,  obj)
+            obj['tilemap_list'].append (obj2)
+            off2 = off2 + size
+            tile_index_cnt +=  obj2['tile_index_lut_cnt']
+
+        obj['tile_index_list'] = []
+        size = 2 # FIXME: don't hardwire the size
+        off2 = obj['tile_index_lookup_off']
+        
+        for i in range (tile_index_cnt):
+            tile_index = stream.read_word (off2)
+            obj['tile_index_list'].append (tile_index)
+            off2 += size
+
+
     def print_overlay (self, obj):
-        self.print_by_desc (obj, self.overlay_desc)
+        self.print_struc (obj, self.overlay_desc)
 
-        
-    def decode_door (self, offset, obj):
-        self.decode_by_desc (offset, self.door_desc, obj)
+        i = 0
+        for obj2 in obj['tilemap_list']:
+            print 'Tilemap #%d' %i
+            self.print_tilemap (obj2)
+            i = i + 1
+
+        print "Tile indices:",  obj['tile_index_list']
+        print
+
+
+    def read_door (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.door_desc, obj)
 
         obj['open_door_poly_list'] = []
         off = obj['open_door_poly_off']
         for i in range (obj['open_door_poly_cnt']):
             obj2 = {}
-            self.decode_polygon (off, obj2)
+            self.read_polygon (stream, off, obj2)
             obj['open_door_poly_list'].append (obj2)
             off = off + 34
 
@@ -364,13 +401,13 @@ class WED_Format (Format):
         off = obj['closed_door_poly_off']
         for i in range (obj['closed_door_poly_cnt']):
             obj2 = {}
-            self.decode_polygon (off, obj2)
+            self.read_polygon (stream, off, obj2)
             obj['closed_door_poly_list'].append (obj2)
             off = off + 34
 
         
     def print_door (self, obj):
-        self.print_by_desc (obj, self.door_desc)
+        self.print_struc (obj, self.door_desc)
 
         i = 0
         for obj2 in obj['open_door_poly_list']:
@@ -385,32 +422,31 @@ class WED_Format (Format):
             i = i + 1
 
         
-    def decode_tilemap (self, offset, obj):
-        self.decode_by_desc (offset, self.tilemap_desc, obj)
+    def read_tilemap (self, stream, offset, obj, overlay):
+        self.read_struc (stream, offset, self.tilemap_desc, obj)
         
     def print_tilemap (self, obj):
-        self.print_by_desc (obj, self.tilemap_desc)
-
+        self.print_struc (obj, self.tilemap_desc)
         
-    def decode_wallgroup (self, offset, obj):
-        self.decode_by_desc (offset, self.wallgroup_desc, obj)
+    def read_wallgroup (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.wallgroup_desc, obj)
         
     def print_wallgroup (self, obj):
-        self.print_by_desc (obj, self.wallgroup_desc)
+        self.print_struc (obj, self.wallgroup_desc)
 
 
-    def decode_polygon (self, offset, obj):
-        self.decode_by_desc (offset, self.polygon_desc, obj)
+    def read_polygon (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.polygon_desc, obj)
         
     def print_polygon (self, obj):
-        self.print_by_desc (obj, self.polygon_desc)
+        self.print_struc (obj, self.polygon_desc)
 
         
-    def decode_vertex (self, offset, obj):
-        self.decode_by_desc (offset, self.vertex_desc, obj)
+    def read_vertex (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.vertex_desc, obj)
         
     def print_vertex (self, obj):
-        self.print_by_desc (obj, self.vertex_desc)
+        self.print_struc (obj, self.vertex_desc)
 
         
         

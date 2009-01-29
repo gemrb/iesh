@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,29 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: key.py,v 1.4 2006/07/08 14:29:26 edheldil Exp $
 
 import re
 import sys
 
-from ie_shell.formats.format import Format, register_format, TICK_SIZE, TACK_SIZE
+from infinity import core
+from infinity.format import Format, register_format
 
 class KEY_Format (Format):
-    def __init__ (self, filename):
-        Format.__init__ (self, filename)
-        self.expect_signature = 'KEY'
-
-        self.bif_list = []
-        self.bif_hash = {}
-
-        self.resref_list = []
-        self.resref_hash = {}
-
-        # when set to some number, read that number of resources at most
-        #self.options['max_read_bifs'] = None
-        self.options['max_read_resrefs'] = None
-
-        self.header_desc = (
+    header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
@@ -71,7 +57,7 @@ class KEY_Format (Format):
             )
         
 
-        self.bif_record_desc = (
+    bif_record_desc = (
             { 'key': 'file_len',
               'type': 'DWORD',
               'off': 0x0000,
@@ -98,7 +84,7 @@ class KEY_Format (Format):
               'label': 'BIF location' },
             )
 
-        self.resref_record_desc = (
+    resref_record_desc = (
             { 'key': 'resref_name',
               'type': 'RESREF',
               'off': 0x0000,
@@ -133,41 +119,83 @@ class KEY_Format (Format):
               'label': 'resref locator (non-tileset index)' },
             )
 
-    def decode_file (self):
-        self.decode_header ()
+    def __init__ (self):
+        Format.__init__ (self)
+        self.expect_signature = 'KEY'
+
+        self.bif_list = []
+        self.bif_hash = {}
+
+        self.resref_list = []
+        self.resref_hash = {}
+
+        # when set to some number, read that number of resources at most
+        #self.options['max_read_bifs'] = None
+
+
+    def read (self, stream):
+        self.read_header (stream)
 
         off = self.header['bif_offset']
+        bif_record_size = self.get_struc_size (self.bif_record_desc)
         for i in range (self.header['num_of_bifs']):
             obj = {}
-            self.decode_bif_record (off, obj)
+            self.read_bif_record (stream, off, obj)
             self.bif_list.append (obj)
             self.bif_hash[obj['file_name']] = obj
-            off = off + 12
+            off = off + bif_record_size
 
         off = self.header['resref_offset']
         max_read_resrefs = self.header['num_of_resrefs']
-        if self.options['max_read_resrefs']:
-            max_read_resrefs = min (max_read_resrefs, self.options['max_read_resrefs'])
-            
+        if self.get_option ('format.key.max_read_resrefs'):
+            max_read_resrefs = min (max_read_resrefs, self.get_option ('format.key.max_read_resrefs'))
+        
+        resref_record_size = self.get_struc_size (self.resref_record_desc)
+        tick_size = self.get_option ('format.key.tick_size')
+        tack_size = self.get_option ('format.key.tack_size')
         for i in range (max_read_resrefs):
             #if i == 1000:
             #    break
             
             obj = {}
-            self.decode_resref_record (off, obj)
+            self.read_resref_record (stream, off, obj)
             self.resref_list.append (obj)
             obj['file_name'] = self.bif_list[obj['locator_src_ndx']]
             self.resref_hash[obj['resref_name']] = obj
-            off = off + 14
+            off = off + resref_record_size
 
-            if not (i % TICK_SIZE):
+            if not (i % tick_size):
                 sys.stdout.write('.')
-                if not (i % TACK_SIZE):
+                if not (i % tack_size):
                     sys.stdout.write('%d' %i)
                 sys.stdout.flush ()
         print
 
-    def print_file (self):
+    def write (self, stream):
+        # FIXME: STROFF is missing
+        header_size = self.get_struc_size (self.header_desc)
+        bif_record_size = self.get_struc_size (self.bif_record_desc)
+        resref_record_size = self.get_struc_size (self.resref_record_desc)
+        
+        self.header['num_of_bifs'] = len (self.bif_list)
+        self.header['num_of_resrefs'] = len (self.resref_list)
+        self.header['bif_offset'] = header_size
+        self.header['resref_offset'] = header_size + len (self.bif_list) * bif_record_size
+        
+        self.write_struc (stream, 0x0000, self.header_desc, self.header)
+
+        off2 = self.header['bif_offset']
+        for obj in self.bif_list:
+            self.write_struc (stream, off2, self.bif_record_desc, obj)
+            off2 += bif_record_size
+            
+        off2 = self.header['resref_offset']
+        for obj in self.resref_list:
+            self.write_struc (stream, off2, self.resref_record_desc, obj)
+            off2 += resref_record_size
+            
+
+    def printme (self):
         self.print_header ()
 
         i = 0
@@ -183,26 +211,18 @@ class KEY_Format (Format):
             i = i + 1
 
 
-    def decode_header (self):
-        self.header = {}
-        self.decode_by_desc (0x0000, self.header_desc, self.header)
-        
-    def print_header (self):
-        self.print_by_desc (self.header, self.header_desc)
-
-        
-    def decode_bif_record (self, offset, obj):
-        self.decode_by_desc (offset, self.bif_record_desc, obj)
+    def read_bif_record (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.bif_record_desc, obj)
         
     def print_bif_record (self, obj):
-        self.print_by_desc (obj, self.bif_record_desc)
+        self.print_struc (obj, self.bif_record_desc)
 
 
-    def decode_resref_record (self, offset, obj):
-        self.decode_by_desc (offset, self.resref_record_desc, obj)
+    def read_resref_record (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.resref_record_desc, obj)
         
     def print_resref_record (self, obj):
-        self.print_by_desc (obj, self.resref_record_desc)
+        self.print_struc (obj, self.resref_record_desc)
 
 
 

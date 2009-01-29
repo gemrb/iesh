@@ -1,7 +1,7 @@
 # -*-python-*-
 
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,23 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: wmap.py,v 1.1 2005/03/02 20:44:23 edheldil Exp $
 
-from ie_shell.formats.format import Format, register_format
+from infinity.format import Format, register_format
 
 class WMAP_Format (Format):
-    def __init__ (self, filename):
-        Format.__init__ (self, filename)
-        self.expect_signature = 'WMAP'
 
-        self.wmap_list = []
-
-        # FIXME: maybe they should be local to wmap entries
-        self.area_list = []
-        self.arealink_list = []
-
-
-        self.header_desc = (
+    header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
@@ -56,7 +45,7 @@ class WMAP_Format (Format):
             )
         
 
-        self.wmap_record_desc = (
+    wmap_record_desc = (
             { 'key': 'map_resref',
               'type': 'RESREF',
               'off': 0x0000,
@@ -117,9 +106,14 @@ class WMAP_Format (Format):
               'off': 0x0030,
               'label': 'Map icons resource name' },
             
+            { 'key': 'unknown38',
+              'type': 'BYTES',
+              'off': 0x0038,
+              'size': 128,
+              'label': 'Unknown 0x0038' },
             )
 
-        self.area_record_desc = (
+    area_record_desc = (
             { 'key': 'area_name',
               'type': 'RESREF',
               'off': 0x0000,
@@ -214,9 +208,15 @@ class WMAP_Format (Format):
               'off': 0x006C,
               'label': '# of arealinks west' },
 
+            { 'key': 'unknown70',
+              'type': 'BYTES',
+              'off': 0x0070,
+              'size': 128,
+              'label': 'Unknown 0x0070' },
+
             )
 
-        self.arealink_record_desc = (
+    arealink_record_desc = (
             { 'key': 'dest_map_ndx',
               'type': 'DWORD',
               'off': 0x0000,
@@ -264,104 +264,69 @@ class WMAP_Format (Format):
 
             { 'key': 'encounter_chance',
               'type': 'DWORD',
-              'off': 0x0050,
+              'off': 0x0054,
               'label': 'Random encounter chance' },
+
+            { 'key': 'unknown58',
+              'type': 'BYTES',
+              'off': 0x0058,
+              'size': 128,
+              'label': 'Unknown 0x0058' },
 
             )
 
+    def __init__ (self):
+        Format.__init__ (self)
+        self.expect_signature = 'WMAP'
 
-    def decode_file (self):
-        self.decode_header ()
+        self.wmap_list = []
+
+        # FIXME: maybe they should be local to wmap entries
+        self.area_list = []
+        self.arealink_list = []
+
+
+
+
+    def read (self, stream):
+        self.read_header (stream)
 
         off = self.header['wmap_offset']
+        print self.get_struc_size (self.wmap_record_desc)
+        print self.get_struc_size (self.area_record_desc)
+        print self.get_struc_size (self.arealink_record_desc)
+        
         for i in range (self.header['num_of_wmaps']):
             obj = {}
-            self.decode_wmap_record (off, obj)
+            self.read_wmap_record (stream, off, obj)
             self.wmap_list.append (obj)
-            off = off + 184
+            off = off + 184#self.get_struc_size (self.wmap_record_desc) # FIXME: compute the size outside the loop
 
         for wmap in self.wmap_list:
             off = wmap['area_offset']
             for i in range (wmap['num_of_areas']):
                 obj = {}
-                self.decode_area_record (off, obj)
+                self.read_area_record (stream, off, obj)
                 self.area_list.append (obj)
-                off = off + 240
+                off = off + 240#self.get_struc_size (self.area_record_desc) # FIXME: compute the size outside the loop
 
             off = wmap['arealink_offset']
             for i in range (wmap['num_of_arealinks']):
                 obj = {}
-                self.decode_arealink_record (off, obj)
+                self.read_arealink_record (stream, off, obj)
                 self.arealink_list.append (obj)
-                off = off + 168
+                # FIXME: is the size correct???
+                off = off + 168#self.get_struc_size (self.arealink_record_desc) # FIXME: compute the size outside the loop
 
-    def print_file (self):
+    def printme (self):
         self.print_header ()
 
-        i = 0
-        for obj in self.wmap_list:
-            print '#%d' %i
-            self.print_wmap_record (obj)
-            i = i + 1
-
-        i = 0
-        for obj in self.arealink_list:
-            print '#%d' %i
-            self.print_arealink_record (obj)
-            i = i + 1
-            
-        i = 0
-        for obj in self.area_list:
-            print '#%d' %i
-            self.print_area_record (obj)
-            i = i + 1
-            
-        return
-    
-        for i in range (self.header['num_of_res']):
-            self.decode_res_record (off, obj)
-            off = off + 14
-            print '#%d' %i
-            self.print_res_record (obj)
-
-
-    def decode_header (self):
-        self.header = {}
-        self.decode_by_desc (0x0000, self.header_desc, self.header)
-        
-    def print_header (self):
-        self.print_by_desc (self.header, self.header_desc)
-        
-
-    def decode_wmap_record (self, offset, obj):
-        self.decode_by_desc (offset, self.wmap_record_desc, obj)
-        
-    def print_wmap_record (self, obj):
-        self.print_by_desc (obj, self.wmap_record_desc)
-
-
-    def decode_area_record (self, offset, obj):
-        self.decode_by_desc (offset, self.area_record_desc, obj)
-        
-    def print_area_record (self, obj):
-        self.print_by_desc (obj, self.area_record_desc)
-
-
-    def decode_arealink_record (self, offset, obj):
-        self.decode_by_desc (offset, self.arealink_record_desc, obj)
-        
-    def print_arealink_record (self, obj):
-        self.print_by_desc (obj, self.arealink_record_desc)
+        self.print_list ('wmap')
+        self.print_list ('arealink')
+        self.print_list ('area')
 
 
 
-    def get_file_res_data (self, obj):
-        obj['data'] = self.decode_blob (obj['data_offset'], obj['data_size'])
 
-    def save_file_res (self, filename, obj):
-        self.get_file_res_data (obj)
-        fh = open (filename, 'w')
-        fh.write (obj['data'])
-        fh.close ()
-        
+
 register_format ('WMAP', 'V1.0', WMAP_Format)

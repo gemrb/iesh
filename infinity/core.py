@@ -1,7 +1,30 @@
 # -*-python-*-
+# iesh / ie_shell.py - Simple shell for Infinity Engine-based game files
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+"""
+Core and global definitions for the `infinity' package
+
+"""
 
 import string
+import sys
 
+import defaults
 
 global formats
 formats = {}
@@ -13,24 +36,27 @@ global keys
 keys = None
 
 global options
-options = {}
+options = defaults.options
 
 # Loaded IDS files
 global ids
 ids = {}
 
+# These variables are filled after call to load_game()
 game_dir = None
-chitin_file = 'CHITIN.KEY'
-dialog_file = 'dialog.tlk'
+chitin_file = None
+dialog_file = None
 
 xor_key = "\x88\xa8\x8f\xba\x8a\xd3\xb9\xf5\xed\xb1\xcf\xea\xaa\xe4\xb5\xfb\xeb\x82\xf9\x90\xca\xc9\xb5\xe7\xdc\x8e\xb7\xac\xee\xf7\xe0\xca\x8e\xea\xca\x80\xce\xc5\xad\xb7\xc4\xd0\x84\x93\xd5\xf0\xeb\xc8\xb4\x9d\xcc\xaf\xa5\x95\xba\x99\x87\xd2\x9d\xe3\x91\xba\x90\xca"
-
+"""Key used to `encrypt' some objects in IE files by XOR"""
 
 global slash_trans
 slash_trans = string.maketrans ('\\', '/')
 
 t_cp1250 = '\xe1\xe8\xef\xe9\xec\xed\xf2\xf3\xf8\x9a\x9d\xfa\xf9\xfd\x9e\xc1\xc8\xcf\xc9\xcc\xcd\xd2\xd3\xd8\x8a\x8d\xda\xd9\xdd\x8e'
 t_iso8859_2 = '\xe1\xe8\xef\xe9\xec\xed\xf2\xf3\xf8\xb9\xbb\xfa\xf9\xfd\xbe\xc1\xc8\xcf\xc9\xcc\xcd\xd2\xd3\xd8\xa9\xab\xda\xd9\xdd\xae'
+
+
 
 global lang_trans
 lang_trans = string.maketrans (t_cp1250, t_iso8859_2)
@@ -156,14 +182,22 @@ restype_rev_hash = {
     }
 
 
-def register_format (signature, version, klass):
+def register_format (signature, version, klass,  desc = None):
+    """Register class `klass' for reading, parsing and (possibly) writing
+    IE file format with given `signature' and `version'.  `desc' allows
+    to specify text displayed in format list and should be used to 
+    describe status/progress of implementation."""
+
     #core.formats[(signature, version)] = klass
-    formats[signature] = klass
+    #formats[signature] = klass
+    formats[(signature,  version)] = (klass,  desc)
+    # FIXME: this is ugly temporary hack
+    formats[(signature,  None)] = (klass,  desc)
 
 
 def get_format (signature, version = None):
     try:
-        return formats[signature]
+        return formats[(signature,  version)][0]
     except:
         return None
 
@@ -175,3 +209,50 @@ def get_format_by_type (type):
     except:
         return None
 
+def id_to_symbol (idsfile, id):
+    # FIXME: ugly
+    import traceback
+    from stream import ResourceStream
+    idsfile = idsfile.upper ()
+    
+    if not ids.has_key (idsfile):
+        try:
+            # FIXME: ugly & should use 'IDS' instead of 0x3F0
+            idsobj = ResourceStream ().open (idsfile, 0x03F0).load_object ()
+            #idsobj.read ()
+            ids[idsfile] = idsobj
+        except Exception, e:
+            traceback.print_exc()
+            print e
+            return id
+
+    try:
+        return ids[idsfile].ids[id]
+    except KeyError, e:
+        sys.stderr.write ("Warning: No such id %d in %s\n" %(id, idsfile))
+        return id
+        
+    #try:
+    #    return core.ids[idsfile.upper ()].ids[id]
+    #except:
+    #    return None
+    
+
+def get_option (key):
+    try:
+        return options[key][0]
+    except KeyError:
+        raise RuntimeError ("Unknown option `%s'" %key)
+
+def set_option (key,  value,  desc = None):
+    try:
+        opt = options[key]
+        opt[0] = value
+    except KeyError:
+        # option does not exist yet, require desc and create it
+        if desc is None:
+            raise RuntimeError ("Unknown option `%s', `desc' required to create it" %key)
+        options[key] = [value,  desc]
+
+
+# End of file core.py

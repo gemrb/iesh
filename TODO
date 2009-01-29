@@ -1,0 +1,21 @@
+1. use search path for files
+2. Format.read_struc(): allow for offset based on size of other field (STRSIZED, as in BIFC_Format)
+3. make the MemoryStream data buffer autostrech (shrink/grow)
+4. canonize field names and labels
+    - e.g.: 
+        door_cnt or doors_cnt ?
+        # of doors or Doors count?
+5. load objects in cache and override dirs as well
+        
+Data types:
+
+1. OFFSET/COUNT data type?
+2. make data types with mask automatically report unknown bits
+3. Add file type to RESREF data type (e.g. RESREF/ITM)
+4. Strip trailing garbage from strings
+5. Signed data types (SWORD, SDWORD,...). Ugly, Adding unsigned ones would be better
+6. allow for name enums desc items with count > 1 (e.g. 100 strrefs in CRE)
+7. change all *_desc tuples to lists to allow patching in subclasses for other versions of data file
+
+Streams:
+1. Base streams on Python's native file interface, so normal files can be used for reading structures and also the streams can be used with normal python functions. This would require moving the read_(resref|word|...) functions elsewhere, though

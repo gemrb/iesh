@@ -15,5 +15,5 @@ dist:
 	if test -d $(FULLNAME) ; then rm -rf $(FULLNAME); fi
 
 clean:
-	rm -f *.pyc */*.pyc *~ */*~ $(FULLNAME).tar.gz
-
+	rm -f *.pyc */*.pyc */*/*.pyc *~ */*~ */*/*~ *.tmp *.core $(FULLNAME).tar.gz MANIFEST
+	rm -rf build dist

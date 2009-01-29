@@ -16,21 +16,36 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: ie_shell.py,v 1.5 2006/07/03 18:15:34 edheldil Exp $
 
 import atexit
+import cPickle
 import os
 import os.path
 import rlcompleter
 import readline
+import subprocess
 import sys
 import traceback
 
-from ie_shell import core
-from ie_shell.builtins import *
+import infinity
+from infinity import core
+from infinity.builtins import *
+from infinity.stream import *
+from infinity.formats import *
 
-from ie_shell.formats import *
-from ie_shell.formats.stream import *
+###################################################
+IESH_PROFILE_FILE = "~/.iesh_profile"
+"""Load and execute this file at startup in interactive mode."""
+
+IESH_HISTORY_FILE = "~/.iesh_history"
+"""Command line history"""
+
+IESH_RESTORE_FILE = "~/.iesh_restore"
+"""Save keys, strrefs and other core vars to this file for quick restore."""
+
+IESH_NORMAL_PROMPT = 'Cmd: '
+IESH_COMPOUND_PROMPT = '.... '
+IESH_INDENT = '    '
 
 ###################################################
 ## list of commands to be executed before eventual user's input
@@ -39,8 +54,11 @@ commands = []
 ## current indentation for compound commands
 indent = ""
 
-## current comound command if non-empty
+## current compound command if non-empty
 compound_command = ""
+
+pager = None
+"""Pager process (as a Popen object)"""
 
 ###################################################
 def help_on_shell ():
@@ -67,18 +85,21 @@ def help_on_shell ():
           tries to find and load object from a file or resources.
           Returns format object, so the object type has to be supported
     
-      find_str ("^(?i)gemrb")
-          List strrefs for all strings starting with word GemRB, regardless
-          of case
-          
+      load_object ("AGOODY").printme ()
+        
       export_obj ("GUICG", "GUICG.chu")
           Try to find resource GUICG and export it to file GUICG.chu.
           If the name is not unique, add third parameter,
           e.g. type=0x03ea to restrict the resource type
 
+      find_str ("^(?i)gemrb")
+          List strrefs for all strings starting with word GemRB, regardless
+          of case
+          
+
       c = chui.CHUI_Format ("GUISAVE.chu")
-      c.decode_file ()
-      c.print_file ()
+      c.read ()
+      c.printme ()
            loads file GUISAVE.chu from the current dir, decodes it
            and prints its contents
 
@@ -97,6 +118,11 @@ def help_on_shell ():
       core.keys.print_bif_record (core.keys.bif_list[0])
       core.strrefs.print_strref_record (core.strrefs.strref_list[0])
            print first records from chitin.key or dialog.tlk file
+    
+      help (__name__)
+      help (infinity)
+      help (infinity.builtins)
+            help on various topics
 
       !shell_cmd
           Runs command shell_cmd in your native shell. Useful to list
@@ -110,6 +136,8 @@ def help_on_shell ():
 
 ###################################################
 def read_command_file (filename, add_quit = False):
+    """Read commands to be executed from a file."""
+
     try: fh = open (filename)
     except: return False
 
@@ -122,34 +150,67 @@ def read_command_file (filename, add_quit = False):
 
 ###################################################
 def read_command (prompt):
+    """Return next command to be executed.
+    The command is read either from a file or from the command line."""
+
     if len (commands) != 0:
         return commands.pop (0)
     else:
-        return raw_input (prompt)
+        try: return raw_input (prompt)
+        except KeyboardInterrupt:
+            print
+            return ''
+        except EOFError: 
+                print
+                return 'quit'
 
 ###################################################
-def readline_init ():
-    # Just enable history and tab completion for the command line
+def _readline_init ():
+    """Enable history and tab completion for the command line."""
+
     readline.parse_and_bind ("tab: complete")
-    histfile = os.path.join (os.environ["HOME"], ".iesh_history")
+    histfile = os.path.expanduser (IESH_HISTORY_FILE)
     try:
         readline.read_history_file (histfile)
     except IOError:
         pass
 
     atexit.register (readline.write_history_file, histfile)
-    del histfile
-    readline.set_pre_input_hook (readline_hook)
+    #del histfile
+    readline.set_pre_input_hook (_readline_hook)
 
 ###################################################
-def readline_hook ():
+def _readline_hook ():
     readline.insert_text (indent)
     readline.redisplay ()
 
+###################################################
+def save (name = ''):
+    """Saves some core variables (especially keys and strrefs), so that they
+    can be later loaded faster than from IE data files. if `name' is specified, 
+    it's added to filename where the data is stored, thus allowing more
+    save files than just one."""
+    if name != '':
+        name = '-' + name
+    data = [core.game_dir,  core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs]
+    fh = open (os.path.expanduser (IESH_RESTORE_FILE + name),  'w')
+    cPickle.dump (data,  fh)
+    fh.close ()
 
 ###################################################
+def restore (name = ''):
+    """Loads some core variables (especially keys and strrefs) saved
+    by save() function, much faster than from IE data files. if `name' 
+    is specified, it's added to filename where the data is stored, thus
+    allowing more save files than just one."""
+    if name != '':
+        name = '-' + name
+    fh = open (os.path.expanduser (IESH_RESTORE_FILE + name))
+    data = cPickle.load (fh)
+    fh.close ()
+    core.game_dir,  core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs = data
+
 ###################################################
-# main
 ###################################################
 
 #
@@ -165,8 +226,8 @@ if len (sys.argv) > 1:
         print "Can't read input file: %s" %sys.argv[1]
         sys.exit (1)
 else:
-    readline_init ()
-    read_command_file (os.path.join (os.environ["HOME"], ".iesh_profile"))
+    _readline_init ()
+    read_command_file (os.path.expanduser (IESH_PROFILE_FILE))
     print "\n\nType `help' to print a short help, `quit' or ^D to exit the shell\n"
 
 #
@@ -174,47 +235,67 @@ else:
 #
 
 while 1:
-    prompt = "Cmd: "
-    if compound_command != '':
-        prompt = ".... "
+    if compound_command == '':
+        prompt = IESH_NORMAL_PROMPT
+    else:
+        prompt = IESH_COMPOUND_PROMPT
 
-    #s = raw_input (prompt)
-    s = read_command (prompt)
+    #current_command = raw_input (prompt)
+    current_command = read_command (prompt)
 
-    indent = s[0:(len (s) - len (s.lstrip ()))]
+    indent = current_command[0:(len (current_command) - len (current_command.lstrip ()))]
 
-    if s.endswith (":"):
-        indent = indent + "    "
+    if current_command.endswith (":"):
+        indent = indent + IESH_INDENT
 
-    if (s != '' and compound_command != '') or s.endswith (":"):
-        compound_command = compound_command + "\n" + s
+    if (current_command != '' and compound_command != '') or current_command.endswith (":"):
+        compound_command = compound_command + "\n" + current_command
         continue
 
     # zero-length input ends compound commands
-    if s == '' and compound_command != '':
-        s = compound_command
+    if current_command == '' and compound_command != '':
+        current_command = compound_command
         compound_command = ''
 
         
-    if s == 'q' or s == 'quit':
+    if current_command in ('q', 'quit'):
         break
         
-    if s == '?' or s == 'help':
+    if current_command in ('?', 'help'):
         help_on_shell ()
         continue
     
-    if s.startswith ('!'):
-        os.system (s[1:])
+    if current_command.startswith ('!'):
+        os.system (current_command[1:])
         continue
 
+    # If `pager' option is set, run the `pager' and pipe command output to it
+    #   That makes problems with e.g. help(), which runs pager as well, so
+    #   try to avoid the situation. Ugly hack, there might be other such commands
+    #    and moreover it's too easily fooled.
+    
+    save_stdout = sys.stdout
+    save_stderr = sys.stdout
+    
+    if core.get_option ('pager') and not current_command.startswith ('help') and not current_command.startswith ('load_game'):
+        pager = subprocess.Popen (core.get_option ('pager'),  shell = True,  stdin=subprocess.PIPE)
+        sys.stdout = pager.stdin
+        sys.stderr = pager.stdin
+    
     try:
-        exec (s)
+        exec (current_command)
     except:
         print "\n*** Exception in command ***\n"
         traceback.print_exc ()
         print
 
+    if pager is not None:
+        pager.stdin.close ()
+        pager.wait ()
+        sys.stdout = save_stdout
+        sys.stderr = save_stderr
+        pager = None
+    
 
 ###################################################
 # End of file iesh
-

@@ -1,24 +1,28 @@
-ie_shell - Simple Python shell for exploring Infinity Engine-based game files
-==============================================================================
+iesh - Simple Python shell for exploring Infinity Engine-based data files
+=========================================================================
 
 
 Installation:
 -------------
-None at present, just untar the tarball somewhere convenient.
+If you are installing from the source package, type
+
+# python ./setup.py install
+
+If you are installing from the binary package, untar the tarball
+to a usual directory, e.g. /usr/local
 
 Package contents:
-  ./ie_shell.py
-  ./data/ - directory for storing exported data, provided for convenience
+  iesh - the shell
+  infinity - python module package dealing with the reading of IE files
+  infinity/formats/* - various modules for reading the specific IE file formats
 
-  ./formats/format.py
-  ./formats/stream.py
-  ./formats/bam.py
-  ...
-  ./formats/wmap.py
-
-  ./plugins/core.py
-  ./plugins/builtins.py
-  ./plugins/...
+  infinity/stream.py
+  infinity/format.py
+  infinity/core.py
+  infinity/builtins.py
+  
+  data/ - directory for storing exported data, provided for convenience
+  examples/ - some example code snippets
 
 
 Configuration:
@@ -37,11 +41,13 @@ dialog_file
 Other files:
   $HOME/.iesh_profile
   $HOME/.iesh_history
+  $HOME/.iesh_save
+  $HOME/.iesh_save-*
 
 
 Running:
 --------
-Just type ./ie_shell.py or python ./ie_shell.py and you should see 
+Just type ./iesh or python ./iesh and you should see 
 dots marking progress as the program loads CHITIN.KEY and DIALOG.TLK.
 
 !!! This might take *extremely* long time on a slow computer and
@@ -54,26 +60,62 @@ python statements.
 Now you can load files, inspect their contents, search them and export
 objects out of them.
 
-The following resource formats are recognized in this version:
-  BAM
-  BIFF  (only file records)
-  CHUI
-  CRE   (only partial)
-  IDS
-  ITM
-  KEY
-  TLK
-  WMAP
+Getting help:
+-------------
+?, help
+help (object)
+help (infinity)
+help (infinity.builtins)
+...
 
+The following resource formats are recognized in this version:
+  2DA
+  AREA V1.0
+  BAM V1
+  BAMC V1
+  BIFF V1
+  BIF V1.0
+  CHUI V1
+  CRE V1.2
+  DLG V1.0
+  IDS
+  ITM V1.1
+  KEY V1
+  MOS V1
+  MOSC V1
+  PRO V1.0
+  SPL V1
+  STOR V1.1
+  TIS V1
+  TLK V1
+  VVC V1.0
+  WED V1.3
+  WFX  V1.0
+  WMAP V1.0
+
+Type list_formats() to print list of recognized file formats.
+  
 Type `?' or `help' to get some online help and `q', `quit' or ^D
 to exit the program.
+
+
+Struc format:
+-------------
+key - field name, used as a key in the resulting object
+type - data type used for read/write and presentation
+off - field offset, relative to struc's offset 0x0000
+enum - map of field values to their descriptions or IDS filename
+mask - map of bit masks[FIXME: or bit nums?] to their descriptions
+size - num of bytes for BYTES data type
+count - count of fields of the same type and description
+label - label printed for this field
 
 
 
 License, disclaimer and similar stuff:
 --------------------------------------
 
-Copyright (C) 2004-2006 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -88,3 +130,4 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+

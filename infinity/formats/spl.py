@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,20 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: spl.py,v 1.1 2005/03/02 20:44:23 edheldil Exp $
 
-from ie_shell.formats.format import Format, register_format
+from infinity.format import Format, register_format
 
 class SPL_Format (Format):
-    def __init__ (self, filename):
-        Format.__init__ (self, filename)
-        self.expect_signature = 'SPL'
-
-        self.extended_header_list = []
-        self.casting_feature_block_list = []
-
-
-        self.header_desc = (
+    header_desc = [
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
@@ -187,19 +178,19 @@ class SPL_Format (Format):
               'off': 0x006A,
               'label': 'Feature block offset'},
 
-            { 'key': 'casting_feature_block_off',
+            { 'key': 'casting_feature_ndx',
               'type': 'WORD',
               'off': 0x006E,
-              'label': 'Casting feature block offset'},
+              'label': 'First casting feature index'},
 
-            { 'key': 'casting_feature_block_cnt',
+            { 'key': 'casting_feature_cnt',
               'type': 'WORD',
               'off': 0x0070,
-              'label': 'Casting feature block count'},
+              'label': 'Casting feature count'},
 
-            )
+            ]
         
-        self.extended_header_desc = (
+    extended_header_desc = (
             { 'key': 'spell_form',
               'type': 'BYTE',
               'off': 0x0000,
@@ -266,10 +257,10 @@ class SPL_Format (Format):
               'off': 0x001E,
               'label': 'Feature count'},
 
-            { 'key': 'feature_off',
+            { 'key': 'feature_ndx',
               'type': 'WORD',
               'off': 0x0020,
-              'label': 'Feature offset'},
+              'label': 'First feature index'},
 
             { 'key': 'projectile',
               'type': 'WORD',
@@ -288,10 +279,11 @@ class SPL_Format (Format):
 
             )
 
-        self.feature_block_desc = (
+    feature_desc = (
             { 'key': 'opcode_number',
               'type': 'WORD',
               'off': 0x0000,
+              'enum': 'effects',
               'label': 'Opcode number'},
 
             { 'key': 'target',
@@ -375,74 +367,100 @@ class SPL_Format (Format):
 
             )
 
+    def __init__ (self):
+        Format.__init__ (self)
+        self.expect_signature = 'SPL'
 
-    def decode_file (self):
-        self.decode_header ()
+        self.extended_header_list = []
+        self.casting_feature_list = []
+
+
+    def read (self, stream):
+        self.read_header (stream)
 
         off = self.header['extended_header_off']
         for i in range (self.header['extended_header_cnt']):
             obj = {}
-            self.decode_extended_header (off, obj)
+            self.read_extended_header (stream, off, obj)
             self.extended_header_list.append (obj)
             off = off + 40
 
-        off = self.header['feature_block_off'] + self.header['casting_feature_block_off'] * 48
-        for i in range (self.header['casting_feature_block_cnt']):
+        off = self.header['feature_block_off'] + self.header['casting_feature_ndx'] * 48
+        for i in range (self.header['casting_feature_cnt']):
             obj = {}
-            self.decode_feature_block (off, obj)
+            self.read_feature_block (stream, off, obj)
             self.casting_feature_block_list.append (obj)
             off = off + 48
 
 
-    def print_file (self):
+    def printme (self):
         self.print_header ()
 
         i = 0
-        for obj in self.extended_header_list:
-            print '#%d' %i
-            self.print_extended_header (obj)
+        for obj in self.casting_feature_list:
+            print 'Casting feature #%d' %i
+            self.print_feature (obj)
             i = i + 1
 
         i = 0
-        for obj in self.casting_feature_block_list:
-            print '#%d' %i
-            self.print_feature_block (obj)
+        for obj in self.extended_header_list:
+            print 'Extended header #%d' %i
+            self.print_extended_header (obj)
             i = i + 1
 
 
-    def decode_header (self):
-        self.header = {}
-        self.decode_by_desc (0x0000, self.header_desc, self.header)
-        
-    def print_header (self):
-        self.print_by_desc (self.header, self.header_desc)
-        
-
-    def decode_extended_header (self, offset, obj):
-        self.decode_by_desc (offset, self.extended_header_desc, obj)
+    def read_extended_header (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.extended_header_desc, obj)
 
         obj['feature_list'] = []
-        off2 = self.header['feature_block_off'] + obj['feature_off'] * 48
+        off2 = self.header['feature_block_off'] + obj['feature_ndx'] * 48
         for j in range (obj['feature_cnt']):
             obj2 = {}
-            self.decode_feature_block (off2, obj2)
+            self.read_feature (stream, off2, obj2)
             obj['feature_list'].append (obj2)
             off2 = off2 + 48
             
     def print_extended_header (self, obj):
-        self.print_by_desc (obj, self.extended_header_desc)
+        self.print_struc (obj, self.extended_header_desc)
 
         j = 0
         for feature in obj['feature_list']:
-            print 'F #%d' %j
-            self.print_feature_block (feature)
+            print 'Feature #%d' %j
+            self.print_feature (feature)
             j = j + 1
 
-    def decode_feature_block (self, offset, obj):
-        self.decode_by_desc (offset, self.feature_block_desc, obj)
+    def read_feature (self, stream, offset, obj):
+        self.read_struc (stream,offset, self.feature_desc, obj)
         
-    def print_feature_block (self, obj):
-        self.print_by_desc (obj, self.feature_block_desc)
+    def print_feature (self, obj):
+        self.print_struc (obj, self.feature_desc)
 
-        
-register_format ('SPL', 'V1', SPL_Format)
+
+
+class SPL_V20_Format (SPL_Format):
+    SPL_Format.header_desc.extend ([
+            { 'key': 'duration_modifier_level',
+              'type': 'BYTE',
+              'off': 0x0072,
+              'label': 'Duration modifier (level)' },
+
+            { 'key': 'duration_modifier_rounds',
+              'type': 'BYTE',
+              'off': 0x0073,
+              'label': 'Duration modifier (rounds)' }, 
+
+            { 'key': 'unknown_73',
+              'type': 'BYTES',
+              'off': 0x0074,
+              'size': 14, 
+              'label': 'Unknown 0x73' },
+    ])
+
+    ###Format.get_struc_field (None,  SPL_Format.extended_header_desc, 'off',  0x24)['enum'] = { 0: 'None' }
+
+    def __init__ (self):
+        SPL_Format.__init__ (self)
+
+
+register_format ('SPL', 'V1', SPL_Format,  "Should be done except of enums")
+register_format ('SPL', 'V2.0', SPL_V20_Format,  "Should be done except of enums")

@@ -13,7 +13,7 @@ of data files of Infinity Engine-based games
        author_email = 'edheldil@users.sourceforge.net',
        url = 'http://www.eowyn.cz/ie_shell',
        scripts = ['iesh'],
-       packages = ['ie_shell', 'ie_shell.formats'],
+       packages = ['infinity', 'infinity.formats'],
        data_files = [
                      ('share/doc/ie_shell', ['README', 'COPYING']),
                      ('share/doc/ie_shell/examples', glob.glob ('examples/*.py')),

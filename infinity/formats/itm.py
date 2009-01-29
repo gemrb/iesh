@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,20 +16,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: itm.py,v 1.1 2005/03/02 20:44:23 edheldil Exp $
 
-from ie_shell.formats.format import Format, register_format
+from infinity.format import Format, register_format
 
 class ITM_Format (Format):
-    def __init__ (self, filename):
-        Format.__init__ (self, filename)
-        self.expect_signature = 'ITM'
-
-        self.extended_header_list = []
-        self.equipping_feature_block_list = []
-
-
-        self.header_desc = (
+    header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
@@ -183,15 +174,15 @@ class ITM_Format (Format):
               'off': 0x006A,
               'label': 'Feature block offset'},
 
-            { 'key': 'equipping_feature_block_off',
+            { 'key': 'equipping_feature_ndx',
               'type': 'WORD',
               'off': 0x006E,
-              'label': 'Equipping feature block offset'},
+              'label': 'First equipping feature index'},
 
-            { 'key': 'equipping_feature_block_cnt',
+            { 'key': 'equipping_feature_cnt',
               'type': 'WORD',
               'off': 0x0070,
-              'label': 'Equipping feature block count'},
+              'label': 'Equipping feature count'},
 
             # PST only
             { 'key': 'dialog',
@@ -211,7 +202,7 @@ class ITM_Format (Format):
 
             )
         
-        self.extended_header_desc = (
+    extended_header_desc = (
             { 'key': 'attack_type',
               'type': 'BYTE',
               'off': 0x0000,
@@ -297,10 +288,10 @@ class ITM_Format (Format):
               'off': 0x001E,
               'label': 'Feature count'},
 
-            { 'key': 'feature_off',
+            { 'key': 'feature_ndx',
               'type': 'WORD',
               'off': 0x0020,
-              'label': 'Feature offset'},
+              'label': 'First feature index'},
 
             { 'key': 'charges',
               'type': 'WORD',
@@ -366,10 +357,11 @@ class ITM_Format (Format):
 
             )
 
-        self.feature_block_desc = (
+    feature_desc = (
             { 'key': 'opcode_number',
               'type': 'WORD',
               'off': 0x0000,
+              'enum': 'effects',
               'label': 'Opcode number'},
 
             { 'key': 'target',
@@ -453,74 +445,111 @@ class ITM_Format (Format):
 
             )
 
+    def __init__ (self):
+        Format.__init__ (self)
+        self.expect_signature = 'ITM'
 
-    def decode_file (self):
-        self.decode_header ()
+        self.extended_header_list = []
+        self.equipping_feature_list = []
+
+
+    def read (self, stream):
+        self.read_header (stream)
 
         off = self.header['extended_header_off']
         for i in range (self.header['extended_header_cnt']):
             obj = {}
-            self.decode_extended_header (off, obj)
+            self.read_extended_header (stream, off, obj)
             self.extended_header_list.append (obj)
             off = off + 56
 
-        off = self.header['feature_block_off'] + self.header['equipping_feature_block_off'] * 48
-        for i in range (self.header['equipping_feature_block_cnt']):
+        off = self.header['feature_block_off'] + self.header['equipping_feature_ndx'] * 48
+        for i in range (self.header['equipping_feature_cnt']):
             obj = {}
-            self.decode_feature_block (off, obj)
-            self.equipping_feature_block_list.append (obj)
+            self.read_feature (stream, off, obj)
+            self.equipping_feature_list.append (obj)
             off = off + 48
 
+    def write (self, stream):
+        size_extended = self.get_struc_size (self.extended_header_desc)
+        size_feature = self.get_struc_size (self.feature_desc)
+        
+        self.header['extended_header_off'] = self.get_struc_size (self.header)
+        self.header['extended_header_cnt'] = len (self.extended_header_list)
+        self.header['feature_block_off'] = len (self.extended_header_list) * size_extended
+        self.header['equipping_feature_ndx'] = 0
+        self.header['equipping_feature_cnt'] = len (self.equipping_feature_list)
 
-    def print_file (self):
+        feature_cnt = self.header['equipping_feature_cnt']
+        for obj in self.extended_header_list:
+            obj['feature_ndx'] = feature_cnt
+            obj['feature_cnt'] = len (obj['feature_list'])
+            feature_cnt += obj['feature_cnt']
+
+        self.write_header (stream)
+        
+        offset = self.header['feature_block_off']
+        for obj in self.equipping_feature_list:
+            self.write_feature (stream, offset, obj)
+            offset += size_feature
+
+        offset = self.header['extended_header_off']
+        for obj in self.extended_header_list:
+            # FIXME: recalc feature indices
+            self.write_extended_header (stream, offset, obj)
+            offset += size_extended
+        
+
+    def printme (self):
         self.print_header ()
 
         i = 0
-        for obj in self.extended_header_list:
-            print '#%d' %i
-            self.print_extended_header (obj)
+        for obj in self.equipping_feature_list:
+            print 'Equipping feature #%d' %i
+            self.print_feature (obj)
             i = i + 1
 
         i = 0
-        for obj in self.equipping_feature_block_list:
-            print '#%d' %i
-            self.print_feature_block (obj)
+        for obj in self.extended_header_list:
+            print 'Extended header #%d' %i
+            self.print_extended_header (obj)
             i = i + 1
 
 
-    def decode_header (self):
-        self.header = {}
-        self.decode_by_desc (0x0000, self.header_desc, self.header)
-        
-    def print_header (self):
-        self.print_by_desc (self.header, self.header_desc)
-        
-
-    def decode_extended_header (self, offset, obj):
-        self.decode_by_desc (offset, self.extended_header_desc, obj)
+    def read_extended_header (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.extended_header_desc, obj)
 
         obj['feature_list'] = []
-        off2 = self.header['feature_block_off'] + obj['feature_off'] * 48
+        size_feature = self.get_struc_size (self.feature_desc)
+        off2 = self.header['feature_block_off'] + obj['feature_ndx'] * size_feature
         for j in range (obj['feature_cnt']):
             obj2 = {}
-            self.decode_feature_block (off2, obj2)
+            self.read_feature (stream, off2, obj2)
             obj['feature_list'].append (obj2)
-            off2 = off2 + 48
-            
+            off2 += size_feature
+
+    def write_extended_header (self, stream, offset, obj):
+        self.write_struc (stream, offset, obj)
+        size_feature = self.get_struc_size (self.feature_desc)
+        off2 = self.header['feature_block_off'] +obj['feature_ndx'] * size_feature
+        for obj2 in obj['feature_list']:
+            self.write_feature (stream, off2, obj2)
+            off2 += size_feature
+        
     def print_extended_header (self, obj):
-        self.print_by_desc (obj, self.extended_header_desc)
+        self.print_struc (obj, self.extended_header_desc)
 
         j = 0
         for feature in obj['feature_list']:
-            print 'F #%d' %j
-            self.print_feature_block (feature)
+            print 'Feature #%d' %j
+            self.print_feature (feature)
             j = j + 1
 
-    def decode_feature_block (self, offset, obj):
-        self.decode_by_desc (offset, self.feature_block_desc, obj)
+    def read_feature (self, stream, offset, obj):
+        self.read_struc (stream, offset, self.feature_desc, obj)
         
-    def print_feature_block (self, obj):
-        self.print_by_desc (obj, self.feature_block_desc)
+    def print_feature (self, obj):
+        self.print_struc (obj, self.feature_desc)
 
         
 register_format ('ITM', 'V1.1', ITM_Format)

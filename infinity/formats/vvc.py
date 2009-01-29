@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,17 +16,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: vvc.py,v 1.1 2006/07/08 14:29:27 edheldil Exp $
 
-from ie_shell.formats.format import Format, register_format, core
+from infinity import core
+from infinity.format import Format, register_format
 
 class VVC_Format (Format):
-    def __init__ (self, filename):
-        Format.__init__ (self, filename)
-        self.expect_signature = 'VVC'
 
-
-        self.header_desc = (
+    header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
@@ -251,21 +247,16 @@ class VVC_Format (Format):
 
             )
 
+    def __init__ (self):
+        Format.__init__ (self)
+        self.expect_signature = 'VVC'
 
+    def read (self, stream):
+        self.read_header (stream)
 
-    def decode_file (self):
-        self.decode_header ()
-
-    def print_file (self):
+    def printme (self):
         self.print_header ()
 
-    def decode_header (self):
-        self.header = {}
-        self.decode_by_desc (0x0000, self.header_desc, self.header)
-        
-    def print_header (self):
-        self.print_by_desc (self.header, self.header_desc)
-        
 
         
 register_format ('VVC', 'V1.0', VVC_Format)

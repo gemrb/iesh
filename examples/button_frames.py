@@ -5,7 +5,7 @@ from formats import *
 # print buttons which have frame indices other than 0, 1, 0, 0
 def print_button_frames (filename):
     c = chui.CHUI_Format (filename)
-    c.decode_file()
+    c.read()
 
 
     for w in c.window_list:

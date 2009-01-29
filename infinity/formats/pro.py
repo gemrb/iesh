@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,17 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# RCS: $Id: pro.py,v 1.1 2006/07/08 14:29:26 edheldil Exp $
 
-from ie_shell.formats.format import Format, register_format, core
+from infinity import core
+from infinity.format import Format, register_format
 
 class PRO_Format (Format):
-    def __init__ (self, filename):
-        Format.__init__ (self, filename)
-        self.expect_signature = 'PRO'
-
-
-        self.header_desc = (
+    header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
@@ -216,7 +211,7 @@ class PRO_Format (Format):
 
             )
 
-        self.area_header_desc = (
+    area_header_desc = (
             { 'key': 'aoe_target',
               'type': 'WORD',
               'off': 0x0200,
@@ -319,34 +314,29 @@ class PRO_Format (Format):
 
             )
 
+    def __init__ (self):
+        Format.__init__ (self)
+        self.expect_signature = 'PRO'
 
 
-    def decode_file (self):
-        self.decode_header ()
+    def read (self, stream):
+        self.read_header (stream)
         if self.header['projectile_type'] == 3:
-            self.decode_area_header ()
+            self.read_area_header ()
 
 
-    def print_file (self):
+    def printme (self):
         self.print_header ()
         if self.header['projectile_type'] == 3:
             self.print_area_header ()
-
-
-    def decode_header (self):
-        self.header = {}
-        self.decode_by_desc (0x0000, self.header_desc, self.header)
-        
-    def print_header (self):
-        self.print_by_desc (self.header, self.header_desc)
         
 
-    def decode_area_header (self):
+    def read_area_header (self, stream):
         self.area_header = {}
-        self.decode_by_desc (0x0000, self.area_header_desc, self.area_header)
+        self.read_struc (stream, 0x0000, self.area_header_desc, self.area_header)
         
     def print_area_header (self):
-        self.print_by_desc (self.area_header, self.area_header_desc)
+        self.print_struc (self.area_header, self.area_header_desc)
 
         
 register_format ('PRO', 'V1.0', PRO_Format)
