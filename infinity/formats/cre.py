@@ -868,4 +868,744 @@ class CRE_Format (Format):
 
         self.print_struc (self.slots, self.item_slot_desc)
 
+
+
+
+class CRE_V10_Format (CRE_Format):
+
+
+    header_desc = (
+            { 'key': 'signature',
+              'type': 'STR4',
+              'off': 0x0000,
+              'label': 'Signature' },
+
+            { 'key': 'version',
+              'type': 'STR4',
+              'off':0x0004,
+              'label': 'Version'},
+
+            { 'key': 'long_name',
+              'type': 'STRREF',
+              'off': 0x0008,
+              'label': 'Long creature name'},
+
+            { 'key': 'short_name',
+              'type': 'STRREF',
+              'off': 0x000C,
+              'label': 'Short creature name'},
+
+            { 'key': 'flags',
+              'type': 'DWORD',
+              'off': 0x0010,
+              'mask': { 0x0001: 'Dmg doesn\'t stop casting', 0x0002: 'No corpse', 0x0004: 'Keep corpse', 0x0008: 'Orig class Fighter', 0x0010: 'Orig class Mage', 0x0020: 'Orig class Cleric', 0x0040: 'Orig class Thief', 0x0080: 'Orig class Druid', 0x0100: 'Orig class Ranger', 0x0200: 'Fallen Paladin', 0x0400: 'Fallen Ranger', 0x0800: 'Exportable', 0x1000: 'Unknown bit12', 0x2000: 'Quest critical', 0x4000: 'Can activate non-NPC triggers?', 0x8000: 'Been in party',  0x10000: 'Corpse related?',  0xFFFE0000: 'unknown'},
+              'label': 'Creature flags'},
+
+            { 'key': 'xp',
+              'type': 'DWORD',
+              'off': 0x0014,
+              'label': 'XP'},
+
+            { 'key': 'power_level',
+              'type': 'DWORD',
+              'off': 0x0018,
+              'label': 'Creature power level'},
+
+            { 'key': 'gold',
+              'type': 'DWORD',
+              'off': 0x001C,
+              'label': 'Gold carried'},
+
+            { 'key': 'permanent_status_flags',
+              'type': 'DWORD',
+              'off': 0x0020,
+              'enum': 'STATE',
+              'label': 'Permanent status flags'},  # as per STATE.IDS
+
+            { 'key': 'current_hp',
+              'type': 'WORD',
+              'off': 0x0024,
+              'label': 'Current HP'},
+
+            { 'key': 'max_hp',
+              'type': 'WORD',
+              'off': 0x0026,
+              'label': 'Maximum HP'},
+
+            { 'key': 'animation_id',
+              'type': 'WORD',
+              'off': 0x0028,
+              'enum': 'ANIMATE',
+              'label': 'Animation ID'},  # as per ANIMATE.IDS
+
+            { 'key': 'unknown_2A',
+                'type': 'WORD',
+                'off': 0x002A,
+                'label': 'Unknown 2A' },
+
+            { 'key': 'metal_color_index',
+                'type': 'BYTE',
+                'off': 0x002C,
+                'label': 'Metal color index (BG1 anim)' },
+
+            { 'key': 'minor_color_index',
+                'type': 'BYTE',
+                'off': 0x002D,
+                'label': 'Minor color index (BG1 anim)' },
+
+            { 'key': 'major_color_index',
+                'type': 'BYTE',
+                'off': 0x002E,
+                'label': 'Major color index (BG1 anim)' },
+
+            { 'key': 'skin_color_index',
+                'type': 'BYTE',
+                'off': 0x002F,
+                'label': 'Skin color index (BG1 anim)' },
+
+            { 'key': 'leather_color_index',
+                'type': 'BYTE',
+                'off': 0x0030,
+                'label': 'Leather color index (BG1 anim)' },
+
+            { 'key': 'armor_color_index',
+                'type': 'BYTE',
+                'off': 0x0031,
+                'label': 'Armor color index (BG1 anim)' },
+
+            { 'key': 'hair_color_index',
+                'type': 'BYTE',
+                'off': 0x0032,
+                'label': 'Hair color index (BG1 anim)' },
+
+            { 'key': 'eff_structure_version',
+                'type': 'BYTE',
+                'off': 0x0033,
+                'enum': { 0: 'Version 1', 1: 'Version 2' },
+                'label': 'EFF structure version' },
+
+            { 'key': 'small_portrait_resref',
+                'type': 'RESREF',
+                'off': 0x0034,
+                'label': 'Small portrait resref' },
+
+            { 'key': 'large_portrait_resref',
+                'type': 'RESREF',
+                'off': 0x003C,
+                'label': 'Large portrait resref' },
+
+            { 'key': 'reputation',
+                'type': 'BYTE',  # FIXME: actually it's a signed byte
+                'off': 0x0044,
+                'label': 'Reputation' },
+
+            { 'key': 'hide_in_shadows',
+                'type': 'BYTE',
+                'off': 0x0045,
+                'label': 'Hide in shadows (base)' },
+
+            { 'key': 'armor_class_natural',
+                'type': 'WORD',  # FIXME: actually signed word
+                'off': 0x0046,
+                'label': 'Armor class (natural)' },
+
+            { 'key': 'armor_class_effective',
+                'type': 'WORD',  # FIXME: actually signed word
+                'off': 0x0048,
+                'label': 'Armor class (effective)' },
+
+            { 'key': 'armor_class_crushing_mod',
+                'type': 'WORD',  # FIXME: actually signed word
+                'off': 0x004A,
+                'label': 'Armor class (crushing att mod)' },
+
+            { 'key': 'armor_class_missile_mod',
+                'type': 'WORD',  # FIXME: actually signed word
+                'off': 0x004C,
+                'label': 'Armor class (missile att mod)' },
+
+            { 'key': 'armor_class_piercing_mod',
+                'type': 'WORD',  # FIXME: actually signed word
+                'off': 0x004E,
+                'label': 'Armor class (piercing att mod)' },
+
+            { 'key': 'armor_class_slashing_mod',
+                'type': 'WORD',  # FIXME: actually signed word
+                'off': 0x0050,
+                'label': 'Armor class (slashing att mod)' },
+
+            { 'key': 'thac0',
+                'type': 'BYTE',
+                'off': 0x0052,
+                'label': 'THAC0 (1-25)' },
+
+            { 'key': 'num_attacks',
+                'type': 'BYTE',
+                'off': 0x0053,
+                'label': 'Number of attacks (0-10)' },
+
+            { 'key': 'save_vs_death',
+                'type': 'BYTE',
+                'off': 0x0054,
+                'label': 'Save versus death (0-20)' },
+
+            { 'key': 'save_vs_wands',
+                'type': 'BYTE',
+                'off': 0x0055,
+                'label': 'Save versus wands (0-20)' },
+
+            { 'key': 'save_vs_polymorph',
+                'type': 'BYTE',
+                'off': 0x0056,
+                'label': 'Save versus polymorph (0-20)' },
+
+            { 'key': 'save_vs_breath',
+                'type': 'BYTE',
+                'off': 0x0057,
+                'label': 'Save versus breath attacks (0-20)' },
+
+            { 'key': 'save_vs_spells',
+                'type': 'BYTE',
+                'off': 0x0058,
+                'label': 'Save versus spells (0-20)' },
+
+            { 'key': 'resist_fire',
+                'type': 'BYTE',
+                'off': 0x0059,
+                'label': 'Resist fire (0-100)' },
+
+            { 'key': 'resist_cold',
+                'type': 'BYTE',
+                'off': 0x005A,
+                'label': 'Resist cold (0-100)' },
+
+            { 'key': 'resist_electricity',
+                'type': 'BYTE',
+                'off': 0x005B,
+                'label': 'Resist electricity (0-100)' },
+
+            { 'key': 'resist_acid',
+                'type': 'BYTE',
+                'off': 0x005C,
+                'label': 'Resist acid (0-100)' },
+
+            { 'key': 'resist_magic',
+                'type': 'BYTE',
+                'off': 0x005D,
+                'label': 'Resist magic (0-100)' },
+
+            { 'key': 'resist_magic_fire',
+                'type': 'BYTE',
+                'off': 0x005E,
+                'label': 'Resist magic fire (0-100)' },
+
+            { 'key': 'resist_magic_cold',
+                'type': 'BYTE',
+                'off': 0x005F,
+                'label': 'Resist magic cold (0-100)' },
+
+            { 'key': 'resist_slashing',
+                'type': 'BYTE',
+                'off': 0x0060,
+                'label': 'Resist slashing (0-100)' },
+
+            { 'key': 'resist_crushing',
+                'type': 'BYTE',
+                'off': 0x0061,
+                'label': 'Resist crushing (0-100)' },
+
+            { 'key': 'resist_piercing',
+                'type': 'BYTE',
+                'off': 0x0062,
+                'label': 'Resist piercing (0-100)' },
+
+            { 'key': 'resist_missile',
+                'type': 'BYTE',
+                'off': 0x0063,
+                'label': 'Resist missile (0-100)' },
+
+            { 'key': 'detect_illusion',
+                'type': 'BYTE',
+                'off': 0x0064,
+                'label': 'Detect illusion' },
+
+            { 'key': 'set_traps',
+                'type': 'BYTE',
+                'off': 0x0065,
+                'label': 'Set traps' },
+
+            { 'key': 'lore',
+                'type': 'BYTE',
+                'off': 0x0066,
+                'label': 'Lore' },
+
+            { 'key': 'lockpicking',
+                'type': 'BYTE',
+                'off': 0x0067,
+                'label': 'Lockpicking' },
+
+            { 'key': 'stealth',
+                'type': 'BYTE',
+                'off': 0x0068,
+                'label': 'Stealth' },
+
+            { 'key': 'find_disarm_traps',
+                'type': 'BYTE',
+                'off': 0x0069,
+                'label': 'Find and disarm traps' },
+
+            { 'key': 'pick_pockets',
+                'type': 'BYTE',
+                'off': 0x006A,
+                'label': 'Pick pockets' },
+
+            { 'key': 'fatigue',
+                'type': 'BYTE',
+                'off': 0x006B,
+                'label': 'Fatigue' },
+
+            { 'key': 'intoxication',
+                'type': 'BYTE',
+                'off': 0x006C,
+                'label': 'Intoxication' },
+
+            { 'key': 'luck',
+                'type': 'BYTE',
+                'off': 0x006D,
+                'label': 'Luck' },
+
+            { 'key': 'large_sword_proficiency',
+                'type': 'BYTE',
+                'off': 0x006E,
+                'label': 'Large sword proficiency (unused in BG2)' },
+
+            { 'key': 'small_sword_proficiency',
+                'type': 'BYTE',
+                'off': 0x006F,
+                'label': 'Small sword proficiency (unused in BG2)' },
+
+            { 'key': 'bow_proficiency',
+                'type': 'BYTE',
+                'off': 0x0070,
+                'label': 'Bow proficiency (unused in BG2)' },
+
+            { 'key': 'spear_proficiency',
+                'type': 'BYTE',
+                'off': 0x0071,
+                'label': 'Spear proficiency (unused in BG2)' },
+
+            { 'key': 'blunt_proficiency',
+                'type': 'BYTE',
+                'off': 0x0072,
+                'label': 'Blunt proficiency (unused in BG2)' },
+
+            { 'key': 'spiked_proficiency',
+                'type': 'BYTE',
+                'off': 0x0073,
+                'label': 'Spiked proficiency (unused in BG2)' },
+
+            { 'key': 'axe_proficiency',
+                'type': 'BYTE',
+                'off': 0x0074,
+                'label': 'Axe proficiency (unused in BG2)' },
+
+            { 'key': 'missile_proficiency',
+                'type': 'BYTE',
+                'off': 0x0075,
+                'label': 'Missile proficiency (unused in BG2)' },
+
+            { 'key': 'unused_proficiency',
+                'type': 'BYTE',
+                'off': 0x0076,
+                'count': 13,
+                'label': 'Unused proficiency slot' },
+
+            { 'key': 'tracking_skill',
+                'type': 'BYTE',
+                'off': 0x0083,
+                'label': 'Tracking skill' },
+
+            { 'key': 'unknown_84',
+                'type': 'BYTES',
+                'off': 0x0084,
+                'size': 32,
+                'label': 'Unknown 84' },
+
+
+            { 'key': 'strref',      # see SOUNDOFF.IDS (for BG1) and SNDSLOT.IDS for (BG2)
+                'type': 'STRREF',
+                'off': 0x00A4,
+                'count': 100,
+                'label': 'Strref' },
+
+            { 'key': 'primary_highest_level',
+                'type': 'BYTE',
+                'off': 0x0234,
+                'label': 'Highest level in primary class' },
+
+            { 'key': 'secondary_highest_level',
+                'type': 'BYTE',
+                'off': 0x0235,
+                'label': 'Highest level in secondary class' },
+
+            { 'key': 'tertiary_highest_level',
+                'type': 'BYTE',
+                'off': 0x0236,
+                'label': 'Highest level in tertiary class' },
+
+            { 'key': 'sex',
+                'type': 'BYTE',
+                'off': 0x0237,
+                'enum': 'gender',
+                'label': 'Sex (not modified)' },
+
+            { 'key': 'strength',
+                'type': 'BYTE',
+                'off': 0x0238,
+                'label': 'Strength' },
+
+            { 'key': 'strength_bonus',
+                'type': 'BYTE',
+                'off': 0x0239,
+                'label': 'Strength % bonus' },
+
+            { 'key': 'intelligence',
+                'type': 'BYTE',
+                'off': 0x023A,
+                'label': 'Intelligence' },
+
+            { 'key': 'wisdom',
+                'type': 'BYTE',
+                'off': 0x023B,
+                'label': 'Wisdom' },
+
+            { 'key': 'dexterity',
+                'type': 'BYTE',
+                'off': 0x023C,
+                'label': 'Dexterity' },
+
+            { 'key': 'constitution',
+                'type': 'BYTE',
+                'off': 0x023D,
+                'label': 'Constitution' },
+
+            { 'key': 'charisma',
+                'type': 'BYTE',
+                'off': 0x023E,
+                'label': 'Charisma' },
+
+            { 'key': 'morale',
+                'type': 'BYTE',
+                'off': 0x023F,
+                'label': 'Morale' },
+
+            { 'key': 'morale_break',
+                'type': 'BYTE',
+                'off': 0x0240,
+                'label': 'Morale break' },
+
+            { 'key': 'racial_enemy',
+                'type': 'BYTE',
+                'off': 0x0241,
+                'enum': 'race',
+                'label': 'Racial enemy' },
+
+            { 'key': 'morale_recovery_time',
+                'type': 'BYTE',
+                'off': 0x0242,
+                'label': 'Morale recovery time' },
+
+            { 'key': 'unknown_243',
+                'type': 'BYTE',
+                'off': 0x0243,
+                'label': 'Unknown 243' },
+
+            { 'key': 'kit_info',
+                'type': 'DWORD',
+                'off': 0x0244,
+                #'mask': { 0x00000000: 'None', 0x00400000: 'Abjurer', 0x00800000: 'Conjurer', 0x01000000: 'Diviner', 0x02000000: 'Enchanter', 0x04000000: 'Illusionist', 0x08000000: 'Invoker', 0x10000000: 'Necromancer', 0x20000000: 'Transmuter' },
+                'label': 'Kit information' },
+
+            { 'key': 'override_script',
+                'type': 'RESREF',
+                'off': 0x0248,
+                'label': 'Creature script - override' },
+
+            { 'key': 'class_script',
+                'type': 'RESREF',
+                'off': 0x0250,
+                'label': 'Creature script - class' },
+
+            { 'key': 'race_script',
+                'type': 'RESREF',
+                'off': 0x0258,
+                'label': 'Creature script - race' },
+
+            { 'key': 'general_script',
+                'type': 'RESREF',
+                'off': 0x0260,
+                'label': 'Creature script - general' },
+
+            { 'key': 'default_script',
+                'type': 'RESREF',
+                'off': 0x0268,
+                'label': 'Creature script - default' },
+
+            { 'key': 'enemy_ally',
+                'type': 'BYTE',
+                'off': 0x0270,
+                'enum': 'EA',
+                'label': 'Enemy-Ally' },
+
+            { 'key': 'geberal',
+                'type': 'BYTE',
+                'off': 0x0271,
+                'enum': 'GENERAL',
+                'label': 'General' },
+
+            { 'key': 'race',
+                'type': 'BYTE',
+                'off': 0x0272,
+                'enum': 'RACE',
+                'label': 'Race' },
+
+            { 'key': 'class',
+                'type': 'BYTE',
+                'off': 0x0273,
+                'enum': 'CLASS',
+                'label': 'Class' },
+
+            { 'key': 'specific',
+                'type': 'BYTE',
+                'off': 0x0274,
+                'enum': 'SPECIFIC',
+                'label': 'Specific' },
+
+            { 'key': 'gender',
+                'type': 'BYTE',
+                'off': 0x0275,
+                'enum': 'GENDER',
+                'label': 'Gender' },
+
+            { 'key': 'unknown_276',
+                'type': 'BYTES',
+                'off': 0x0276,
+                'size': 5,
+                'label': 'Unknown 276' },
+
+            { 'key': 'alignment',
+                'type': 'BYTE',
+                'off': 0x027B,
+                'enum': 'ALIGNMEN',
+                'label': 'Alignment' },
+
+            { 'key': 'global_actor_enumeration',
+                'type': 'WORD',
+                'off': 0x027C,
+                'label': 'Global actor enumeration value' },
+
+            { 'key': 'local_actor_enumeration',
+                'type': 'WORD',
+                'off': 0x027E,
+                'label': 'Local (area) actor enumeration value' },
+
+            { 'key': 'death_var',
+                'type': 'STR32',
+                'off': 0x0280,
+                'label': 'Death variable' },
+
+            { 'key': 'known_spell_off',
+                'type': 'DWORD',
+                'off': 0x02A0,
+                'label': 'Offset of known spells' },
+
+            { 'key': 'known_spell_cnt',
+                'type': 'DWORD',
+                'off': 0x02A4,
+                'label': 'Count of known spells' },
+
+            { 'key': 'spell_memorization_off',
+                'type': 'DWORD',
+                'off': 0x02A8,
+                'label': 'Offset of spell memorization infos' },
+
+            { 'key': 'spell_memorization_cnt',
+                'type': 'DWORD',
+                'off': 0x02AC,
+                'label': 'Count of spell memorization infos' },
+
+            { 'key': 'memorized_spell_off',
+                'type': 'DWORD',
+                'off': 0x02B0,
+                'label': 'Offset of memorized spells' },
+
+            { 'key': 'memorized_spell_cnt',
+                'type': 'DWORD',
+                'off': 0x02B4,
+                'label': 'Count of memorized spells' },
+
+            { 'key': 'item_slot_off',
+                'type': 'DWORD',
+                'off': 0x02B8,
+                'label': 'Offset of items slots' },
+
+            { 'key': 'item_off',
+                'type': 'DWORD',
+                'off': 0x02BC,
+                'label': 'Offset of items' },
+
+            { 'key': 'item_cnt',
+                'type': 'DWORD',
+                'off': 0x02C0,
+                'label': 'Count of items' },
+
+            { 'key': 'effect_off',
+                'type': 'DWORD',
+                'off': 0x02C4,
+                'label': 'Offset of effects' },
+
+            { 'key': 'effect_cnt',
+                'type': 'DWORD',
+                'off': 0x02C8,
+                'label': 'Count of effects' },
+
+            { 'key': 'dialog',
+                'type': 'RESREF',
+                'off': 0x02CC,
+                'label': 'Dialog resref' },
+            )
+
+    known_spell_desc = (
+            { 'key': 'resref',
+                'type': 'RESREF',
+                'restype': 'SPL',
+                'off': 0x0000,
+                'label': 'SPL resref' },
+
+            { 'key': 'level',
+                'type': 'WORD',
+                'off': 0x0008,
+                'label': 'Spell level -1' },
+
+            { 'key': 'type',
+                'type': 'WORD',
+                'off': 0x000A,
+                'enum': { 0: 'Priest', 1: 'Wizard', 2: 'Innate' },
+                'label': 'Spell type' },
+            )
+
+    spell_memorization_desc = (
+            { 'key': 'level',
+                'type': 'WORD',
+                'off': 0x0000,
+                'label': 'Spell level -1' },
+
+            { 'key': 'num_memorizable',
+                'type': 'WORD',
+                'off': 0x0002,
+                'label': 'Number of spells memorizable' },
+
+            { 'key': 'num_memorizable_after_fx',
+                'type': 'WORD',
+                'off': 0x0004,
+                'label': 'Number of spells memorizable after effects' },
+
+            { 'key': 'type',
+                'type': 'WORD',
+                'off': 0x0006,
+                'enum': { 0: 'Priest', 1: 'Wizard', 2: 'Innate' },
+                'label': 'Spell type' },
+
+            { 'key': 'memorized_spell_ndx',
+                'type': 'DWORD',
+                'off': 0x0008,
+                'label': 'Index to memorized spells' },
+
+            { 'key': 'memorized_spell_cnt',
+                'type': 'DWORD',
+                'off': 0x000C,
+                'label': 'Count of memorized spells' },
+            )
+
+    memorized_spell_desc = (
+            { 'key': 'resref',
+                'type': 'RESREF',
+                'restype': 'SPL',
+                'off': 0x0000,
+                'label': 'SPL resref' },
+
+            { 'key': 'memorized',
+                'type': 'DWORD',
+                'off': 0x0008,
+                'label': 'Memorized' },
+    )
+
+
+    item_desc = (
+            { 'key': 'item_resref',
+                'type': 'RESREF',
+                'restype': 'ITM',
+                'off': 0x0000,
+                'label': 'ITM resref' },
+
+            { 'key': 'item_expiration_time',
+                'type': 'WORD',
+                'off': 0x0008,
+                'label': 'Item expiration time' },
+
+            { 'key': 'usage_1',
+                'type': 'WORD',
+                'off': 0x000A,
+                'label': 'Usage 1' },
+
+            { 'key': 'usage_2',
+                'type': 'WORD',
+                'off': 0x000C,
+                'label': 'Usage 2' },
+
+            { 'key': 'usage_3',
+                'type': 'WORD',
+                'off': 0x000E,
+                'label': 'Usage 3' },
+
+            { 'key': 'flags',
+                'type': 'DWORD',
+                'off': 0x0010,
+                'mask': { 0x01: 'Identified', 0x02: 'Unstealable', 0x04: 'Stolen', 0x08: 'Undroppable' },
+                'label': 'Flags' },
+    )
+
+    item_slot_desc = (
+            { 'key': 'item',
+                'type': 'WORD',
+                'off': 0x0000,
+                'count': 45,
+                'label': 'Item' },
+    )
+
+    def __init__ (self):
+        CRE_Format.__init__ (self)
+        del self.overlay_list
+
+    def read (self, stream):
+        self.read_header (stream)
+        self.read_list (stream, 'known_spell')
+        self.read_list (stream, 'spell_memorization')
+        self.read_list (stream, 'memorized_spell')
+        self.read_list (stream, 'item')
+
+        self.slots = {}
+        self.read_struc (stream, self.header['item_slot_off'], self.item_slot_desc, self.slots)
+
+    def printme (self):
+        self.print_header ()
+        self.print_list ('known_spell')
+        self.print_list ('memorized_spell')
+        self.print_list ('spell_memorization')
+        self.print_list ('item')
+
+        self.print_struc (self.slots, self.item_slot_desc)
+
+
 register_format ('CRE', 'V1.2', CRE_Format)
+register_format ('CRE', 'V1.0', CRE_V10_Format)

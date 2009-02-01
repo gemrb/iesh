@@ -4,6 +4,7 @@ import are
 import bam
 import bcs
 import biff
+import chr
 import chui
 import cre
 import d2a
