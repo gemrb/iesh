@@ -20,7 +20,8 @@
 from infinity.format import Format, register_format
 
 
-class CRE_V12_Format (Format):
+
+class CRE_V10_Format (Format):
 
     header_desc = (
             { 'key': 'signature',
@@ -46,7 +47,7 @@ class CRE_V12_Format (Format):
             { 'key': 'flags',
               'type': 'DWORD',
               'off': 0x0010,
-              'mask': { 0x0001: 'Dmg doesn\'t stop casting', 0x0002: 'No corpse', 0x0004: 'Keep corpse', 0x0008: 'Orig class Fighter', 0x0010: 'Orig class Mage', 0x0020: 'Orig class Cleric', 0x0040: 'Orig class Thief', 0x0080: 'Orig class Druid', 0x0100: 'Orig class Ranger', 0x0200: 'Fallen Paladin', 0x0400: 'Fallen Ranger', 0x0800: 'Exportable', 0x1000: 'Unknown bit12', 0x2000: 'Unknown bit13', 0x4000: 'Can activate non-NPC triggers?', 0x8000: 'Been in party'},
+              'mask': { 0x0001: 'Dmg doesn\'t stop casting', 0x0002: 'No corpse', 0x0004: 'Keep corpse', 0x0008: 'Orig class Fighter', 0x0010: 'Orig class Mage', 0x0020: 'Orig class Cleric', 0x0040: 'Orig class Thief', 0x0080: 'Orig class Druid', 0x0100: 'Orig class Ranger', 0x0200: 'Fallen Paladin', 0x0400: 'Fallen Ranger', 0x0800: 'Exportable', 0x1000: 'Unknown bit12', 0x2000: 'Quest critical', 0x4000: 'Can activate non-NPC triggers?', 0x8000: 'Been in party',  0x10000: 'Corpse related?',  0xFFFE0000: 'unknown'},
               'label': 'Creature flags'},
 
             { 'key': 'xp',
@@ -322,40 +323,50 @@ class CRE_V12_Format (Format):
                 'off': 0x006D,
                 'label': 'Luck' },
 
-            { 'key': 'fist_proficiency',
+            { 'key': 'large_sword_proficiency',
                 'type': 'BYTE',
                 'off': 0x006E,
-                'label': 'Fist proficiency' },
+                'label': 'Large sword proficiency (unused in BG2)' },
 
-            { 'key': 'edged_proficiency',
+            { 'key': 'small_sword_proficiency',
                 'type': 'BYTE',
                 'off': 0x006F,
-                'label': 'Edged proficiency' },
-
-            { 'key': 'hammer_proficiency',
-                'type': 'BYTE',
-                'off': 0x0070,
-                'label': 'Hammer proficiency' },
-
-            { 'key': 'axe_proficiency',
-                'type': 'BYTE',
-                'off': 0x0071,
-                'label': 'Axe proficiency' },
-
-            { 'key': 'club_proficiency',
-                'type': 'BYTE',
-                'off': 0x0072,
-                'label': 'Club proficiency' },
+                'label': 'Small sword proficiency (unused in BG2)' },
 
             { 'key': 'bow_proficiency',
                 'type': 'BYTE',
+                'off': 0x0070,
+                'label': 'Bow proficiency (unused in BG2)' },
+
+            { 'key': 'spear_proficiency',
+                'type': 'BYTE',
+                'off': 0x0071,
+                'label': 'Spear proficiency (unused in BG2)' },
+
+            { 'key': 'blunt_proficiency',
+                'type': 'BYTE',
+                'off': 0x0072,
+                'label': 'Blunt proficiency (unused in BG2)' },
+
+            { 'key': 'spiked_proficiency',
+                'type': 'BYTE',
                 'off': 0x0073,
-                'label': 'Bow proficiency' },
+                'label': 'Spiked proficiency (unused in BG2)' },
+
+            { 'key': 'axe_proficiency',
+                'type': 'BYTE',
+                'off': 0x0074,
+                'label': 'Axe proficiency (unused in BG2)' },
+
+            { 'key': 'missile_proficiency',
+                'type': 'BYTE',
+                'off': 0x0075,
+                'label': 'Missile proficiency (unused in BG2)' },
 
             { 'key': 'unused_proficiency',
                 'type': 'BYTE',
-                'off': 0x0074,
-                'count': 15,
+                'off': 0x0076,
+                'count': 13,
                 'label': 'Unused proficiency slot' },
 
             { 'key': 'tracking_skill',
@@ -461,7 +472,7 @@ class CRE_V12_Format (Format):
             { 'key': 'kit_info',
                 'type': 'DWORD',
                 'off': 0x0244,
-                'mask': { 0x00000000: 'None', 0x00400000: 'Abjurer', 0x00800000: 'Conjurer', 0x01000000: 'Diviner', 0x02000000: 'Enchanter', 0x04000000: 'Illusionist', 0x08000000: 'Invoker', 0x10000000: 'Necromancer', 0x20000000: 'Transmuter' },
+                #'mask': { 0x00000000: 'None', 0x00400000: 'Abjurer', 0x00800000: 'Conjurer', 0x01000000: 'Diviner', 0x02000000: 'Enchanter', 0x04000000: 'Illusionist', 0x08000000: 'Invoker', 0x10000000: 'Necromancer', 0x20000000: 'Transmuter' },
                 'label': 'Kit information' },
 
             { 'key': 'override_script',
@@ -489,242 +500,128 @@ class CRE_V12_Format (Format):
                 'off': 0x0268,
                 'label': 'Creature script - default' },
 
-            { 'key': 'unknown_270',
-                'type': 'BYTES',
-                'off': 0x0270,
-                'size': 52,
-                'label': 'Unknown 270' },
-
-            { 'key': 'overlay_off',
-                'type': 'DWORD',
-                'off': 0x0294,
-                'label': 'Offset to overlay section' },
-
-            { 'key': 'overlay_cnt',
-                'type': 'DWORD',
-                'off': 0x0298,
-                'label': 'Size of overlay section' },
-
-            { 'key': 'xp_secondary',
-                'type': 'DWORD',
-                'off': 0x029C,
-                'label': 'XP (secondary class)' },
-
-            { 'key': 'xp_tertiary',
-                'type': 'DWORD',
-                'off': 0x02A0,
-                'label': 'XP (tertiary class)' },
-
-            { 'key': 'internal',
-                'type': 'WORD',
-                'off': 0x02A4,
-                'count': 12, # FIXME: IESDP has 10 here
-                'label': 'Internal' },
-
-            { 'key': 'monstrous_compendium_entry',
-                'type': 'STR32',
-                'off': 0x02BC,  # FIXME: IESDP has 2B8 here
-                'label': 'Monstrous compendium entry' },
-
-            { 'key': 'dialog_activation_range',
-                'type': 'BYTE',
-                'off': 0x02DC,
-                'label': 'Dialog activation range' },
-
-            { 'key': 'selection_cirle_size',
-                'type': 'BYTE',
-                'off': 0x02DD,
-                'label': 'Selection circle size' },
-
-            { 'key': 'unknown_2DE',
-                'type': 'BYTE',
-                'off': 0x002DE,
-                'label': 'Unknown 2DE' },
-
-            { 'key': 'num_colors',
-                'type': 'BYTE',
-                'off': 0x02DF,
-                'label': 'Number of colors' },
-
-            { 'key': 'attr_flags',
-                'type': 'DWORD',
-                'off': 0x02E0,
-                'mask': { 0x0002: 'Transparent', 0x100: 'Invulnerable' },
-                'label': 'Attribute flags' },
-
-            { 'key': 'color',
-                'type': 'WORD',
-                'off': 0x02E4,
-                'enum': 'Clownclr',
-                'count': 7,
-                'label': 'Color' },
-
-            { 'key': 'unknown_2F2',
-                'type': 'BYTES',
-                'off': 0x002F2,
-                'size': 3,
-                'label': 'Unknown 2F2' },
-
-            { 'key': 'color_placement',
-                'type': 'BYTE',
-                'off': 0x02F5,
-                'count': 7,
-                'label': 'Color placement' },
-
-            { 'key': 'unknown_2FC',
-                'type': 'BYTES',
-                'off': 0x002FC,
-                'size': 21,
-                'label': 'Unknown 2FC' },
-
-            { 'key': 'species',
-                'type': 'BYTE',
-                'off': 0x0311,
-                'enum': 'RACE',
-                'label': 'Species' },
-
-            { 'key': 'team',
-                'type': 'BYTE',
-                'off': 0x0312,
-                'enum': 'TEAM',
-                'label': 'Team' },
-
-            { 'key': 'faction',
-                'type': 'BYTE',
-                'off': 0x0313,
-                'enum': 'FACTION',
-                'label': 'Faction' },
-
             { 'key': 'enemy_ally',
                 'type': 'BYTE',
-                'off': 0x0314,
+                'off': 0x0270,
                 'enum': 'EA',
                 'label': 'Enemy-Ally' },
 
             { 'key': 'general',
                 'type': 'BYTE',
-                'off': 0x0315,
+                'off': 0x0271,
                 'enum': 'GENERAL',
                 'label': 'General' },
 
             { 'key': 'race',
                 'type': 'BYTE',
-                'off': 0x0316,
+                'off': 0x0272,
                 'enum': 'RACE',
                 'label': 'Race' },
 
             { 'key': 'class',
                 'type': 'BYTE',
-                'off': 0x0317,
+                'off': 0x0273,
                 'enum': 'CLASS',
                 'label': 'Class' },
 
             { 'key': 'specific',
                 'type': 'BYTE',
-                'off': 0x0318,
+                'off': 0x0274,
                 'enum': 'SPECIFIC',
                 'label': 'Specific' },
 
             { 'key': 'gender',
                 'type': 'BYTE',
-                'off': 0x0319,
+                'off': 0x0275,
                 'enum': 'GENDER',
                 'label': 'Gender' },
 
-            { 'key': 'unknown_31A',
+            { 'key': 'unknown_276',
                 'type': 'BYTES',
-                'off': 0x031A,
+                'off': 0x0276,
                 'size': 5,
-                'label': 'Unknown 31A' },
+                'label': 'Unknown 276' },
 
             { 'key': 'alignment',
                 'type': 'BYTE',
-                'off': 0x031F,
+                'off': 0x027B,
                 'enum': 'ALIGNMEN',
                 'label': 'Alignment' },
 
             { 'key': 'global_actor_enumeration',
                 'type': 'WORD',
-                'off': 0x0320,
+                'off': 0x027C,
                 'label': 'Global actor enumeration value' },
 
             { 'key': 'local_actor_enumeration',
                 'type': 'WORD',
-                'off': 0x0322,
+                'off': 0x027E,
                 'label': 'Local (area) actor enumeration value' },
 
             { 'key': 'death_var',
                 'type': 'STR32',
-                'off': 0x0324,
+                'off': 0x0280,
                 'label': 'Death variable' },
 
             { 'key': 'known_spell_off',
                 'type': 'DWORD',
-                'off': 0x0344,
+                'off': 0x02A0,
                 'label': 'Offset of known spells' },
 
             { 'key': 'known_spell_cnt',
                 'type': 'DWORD',
-                'off': 0x0348,
+                'off': 0x02A4,
                 'label': 'Count of known spells' },
 
             { 'key': 'spell_memorization_off',
                 'type': 'DWORD',
-                'off': 0x034C,
+                'off': 0x02A8,
                 'label': 'Offset of spell memorization infos' },
 
             { 'key': 'spell_memorization_cnt',
                 'type': 'DWORD',
-                'off': 0x0350,
+                'off': 0x02AC,
                 'label': 'Count of spell memorization infos' },
 
             { 'key': 'memorized_spell_off',
                 'type': 'DWORD',
-                'off': 0x0354,
+                'off': 0x02B0,
                 'label': 'Offset of memorized spells' },
 
             { 'key': 'memorized_spell_cnt',
                 'type': 'DWORD',
-                'off': 0x0358,
+                'off': 0x02B4,
                 'label': 'Count of memorized spells' },
 
             { 'key': 'item_slot_off',
                 'type': 'DWORD',
-                'off': 0x035C,
+                'off': 0x02B8,
                 'label': 'Offset of items slots' },
 
             { 'key': 'item_off',
                 'type': 'DWORD',
-                'off': 0x0360,
+                'off': 0x02BC,
                 'label': 'Offset of items' },
 
             { 'key': 'item_cnt',
                 'type': 'DWORD',
-                'off': 0x0364,
+                'off': 0x02C0,
                 'label': 'Count of items' },
 
             { 'key': 'effect_off',
                 'type': 'DWORD',
-                'off': 0x0368,
+                'off': 0x02C4,
                 'label': 'Offset of effects' },
 
             { 'key': 'effect_cnt',
                 'type': 'DWORD',
-                'off': 0x036C,
+                'off': 0x02C8,
                 'label': 'Count of effects' },
 
             { 'key': 'dialog',
                 'type': 'RESREF',
-                'off': 0x0370,
+                'off': 0x02CC,
                 'label': 'Dialog resref' },
-            )
-
-    overlay_desc = (
-            { 'key': 'unknown_00',
-                'type': 'BYTES',
-                'off': 0x0000,
-                'size': 36,
-                'label': 'Unknown 00' },
             )
 
     known_spell_desc = (
@@ -800,10 +697,10 @@ class CRE_V12_Format (Format):
                 'off': 0x0000,
                 'label': 'ITM resref' },
 
-            { 'key': 'unknown_08',
+            { 'key': 'item_expiration_time',
                 'type': 'WORD',
                 'off': 0x0008,
-                'label': 'Unknown 08' },
+                'label': 'Item expiration time' },
 
             { 'key': 'usage_1',
                 'type': 'WORD',
@@ -835,20 +732,20 @@ class CRE_V12_Format (Format):
                 'label': 'Item' },
     )
 
+
     def __init__ (self):
         Format.__init__ (self)
         self.expect_signature = 'CRE'
 
-        self.overlay_list = []
         self.known_spell_list = []
         self.spell_memorization_list = []
         self.item_list = []
         self.memorized_spell_list = []
         self.slots = None
 
+
     def read (self, stream):
         self.read_header (stream)
-        self.read_list (stream, 'overlay')
         self.read_list (stream, 'known_spell')
         self.read_list (stream, 'spell_memorization')
         self.read_list (stream, 'memorized_spell')
@@ -857,10 +754,10 @@ class CRE_V12_Format (Format):
         self.slots = {}
         self.read_struc (stream, self.header['item_slot_off'], self.item_slot_desc, self.slots)
 
+
     def printme (self):
         self.print_header ()
         self.print_list ('known_spell')
-        self.print_list ('overlay')
         self.print_list ('memorized_spell')
         self.print_list ('spell_memorization')
         self.print_list ('item')
@@ -869,4 +766,4 @@ class CRE_V12_Format (Format):
 
 
 
-register_format ('CRE', 'V1.2', CRE_V12_Format)
+register_format ('CRE', 'V1.0', CRE_V10_Format)

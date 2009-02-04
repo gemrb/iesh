@@ -27,6 +27,9 @@ options = {
     'stream.debug_coverage': [False, "On stream close print info on offsets not read or read more than once"], 
     'format.debug_read': [False, "Print each read op to stdout"], 
     'format.debug_write': [False, "Print each write op to stdout"], 
+    'format.print_offset': [False, "Print field's offset"],
+    'format.print_size': [False, "Print field's size (in bytes)"],
+    'format.print_type': [False, "Print field's type"],
 
     'format.bam.force_rle': [True,  "Assume that frame data is always RLE encoded"], 
     'format.bam.decode_frame_data': [True, "Decode BAM frame data"], 

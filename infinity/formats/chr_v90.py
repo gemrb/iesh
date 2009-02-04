@@ -16,12 +16,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+# Conforming to IESDP 4.2.2009
 
 from infinity.format import Format, register_format
 from infinity.stream import MemoryStream
 
 
-class CHR_Format (Format):
+class CHR_V90_Format (Format):
 
     header_desc = (
             { 'key': 'signature',
@@ -92,7 +93,7 @@ class CHR_Format (Format):
     def read (self, stream):
         self.read_header (stream)
         cre = stream.read_blob (self.header['cre_off'],  self.header['cre_len'])
-        ms = MemoryStream ().open (cre)
+        ms = MemoryStream ().open (cre, 'CRE(@0x%04x in %s)' %(self.header['cre_off'], stream.name))
         self.cre = ms.load_object ()
 
 
@@ -101,4 +102,4 @@ class CHR_Format (Format):
         self.cre.printme ()
 
         
-register_format ('CHR', 'V2.0', CHR_Format)
+register_format ('CHR', 'V9.0', CHR_V90_Format)

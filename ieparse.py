@@ -6,6 +6,9 @@ from infinity import core, stream
 from infinity.formats import *
 
 if len (sys.argv) > 1 and sys.argv[1] == '-v':
+    core.set_option ('format.print_offset', True) 
+    core.set_option ('format.print_size', True) 
+    core.set_option ('format.print_type', True) 
     core.set_option ('format.mos.print_tiles', True) 
     core.set_option ('format.mos.print_palettes', True)
     core.set_option ('format.tis.print_tiles', True)

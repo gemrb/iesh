@@ -254,6 +254,7 @@ class Stream (object):
 
 
     def load_object (self, type = 0):
+        print self
         fmt = self.get_format ()
         obj = fmt ()
         self.seek (0)
@@ -372,7 +373,7 @@ class FileStream (Stream):
         self.fh.write (bytes)
 
     def __repr__ (self):
-        return "<FileStream: %s>" %self.filename
+        return "<FileStream: %s at 0x%08x>" %(self.filename, id (self))
 
 
 class MemoryStream (Stream):
@@ -380,7 +381,7 @@ class MemoryStream (Stream):
     def __init__ (self):
         Stream.__init__ (self)
 
-    def open (self, membuffer,  name = '<memory stream>'):
+    def open (self, membuffer,  name = '?'):
         Stream.open (self, name,  '')
         self.buffer = membuffer
         self.offset = 0
@@ -402,7 +403,8 @@ class MemoryStream (Stream):
         self.offset = self.offset + len (data)
         return data
 
-
+    def __repr__ (self):
+        return "<MemoryStream: %s at 0x%08x>" %(self.name, id (self))
 
 class ResourceStream (MemoryStream):
     """Stream for reading RESREFs (files in the IE data `filesystem').
@@ -442,15 +444,17 @@ class ResourceStream (MemoryStream):
 
 
     def __repr__ (self):
-        return "<ResStream: %s>" %self.resref
+        return "<ResourceStream: %s at 0x%08x>" %(self.resref, self (id))
 
 
 class CompressedStream (MemoryStream):
     """Stream for reading compressed files in memory."""
     
-    def open (self, membuffer,  name = '<compressed stream>'):
+    def open (self, membuffer,  name = '?'):
         return MemoryStream.open (self, gzip.zlib.decompress (membuffer),  name)
 
+    def __repr__ (self):
+        return "<CompressedStream: %s at 0x%08x>" %(self.name, self (id))
         
 # End of file stream.py
 

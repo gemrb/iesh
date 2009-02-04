@@ -214,7 +214,7 @@ def id_to_symbol (idsfile, id):
     import traceback
     from stream import ResourceStream
     idsfile = idsfile.upper ()
-    
+
     if not ids.has_key (idsfile):
         try:
             # FIXME: ugly & should use 'IDS' instead of 0x3F0

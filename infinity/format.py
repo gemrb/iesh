@@ -161,6 +161,7 @@ class Format (object):
         return obj
             
     def read_struc (self, stream, offset, desc, obj):
+        obj['_offset'] = offset
         for d in desc:
             key = d['key']
             type = d['type']
@@ -382,9 +383,20 @@ class Format (object):
     
 
     def print_date_by_desc (self, obj, d):
+        p_offset = self.get_option ('format.print_offset')
+        p_type = self.get_option ('format.print_type')
+        p_size = self.get_option ('format.print_size')
+        
         key = d['key']
         rec_type = d['type']
+        off = d['off']
         label = d['label']
+        
+        try: base_offset = obj['_offset']
+        except: base_offset = 0
+
+        try: size = d['size']
+        except: size = self.get_struc_size ([ {'off': 0, 'type': rec_type, 'key': key , 'size': 0}])
 
         try: enum = d['enum']
         except: enum = None
@@ -427,7 +439,7 @@ class Format (object):
                     if not core.ids.has_key (enum):
                         try:
                             # FIXME: ugly & should use 'IDS' instead of 0x3F0
-                            ids = ResourceStream (enum, 0x03F0).load_object ()
+                            ids = ResourceStream ().open (enum, 0x03F0).load_object ()
                             ids.read ()
                             core.ids[enum] = ids
                         except:
@@ -439,11 +451,20 @@ class Format (object):
                     
             elif mask is not None:
                 value2 = '(' + string.join (map (lambda m, mask=mask: mask[m], filter (lambda m, v=value: (m & v) == m, mask.keys ())), '|') + ')'
-    
+
+            if p_offset:
+                print "0x%04X" %(base_offset + off),
+            if p_type:
+                print "%-6s" %rec_type,
+            if p_size:
+                print "%3d" %size,
+                
             if count > 1:
                 print label + '[%d]:' %index, value, value2
             else:
                 print label + ':', value, value2
+
+            off += size
 
 
     def get_option (self, key):
