@@ -4,8 +4,11 @@ import are
 import bam
 import bcs
 import biff
-import chr
 import chr_v10
+import chr_v12
+import chr_v20
+import chr_v22
+import chr_v90
 import chui
 import cre
 import cre_v10
