@@ -21,9 +21,12 @@ import key
 import mos
 import pro
 import spl
-import stor
+import stor_v10
+import stor_v11
+import stor_v90
 import tis
 import tlk
+import var
 import vvc
 import wed
 import wfx

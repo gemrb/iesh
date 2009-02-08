@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# conforming to IESDP 4.5.2008
+# Conforms to IESDP 4.2.2009
 
 from infinity.format import Format, register_format
 from infinity.stream import MemoryStream
@@ -144,15 +144,15 @@ class EFF_V20_Format (Format):
               'off': 0x0050,
               'label': 'Unknown 50'},
             
-            { 'key': 'min_level',
+            { 'key': 'parent_min_level',
               'type': 'DWORD',
               'off': 0x0054,
-              'label': 'Lowest affected level'},
+              'label': 'Parent res lowest affected level'},
             
-            { 'key': 'max_level',
+            { 'key': 'parent_max_level',
               'type': 'DWORD',
               'off': 0x0058,
-              'label': 'Highest affected level'},
+              'label': 'Parent res highest affected level'},
             
             { 'key': 'resistance_type',
               'type': 'DWORD',

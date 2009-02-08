@@ -231,7 +231,10 @@ class Stream (object):
         #    self.seek (0)
 
 
-        if re.match ("[0-9]{1,4}[\r\n ]", s) or re.match ("0[xX][0-9A-Fa-f]{1,4} ", s) or re.match ("-1[\r\n]", s):
+        if s == '902     ':
+            signature = "VAR"
+            version = ""
+        elif re.match ("[0-9]{1,4}[\r\n ]", s) or re.match ("0[xX][0-9A-Fa-f]{1,4} ", s) or re.match ("-1[\r\n]", s):
             signature = "IDS"
             version = ""
         elif s == "SC\nCR\nCO" or s == "SC\r\nCR\r\n":

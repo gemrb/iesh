@@ -16,11 +16,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+# Conforms to IESDP 4.5.2008
 
 from infinity.format import Format, register_format
 
 
-class STOR_Format (Format):
+class STOR_V10_Format (Format):
 
     header_desc = (
             { 'key': 'signature',
@@ -36,7 +37,7 @@ class STOR_Format (Format):
             { 'key': 'type',
                 'type': 'DWORD',
                 'off': 0x0008,
-                'enum': { 0: 'Store', 1: 'Tavern', 2: 'Inn', 3: 'Temple' },
+                'enum': { 0: 'Store', 1: 'Tavern', 2: 'Inn', 3: 'Temple', 5: 'Container' },
                 'label': 'Type' },
 
             { 'key': 'name',
@@ -47,7 +48,7 @@ class STOR_Format (Format):
             { 'key': 'flags',
                 'type': 'DWORD',
                 'off': 0x0010,
-                'mask':  { 0x0001: 'Sells items', 0x0002: 'Buys items', 0x0004: 'Identify', 0x0008: 'Steal', 0x0010: 'Donate', 0x0020: 'Cures', 0x00040: 'Drinks', 0x0080: 'Unknown bit7', 0x0100: 'Unknown bit8', 0x0200: 'Unknown bit9', 0x0400: 'Unknown/Recharge?', 0x0800: 'Unknown bit11', 0x1000: 'Buy fenced goods' },
+                'mask':  { 0x0001: 'Sells items', 0x0002: 'Buys items', 0x0004: 'Identify', 0x0008: 'Steal', 0x0010: 'Donate', 0x0020: 'Cures', 0x00040: 'Drinks', 0x0080: 'Unknown bit7', 0x0100: 'Unknown bit8', 0x0200: 'Quality1', 0x0400: 'Quality2', 0x0800: 'Unknown bit11', 0x1000: 'Buy fenced goods' },
                 'label': 'Flags' },
 
             { 'key': 'sell_price_markup',
@@ -60,14 +61,13 @@ class STOR_Format (Format):
                 'off': 0x0018,
                 'label': 'Buy price markup (% of base price when store buys)' },
 
-
             { 'key': 'depreciation_rate',
                 'type': 'DWORD',
                 'off': 0x001C,
                 'label': 'Depreciation rate' },
 
             { 'key': 'steal_failure_chance',
-                'type': 'WORD',  #FIXME: IESDP has DWORD here
+                'type': 'WORD',
                 'off': 0x0020,
                 'label': 'Steal failure chance' },
 
@@ -179,7 +179,7 @@ class STOR_Format (Format):
             { 'key': 'type',
                 'type': 'DWORD',
                 'off': 0x0000,
-                'enum': 'itemtypes',
+                'enum': 'itemtypes', # FIXME: really? Is not it st. internal?
                 'label': 'Type' },
     )
 
@@ -190,10 +190,10 @@ class STOR_Format (Format):
                 'off': 0x0000,
                 'label': 'ITM resref' },
 
-            { 'key': 'unknown_08',
+            { 'key': 'item_expiration_time',
                 'type': 'WORD',
                 'off': 0x0008,
-                'label': 'Unknown 08' },
+                'label': 'Item expiration time' },
 
             { 'key': 'usage_1',
                 'type': 'WORD',
@@ -225,17 +225,6 @@ class STOR_Format (Format):
                 'type': 'DWORD',
                 'off': 0x0018,
                 'label': 'Infinite supply flag (1=infinite stock)' },
-
-            { 'key': 'trigger_strref',
-                'type': 'STRREF',
-                'off': 0x001C,
-                'label': 'Trigger strref' },
-
-            { 'key': 'unknown_20',
-                'type': 'BYTES',
-                'off': 0x0020,
-                'size': 56,
-                'label': 'Unknown 20' },
     )
 
 
@@ -313,4 +302,4 @@ class STOR_Format (Format):
 
 
         
-register_format ('STOR', 'V1.1', STOR_Format)
+register_format ('STOR', 'V1.0', STOR_V10_Format)
