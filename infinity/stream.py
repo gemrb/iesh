@@ -125,13 +125,13 @@ class Stream (object):
         if offset is not None:
             self.seek (offset)
         v = self.read (2)
-        return struct.unpack ('H', v)[0]
+        return struct.unpack ('<H', v)[0]
 
     def write_word (self, value, offset = None):
         # offset == None means "current offset" here
         if offset is not None:
             self.seek (offset)
-        bytes = struct.pack ('H', value)
+        bytes = struct.pack ('<H', value)
         self.write (bytes)
 
     def read_dword (self, offset):
@@ -139,13 +139,13 @@ class Stream (object):
         if offset is not None:
             self.seek (offset)
         v = self.read (4)
-        return struct.unpack ('I', v)[0]
+        return struct.unpack ('<I', v)[0]
 
     def write_dword (self, value, offset = None):
         # offset == None means "current offset" here
         if offset is not None:
             self.seek (offset)
-        bytes = struct.pack ('I', value)
+        bytes = struct.pack ('<I', value)
         self.write (bytes)
 
     def read_sized_string (self, offset, size):
