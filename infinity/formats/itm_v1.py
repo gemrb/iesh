@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2009 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,10 +16,46 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+# Conforms to IESDP 4.5.2008
 
 from infinity.format import Format, register_format
 
-class ITM_Format (Format):
+class ITM_V10_Format (Format):
+    kit_usability_mask = {
+            0x00000001: 'Cleric of Talos',
+            0x00000002: 'Cleric of Helm',
+            0x00000004: 'Cleric of Lathlander',
+            0x00000008: 'Totemic Druid',
+            0x00000010: 'Shapeshifter Druid',
+            0x00000020: 'Avenger Druid',
+            0x00000040: 'Barbarian',
+            0x00000080: 'Wildmage',
+            0x00000100: 'Stalker Ranger',
+            0x00000200: 'Beastmaster Ranger',
+            0x00000400: 'Assassin Thief',
+            0x00000800: 'Bounty hunter Thief',
+            0x00001000: 'Swashbuckler Thief',
+            0x00002000: 'Blade Bard',
+            0x00004000: 'Jester Bard',
+            0x00008000: 'Skald Bard',
+            0x00010000: 'Diviner',
+            0x00020000: 'Enchanter',
+            0x00040000: 'Illusionist',
+            0x00080000: 'Invoker',
+            0x00100000: 'Necromancer',
+            0x00200000: 'Transmuter',
+            0x00400000: 'All (no kit)',
+            0x00800000: 'Ferlain',
+            0x01000000: 'Berserker Fighter',
+            0x02000000: 'Wizardslayer Fighter',
+            0x04000000: 'Kensai Fighter',
+            0x08000000: 'Cavalier Paladin',
+            0x10000000: 'Inquisitor Paladin',
+            0x20000000: 'Undead hunter Paladin',
+            0x40000000: 'Abjurer',
+            0x80000000: 'Conjurer',
+            }
+
     header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
@@ -34,80 +70,197 @@ class ITM_Format (Format):
             { 'key': 'item_name',
               'type': 'STRREF',
               'off': 0x0008,
-              'label': 'Item name'},
+              'label': 'Item name (generic)'},
             
             { 'key': 'item_name_identified',
               'type': 'STRREF',
               'off': 0x000C,
-              'label': 'Item Name Identified'},
+              'label': 'Item name (identified)'},
 
-            { 'key': 'drop_sound',
+            { 'key': 'replacement_item',
               'type': 'RESREF',
               'off': 0x0010,
-              'label': 'Drop sound'},
+              'label': 'Replacement item'},
 
             { 'key': 'flags',
               'type': 'DWORD',
               'off': 0x0018,
-              'mask': {0x0001: 'Critical', 0x0002: 'TwoHanded', 0x0004: 'Movable', 0x0008: 'Displayable', 0x0010: 'Cursed', 0x0020: 'NotCopyable', 0x0040: 'Magical', 0x0080: 'Bow', 0x0100: 'Silver', 0x0200: 'ColdIron', 0x0400: 'Stolen', 0x0800: 'Conversable', 0x1000: 'Pulsating'},
+              'mask': { 0x0001: 'Critical/Unsellable', 0x0002: 'TwoHanded', 0x0004: 'Movable', 0x0008: 'Displayable', 0x0010: 'Cursed', 0x0020: 'Unknown bit5', 0x0040: 'Magical', 0x0080: 'Bow', 0x0100: 'Silver', 0x0200: 'ColdIron', 0x0400: 'Stolen/Unsellable', 0x0800: 'Conversable' },
               'label': 'Flags'},
 
             { 'key': 'item_type',
               'type': 'WORD',
               'off': 0x001C,
-              'enum': {0:'', 1:''},
+              #'enum': {0:''}, # FIXME: define the item types
               'label': 'Item type'},
 
             { 'key': 'usability_mask',
               'type': 'DWORD',
               'off': 0x001E,
-              'label': 'Usability mask'},
+              'mask': { 
+                       0x00000001: 'Chaotic...',
+                       0x00000002: '...Evil',
+                       0x00000004: '...Good',
+                       0x00000008: '...Neutral',
+                       0x00000010: 'Lawful...',
+                       0x00000020: 'Neutral...',
+                       0x00000040: 'Bard',
+                       0x00000080: 'Cleric',
+                       0x00000100: 'Cleric/Mage',
+                       0x00000200: 'Cleric/Thief',
+                       0x00000400: 'Cleric/Ranger',
+                       0x00000800: 'Fighter',
+                       0x00001000: 'Fighter/Druid',
+                       0x00002000: 'Fighter/Mage',
+                       0x00004000: 'Fighter/Cleric',
+                       0x00008000: 'Fighter/Mage/Cleric',
+                       0x00010000: 'Figter/Mage/Thief',
+                       0x00020000: 'Fighter/Thief',
+                       0x00040000: 'Mage',
+                       0x00080000: 'Mage/Thief',
+                       0x00100000: 'Paladin',
+                       0x00200000: 'Ranger',
+                       0x00400000: 'Thief',
+                       0x00800000: 'Elf',
+                       0x01000000: 'Dwarf',
+                       0x02000000: 'Half-Elf',
+                       0x04000000: 'Halfling',
+                       0x08000000: 'Human',
+                       0x10000000: 'Gnome',
+                       0x20000000: 'Monk',
+                       0x40000000: 'Druid',
+                       0x80000000: 'Half-Orc',
+                       },
+              'label': 'Usability mask'}, #FIXME: in V1.1, this is actually 'UNusablity' mask
 
-            { 'key': 'inventory_icon_type',
+            { 'key': 'item_animation',
               'type': 'STR2',
               'off': 0x0022,
-              'enum': {'  ': 'Fists/Nothing', 'AX': 'Axe', 'DD': 'Dagger', 'CL': 'Club', 'WH': 'Hammer', 'S1': 'Karach', 'CB': 'Crossbow'},
-              'label': 'Inventory icon type'},
+              'enum': {
+                    '  ': 'Nothing', 
+                    '2A': 'Leather armor', 
+                    '3A': 'Chainmail', 
+                    '4A': 'Plate mail',
+                    '2W': 'Robe',
+                    '3W': 'Robe',
+                    '4W': 'Robe',
+                    'AX': 'Axe',
+                    'BW': 'Bow',
+                    'CB': 'Crossbow',
+                    'CL': 'Club', 
+                    'D1': 'Buckler',
+                    'D2': 'Shield (small)',
+                    'D3': 'Shie;d (medium)',
+                    'D4': 'Shield (large)',
+                    'DD': 'Dagger', 
+                    'FL': 'Flail',
+                    'FS': 'Flame sword',
+                    'H0': 'Small vertical horns',
+                    'H1': 'Large horizontal horns',
+                    'H2': 'Feather wings',
+                    'H3': 'Top plume',
+                    'H4': 'Dragon wings',
+                    'H5': 'Feather sideburns',
+                    'H6': 'Large curved horns',
+                    'HB': 'Halberd',
+                    'MC': 'Mace',
+                    'MS': 'Morningstar',
+                    'QS': 'Quarterstaff (metal)',
+                    'S1': 'Sword 1-handed',
+                    'S2': 'Sword 2-handed',
+                    'S3': 'Katana',
+                    'SC': 'Scimitar',
+                    'SL': 'Sling',
+                    'SP': 'Spear',
+                    'SS': 'Short sword',
+                    'WH': 'War hammer', 
+                    },
+              'label': 'Item animation'},
 
             { 'key': 'min_level',
               'type': 'WORD',
               'off': 0x0024,
               'label': 'Min level'},
 
+            { 'key': 'unknown_25', # FIXME: IESDP: is not if just high byte of  0x26 like in V1.1?
+              'type': 'BYTE',
+              'off': 0x0025,
+              'label': 'Unknown 25'},
+
             { 'key': 'min_str',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0026,
-              'label': 'Min strength'},
+              'label': 'Min strength (unused in BG1)'},
+
+            { 'key': 'unknown_27', # FIXME: IESDP: is not if just high byte of  0x26 like in V1.1?
+              'type': 'BYTE',
+              'off': 0x0027,
+              'label': 'Unknown 27'},
 
             { 'key': 'min_str_bonus',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0028,
-              'label': 'Min strength bonus'},
+              'label': 'Min strength bonus (unused in BG1)'},
+
+            { 'key': 'kit_usability_1',
+              'type': 'BYTE',
+              'off': 0x0029,
+              'mask': kit_usability_mask,
+              'label': 'Kit usability 1'},
 
             { 'key': 'min_int',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x002A,
-              'label': 'Min intelligence'},
+              'label': 'Min intelligence (unused in BG1)'},
+
+            { 'key': 'kit_usability_2',
+              'type': 'BYTE',
+              'off': 0x002B,
+              'mask': kit_usability_mask,
+              'label': 'Kit usability 2'},
 
             { 'key': 'min_dex',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x002C,
-              'label': 'Min dexterity'},
+              'label': 'Min dexterity (unused in BG1)'},
+
+            { 'key': 'kit_usability_3',
+              'type': 'BYTE',
+              'off': 0x002D,
+              'mask': kit_usability_mask,
+              'label': 'Kit usability 3'},
 
             { 'key': 'min_wis',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x002E,
-              'label': 'Min wisdom'},
+              'label': 'Min wisdom (unused in BG1)'},
+
+            { 'key': 'kit_usability_4',
+              'type': 'BYTE',
+              'off': 0x002F,
+              'mask': kit_usability_mask,
+              'label': 'Kit usability 4'},
 
             { 'key': 'min_con',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0030,
-              'label': 'Min constitution'},
+              'label': 'Min constitution (unused in BG1)'},
+
+            { 'key': 'weapon_proficiency',
+              'type': 'BYTE',
+              'off': 0x0031,
+              #'enum': {}, # FIXME: type the enum
+              'label': 'Weapon proficiency'},
 
             { 'key': 'min_cha',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0032,
-              'label': 'Min charisma'},
+              'label': 'Min charisma'}, # FIXME: IESDP: is it actually USED in BG1?
+
+            { 'key': 'unknown_33',
+              'type': 'BYTE',
+              'off': 0x0033,
+              'label': 'Unknown 33'},
 
             { 'key': 'price',
               'type': 'DWORD',
@@ -119,10 +272,10 @@ class ITM_Format (Format):
               'off': 0x0038,
               'label': 'Stack amount'},
 
-            { 'key': 'item_icon',
+            { 'key': 'inventory_icon',
               'type': 'RESREF',
               'off': 0x003A,
-              'label': 'Item icon'},
+              'label': 'Inventory icon'},
 
             { 'key': 'lore_to_id',
               'type': 'WORD',
@@ -142,17 +295,17 @@ class ITM_Format (Format):
             { 'key': 'item_desc',
               'type': 'STRREF',
               'off': 0x0050,
-              'label': 'Item description'},
+              'label': 'Item description (generic)'},
 
             { 'key': 'item_desc_identified',
               'type': 'STRREF',
               'off': 0x0054,
               'label': 'Item description identified'},
 
-            { 'key': 'pick_up_sound',
+            { 'key': 'description_icon',
               'type': 'RESREF',
               'off': 0x0058,
-              'label': 'Pick up sound'},
+              'label': 'Description icon'},
 
             { 'key': 'enchantment',
               'type': 'DWORD',
@@ -183,47 +336,31 @@ class ITM_Format (Format):
               'type': 'WORD',
               'off': 0x0070,
               'label': 'Equipping feature count'},
-
-            # PST only
-            { 'key': 'dialog',
-              'type': 'RESREF',
-              'off': 0x0072,
-              'label': 'Dialog'},
-
-            { 'key': 'talking_item_name',
-              'type': 'STRREF',
-              'off': 0x007A,
-              'label': 'Talking item name'},
-
-            { 'key': 'weapon_color',
-              'type': 'WORD',
-              'off': 0x007E,
-              'label': 'Weapon color'},
-
             )
         
     extended_header_desc = (
             { 'key': 'attack_type',
               'type': 'BYTE',
               'off': 0x0000,
-              'enum': {0: 'Default', 1: 'Melee', 2: 'Ranged', 3: 'Magical', 4: 'Launcher'},
+              'enum': {0: 'None', 1: 'Melee', 2: 'Ranged', 3: 'Magical', 4: 'Launcher'},
               'label': 'Attack type'},
 
             { 'key': 'id_req',
               'type': 'BYTE',
               'off': 0x0001,
+              'mask': { 0x1: 'ID required', 0x2: 'Non-ID required' }, # FIXME: really or just IESDP error?
               'label': 'ID req'},
 
             { 'key': 'location',
               'type': 'BYTE',
               'off': 0x0002,
-              'enum': {0: 'unknown', 1: 'Weapon slots', 2: 'unknown', 3: 'Item slots', 4: 'Gem?'},
+              'enum': {0: 'None', 1: 'Weapon', 2: 'Spell', 3: 'Equipment', 4: 'Innate'},
               'label': 'Location'},
 
-            { 'key': 'unknown1',
+            { 'key': 'unknown_03',
               'type': 'BYTE',
               'off': 0x0003,
-              'label': 'Unknown1'},
+              'label': 'Unknown 03'},
 
             { 'key': 'use_icon',
               'type': 'RESREF',
@@ -233,13 +370,13 @@ class ITM_Format (Format):
             { 'key': 'target',
               'type': 'BYTE',
               'off': 0x000C,
-              'enum': {0:'Invalid', 1:'Creature', 2:'Inventory', 3:'Dead character', 4:'Area', 5:'Self', 6:'Unknown', 7:'None'},
+              'enum': { 0:'Invalid', 1:'Creature', 2:'Inventory', 3:'Dead character', 4:'Area', 5:'Self', 6:'Unknown/Crash', 7:'None (Self, ignores pause)' },
               'label': 'Target'},
 
-            { 'key': 'target_number',
+            { 'key': 'target_cnt',
               'type': 'BYTE',
               'off': 0x000D,
-              'label': 'Target number'},
+              'label': 'Target count'},
 
             { 'key': 'range',
               'type': 'WORD',
@@ -249,7 +386,7 @@ class ITM_Format (Format):
             { 'key': 'projectile_type',
               'type': 'WORD',
               'off': 0x0010,
-              'enum': {0: 'None', 1: 'Bow', 2: 'Crossbow', 3: 'Sling'},
+              'enum': { 0: 'None', 1: 'Arrow', 2: 'Bolt', 3: 'Bullet', 40: 'Spear', 100: 'Throwing axe' },
               'label': 'Projectile type'},
 
             { 'key': 'speed',
@@ -280,7 +417,7 @@ class ITM_Format (Format):
             { 'key': 'damage_type',
               'type': 'WORD',
               'off': 0x001C,
-              'enum': {0: 'None', 1: 'Piercing', 2: 'Crushing', 3: 'Slashing', 4: 'Missile', 5: 'Fists'},
+              'enum': { 0: 'None', 1: 'Piercing/Magic', 2: 'Blunt', 3: 'Slashing', 4: 'Ranged', 5: 'Fists', 6: 'Piercing/Blunt', 7: 'Piercing/Slashing', 8: 'Blunt/Slashing' },
               'label': 'Damage type'},
 
             { 'key': 'feature_cnt',
@@ -288,7 +425,7 @@ class ITM_Format (Format):
               'off': 0x001E,
               'label': 'Feature count'},
 
-            { 'key': 'feature_ndx',
+            { 'key': 'feature_ndx', # FIXME: IESDP has offset here
               'type': 'WORD',
               'off': 0x0020,
               'label': 'First feature index'},
@@ -301,44 +438,31 @@ class ITM_Format (Format):
             { 'key': 'charges_depletion',
               'type': 'WORD',
               'off': 0x0024,
-              'enum': {0: 'Unknown', 1: 'Item disappears', 2: 'Replace with Used Up', 3: 'Item remains'},
+              'enum': { 0: 'Don\'t vanish', 1: 'Expended', 2: 'Expended (w/o sound)', 3: 'Recharge each day' },
               'label': 'Charges depletion'},
 
-            { 'key': 'use_strength_bonus',
-              'type': 'BYTE',
+            { 'key': 'flags',
+              'type': 'WORD',
               'off': 0x0026,
-              'label': 'Use strength bonus'},
+              'mask': { 0x0001: 'Add strength bonus', 0x0002: 'Breakable', 0x0400: 'Hostile', 0x0800: 'Recharges' },
+              'label': 'Flags'},
 
-            { 'key': 'recharge',
-              'type': 'BYTE',
-              'off': 0x0027,
-              'enum': {0: 'unknown', 1: 'No', 8: 'After resting'},
-              'label': 'Recharge'},
-
-            { 'key': 'unknown2',
+            { 'key': 'unknown_28',
               'type': 'WORD',
               'off': 0x0028,
-              'label': 'Unknown2'},
+              'label': 'Unknown 28'},
 
             { 'key': 'projectile_animation',
               'type': 'WORD',
               'off': 0x002A,
+              'enum': 'missile', # FIXME: or projectl.ids?
               'label': 'Projectile animation'},
 
-            { 'key': 'melee_animation_0',
+            { 'key': 'melee_animation',
               'type': 'WORD',
               'off': 0x002C,
-              'label': 'Melee animation 0'},
-
-            { 'key': 'melee_animation_1',
-              'type': 'WORD',
-              'off': 0x002E,
-              'label': 'Melee animation 1'},
-
-            { 'key': 'melee_animation_2',
-              'type': 'WORD',
-              'off': 0x0030,
-              'label': 'Melee animation 2'},
+              'count': 3,
+              'label': 'Melee animation'},
 
             { 'key': 'bow_arrow_qualifier',
               'type': 'WORD',
@@ -367,7 +491,7 @@ class ITM_Format (Format):
             { 'key': 'target',
               'type': 'BYTE',
               'off': 0x0002,
-              'enum': {0:'None', 1:'Self', 2:'Pre-Target', 3:'Party', 4:'Global', 5:'Non-Party', 6:'Party?', 7:'Unknown1', 8:'Except-Self', 9:'Original-Caster', 10:'Unknown2', 11:'Unknown3', 12:'Unknown4', 13:'Unknown5'},
+              'enum': { 0:'None', 1:'Self', 2:'Pre-Target', 3:'Party', 4:'Global', 5:'Non-Party', 6:'Non-evil', 7:'Unknown1', 8:'Except-Self', 9:'Original-Caster', 10:'Unknown2', 11:'Unknown3', 12:'Unknown4', 13:'Unknown5' },
               'label': 'Target'},
 
             { 'key': 'power',
@@ -388,13 +512,13 @@ class ITM_Format (Format):
             { 'key': 'timing_mode',
               'type': 'BYTE',
               'off': 0x000C,
-              'enum': {0:'Duration', 1:'Permanent', 2:'While equipped', 3:'Delayed duration', 4:'Delayed2?', 5:'Delayed3?', 6:'Duration2?', 7:'Permanent2?', 8:'Permanent3?', 9:'Permanent? (after Death)', 10:'Trigger'},
+              'enum': { 0:'Duration', 1:'Permanent', 2:'While equipped', 3:'Delayed duration', 4:'Delayed', 5:'Delayed (chg to 8)', 6:'Duration2?', 7:'Permanent2?', 8:'Permanent (unsaved)', 9:'Permanent (after Death)', 10:'Trigger' },
               'label': 'Timing mode'},
 
             { 'key': 'resistance',
               'type': 'BYTE',
               'off': 0x000D,
-              'enum': {0:'Nonmagical', 1:'Dispell/Not bypass', 2:'Not dispell/Not bypass', 3:'Dispell/Bypass'},
+              'enum': { 0:'Nonmagical', 1:'Dispel/Not bypass', 2:'Not dispel/Not bypass', 3:'Dispel/Bypass' },
               'label': 'Resistance'},
 
             { 'key': 'duration',
@@ -430,18 +554,18 @@ class ITM_Format (Format):
             { 'key': 'saving_throw_type',
               'type': 'DWORD',
               'off': 0x0024,
-              'mask': {0:'None', 1:'Spells', 2:'Breathe', 4:'Death', 8:'Wands', 16:'Polymorph'},
-              'label': 'Saving throw type'},
+              'mask': { 0: 'None', 1:'Spells', 2:'Breathe', 4:'Death', 8:'Wands', 16:'Polymorph'},
+              'label': 'Saving throw type' },
 
             { 'key': 'saving_throw_bonus',
               'type': 'DWORD',
               'off': 0x0028,
               'label': 'Saving throw bonus'},
 
-            { 'key': 'unknown',
+            { 'key': 'unknown_2C',
               'type': 'DWORD',
               'off': 0x002C,
-              'label': 'Unknown'},
+              'label': 'Unknown 2C'},
 
             )
 
@@ -455,20 +579,22 @@ class ITM_Format (Format):
 
     def read (self, stream):
         self.read_header (stream)
-
+        size_extended = self.get_struc_size (self.extended_header_desc)
+        size_feature = self.get_struc_size (self.feature_desc)
+        
         off = self.header['extended_header_off']
         for i in range (self.header['extended_header_cnt']):
             obj = {}
             self.read_extended_header (stream, off, obj)
             self.extended_header_list.append (obj)
-            off = off + 56
+            off += size_extended
 
-        off = self.header['feature_block_off'] + self.header['equipping_feature_ndx'] * 48
+        off = self.header['feature_block_off'] + self.header['equipping_feature_ndx'] * size_feature
         for i in range (self.header['equipping_feature_cnt']):
             obj = {}
             self.read_feature (stream, off, obj)
             self.equipping_feature_list.append (obj)
-            off = off + 48
+            off += size_feature
 
     def write (self, stream):
         size_extended = self.get_struc_size (self.extended_header_desc)
@@ -552,4 +678,4 @@ class ITM_Format (Format):
         self.print_struc (obj, self.feature_desc)
 
         
-register_format ('ITM', 'V1.1', ITM_Format)
+register_format ('ITM', 'V1', ITM_V10_Format)

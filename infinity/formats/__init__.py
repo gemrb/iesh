@@ -16,7 +16,9 @@ import d2a
 import dlg
 import eff_v20
 import ids
-import itm
+import itm_v1
+import itm_v11
+import itm_v20
 import key
 import mos
 import pro
