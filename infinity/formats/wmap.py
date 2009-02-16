@@ -1,7 +1,7 @@
 # -*-python-*-
 
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2009 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -17,10 +17,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+# Conforms to IESDP 17.2.2009
 
 from infinity.format import Format, register_format
 
-class WMAP_Format (Format):
+class WMAP_V10_Format (Format):
 
     header_desc = (
             { 'key': 'signature',
@@ -33,23 +34,23 @@ class WMAP_Format (Format):
               'off':0x0004,
               'label': 'Version'},
             
-            { 'key': 'num_of_wmaps',
+            { 'key': 'wmap_cnt',
               'type': 'DWORD',
               'off': 0x0008,
               'label': '# of wmap entries'},
             
-            { 'key': 'wmap_offset',
+            { 'key': 'wmap_off',
               'type': 'DWORD',
               'off': 0x000C,
               'label': 'First wmap entry offset'},
             )
         
 
-    wmap_record_desc = (
-            { 'key': 'map_resref',
+    wmap_desc = (
+            { 'key': 'background_image',
               'type': 'RESREF',
               'off': 0x0000,
-              'label': 'Map resource name' },
+              'label': 'Background image MOS' },
             
             { 'key': 'width',
               'type': 'DWORD',
@@ -71,58 +72,58 @@ class WMAP_Format (Format):
               'off': 0x0014,
               'label': 'Area name' },
             
-            { 'key': 'unknown',
+            { 'key': 'unknown_18',
               'type': 'DWORD',
               'off': 0x0018,
-              'label': '???' },
+              'label': 'Unknown 18' },
 
-            { 'key': 'unknown',
+            { 'key': 'unknown_1C',
               'type': 'DWORD',
               'off': 0x001C,
-              'label': '???' },
+              'label': 'Unknown 1C' },
 
-            { 'key': 'num_of_areas',
+            { 'key': 'area_cnt',
               'type': 'DWORD',
               'off': 0x0020,
               'label': 'Num of area entries' },
 
-            { 'key': 'area_offset',
+            { 'key': 'area_off',
               'type': 'DWORD',
               'off': 0x0024,
               'label': 'Offset of first area entry' },
 
-            { 'key': 'arealink_offset',
+            { 'key': 'area_link_off',
               'type': 'DWORD',
               'off': 0x0028,
-              'label': 'Offset of first arealink entry' },
+              'label': 'Offset of first area link entry' },
 
-            { 'key': 'num_of_arealinks',
+            { 'key': 'area_link_cnt',
               'type': 'DWORD',
               'off': 0x002C,
-              'label': 'Num of arealink entries' },
+              'label': 'Num of area link entries' },
 
             { 'key': 'map_icon_resref',
               'type': 'RESREF',
               'off': 0x0030,
-              'label': 'Map icons resource name' },
+              'label': 'Map icons BAM resref' },
             
-            { 'key': 'unknown38',
+            { 'key': 'unknown_38',
               'type': 'BYTES',
               'off': 0x0038,
               'size': 128,
-              'label': 'Unknown 0x0038' },
+              'label': 'Unknown 38' },
             )
 
-    area_record_desc = (
-            { 'key': 'area_name',
-              'type': 'RESREF',
-              'off': 0x0000,
-              'label': 'Area name' },
-            
+    area_desc = (
             { 'key': 'area_resref',
               'type': 'RESREF',
-              'off': 0x0008,
+              'off': 0x0000,
               'label': 'Area resref' },
+            
+            { 'key': 'area_name',
+              'type': 'STR8',
+              'off': 0x0008,
+              'label': 'Area short name' },
             
             { 'key': 'area_long_name',
               'type': 'STR32',
@@ -132,12 +133,13 @@ class WMAP_Format (Format):
             { 'key': 'area_status',
               'type': 'DWORD',
               'off': 0x0030,
+              'mask': { 0x01: 'Visible',  0x02: 'Visible from adjacent',  0x04: 'Reachable',  0x08: 'Already visited' }, 
               'label': 'Area status flags' },
             
             { 'key': 'icon_seq_ndx',
               'type': 'DWORD',
               'off': 0x0034,
-              'label': 'Icon sequence index' },
+              'label': 'Icon BAM sequence index' },
             
             { 'key': 'xpos',
               'type': 'DWORD',
@@ -165,77 +167,78 @@ class WMAP_Format (Format):
               'label': 'Loading screen MOS file' },
             
 
-            { 'key': 'arealink_ndx_north',
+            { 'key': 'area_link_north_ndx',
               'type': 'DWORD',
               'off': 0x0050,
-              'label': 'Index of 1st arealink north' },
+              'label': 'Index of 1st area link north' },
 
-            { 'key': 'arealinks_cnt_north',
+            { 'key': 'area_link_north_cnt',
               'type': 'DWORD',
               'off': 0x0054,
-              'label': '# of arealinks north' },
+              'label': '# of area links north' },
 
 
-            { 'key': 'arealink_ndx_east',
+            { 'key': 'area_link_east_ndx',
               'type': 'DWORD',
               'off': 0x0058,
-              'label': 'Index of 1st arealink east' },
+              'label': 'Index of 1st area link east' },
 
-            { 'key': 'arealinks_cnt_east',
+            { 'key': 'area_link_east_cnt',
               'type': 'DWORD',
               'off': 0x005C,
               'label': '# of arealinks east' },
 
 
-            { 'key': 'arealink_ndx_south',
+            { 'key': 'area_link_south_ndx',
               'type': 'DWORD',
               'off': 0x0060,
-              'label': 'Index of 1st arealink south' },
+              'label': 'Index of 1st area link south' },
 
-            { 'key': 'arealinks_cnt_south',
+            { 'key': 'area_link_south_cnt',
               'type': 'DWORD',
               'off': 0x0064,
-              'label': '# of arealinks south' },
+              'label': '# of area links south' },
 
 
-            { 'key': 'arealink_ndx_west',
+            { 'key': 'area_link_west_ndx',
               'type': 'DWORD',
               'off': 0x0068,
               'label': 'Index of 1st arealink west' },
 
-            { 'key': 'arealinks_cnt_west',
+            { 'key': 'area_link_west_cnt',
               'type': 'DWORD',
               'off': 0x006C,
-              'label': '# of arealinks west' },
+              'label': '# of area links west' },
 
-            { 'key': 'unknown70',
+            { 'key': 'unknown_70',
               'type': 'BYTES',
               'off': 0x0070,
               'size': 128,
-              'label': 'Unknown 0x0070' },
+              'label': 'Unknown 70' },
 
             )
 
-    arealink_record_desc = (
-            { 'key': 'dest_map_ndx',
+    area_link_desc = (
+            { 'key': 'dest_area_ndx',
               'type': 'DWORD',
               'off': 0x0000,
-              'label': 'Destination map index' },
+              'label': 'Destination area index' },
 
-            { 'key': 'dest_map_entry_point',
+            { 'key': 'entry_point',
               'type': 'STR32',
               'off': 0x0004,
-              'label': 'Destination map entry_point name' },
+              'label': 'Destination area entry point name' },
 
-            { 'key': 'distance_scale',
+            { 'key': 'travel_time',
               'type': 'DWORD',
               'off': 0x0024,
-              'label': 'Distance scale?' },
+              'label': 'Travel time / 4' },
 
-            { 'key': 'flags',
+            { 'key': 'default_entry_location',
               'type': 'DWORD',
               'off': 0x0028,
-              'label': 'Flags' },
+              'enum': { 1: 'North', 2: 'East',  4: 'South',  8: 'West'},  # FIXME: looks like mask, not enum
+              'label': 'Default entry location' },
 
             { 'key': 'encounter_area0',
               'type': 'RESREF',
@@ -267,11 +270,11 @@ class WMAP_Format (Format):
               'off': 0x0054,
               'label': 'Random encounter chance' },
 
-            { 'key': 'unknown58',
+            { 'key': 'unknown_58',
               'type': 'BYTES',
               'off': 0x0058,
               'size': 128,
-              'label': 'Unknown 0x0058' },
+              'label': 'Unknown 58' },
 
             )
 
@@ -281,9 +284,9 @@ class WMAP_Format (Format):
 
         self.wmap_list = []
 
-        # FIXME: maybe they should be local to wmap entries
+        # FIXME: they should be local to wmap entries
         self.area_list = []
-        self.arealink_list = []
+        self.area_link_list = []
 
 
 
@@ -291,42 +294,33 @@ class WMAP_Format (Format):
     def read (self, stream):
         self.read_header (stream)
 
-        off = self.header['wmap_offset']
-        print self.get_struc_size (self.wmap_record_desc)
-        print self.get_struc_size (self.area_record_desc)
-        print self.get_struc_size (self.arealink_record_desc)
+        size_area = self.get_struc_size (self.area_desc)
+        size_area_link = self.get_struc_size (self.area_link_desc)
         
-        for i in range (self.header['num_of_wmaps']):
-            obj = {}
-            self.read_wmap_record (stream, off, obj)
-            self.wmap_list.append (obj)
-            off = off + 184#self.get_struc_size (self.wmap_record_desc) # FIXME: compute the size outside the loop
+        self.read_list (stream,  'wmap')
 
         for wmap in self.wmap_list:
-            off = wmap['area_offset']
-            for i in range (wmap['num_of_areas']):
+            off = wmap['area_off']
+            for i in range (wmap['area_cnt']):
                 obj = {}
-                self.read_area_record (stream, off, obj)
+                self.read_struc (stream, off, self.area_desc, obj)
                 self.area_list.append (obj)
-                off = off + 240#self.get_struc_size (self.area_record_desc) # FIXME: compute the size outside the loop
+                off += size_area
 
-            off = wmap['arealink_offset']
-            for i in range (wmap['num_of_arealinks']):
+            off = wmap['area_link_off']
+            for i in range (wmap['area_link_cnt']):
                 obj = {}
-                self.read_arealink_record (stream, off, obj)
-                self.arealink_list.append (obj)
-                # FIXME: is the size correct???
-                off = off + 168#self.get_struc_size (self.arealink_record_desc) # FIXME: compute the size outside the loop
+                self.read_struc (stream, off, self.area_link_desc, obj)
+                self.area_link_list.append (obj)
+                off += size_area_link
+
 
     def printme (self):
         self.print_header ()
 
         self.print_list ('wmap')
-        self.print_list ('arealink')
         self.print_list ('area')
+        self.print_list ('area_link')
 
 
-
-
-
-register_format ('WMAP', 'V1.0', WMAP_Format)
+register_format ('WMAP', 'V1.0', WMAP_V10_Format)
