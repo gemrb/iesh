@@ -87,7 +87,7 @@ def help_on_shell ():
     
       load_object ("AGOODY").printme ()
         
-      export_obj ("GUICG", "GUICG.chu")
+      export_object ("GUICG", "GUICG.chu")
           Try to find resource GUICG and export it to file GUICG.chu.
           If the name is not unique, add third parameter,
           e.g. type=0x03ea to restrict the resource type
