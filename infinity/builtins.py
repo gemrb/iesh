@@ -44,11 +44,13 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
         dialog_file = core.get_option ('core.dialog_file')
 
     core.game_dir = game_dir
+    core.game_data_path = game_dir
     core.chitin_file = chitin_file
     core.dialog_file = dialog_file
     
     # Load RESREF index file (CHITIN.KEY)
-    stream = FileStream ().open (os.path.join (game_dir, chitin_file))
+    chitin_file = core.find_file (chitin_file)
+    stream = FileStream ().open (chitin_file)
     core.keys = core.get_format ('KEY') ()
     core.keys.read_header (stream)
     print "Loading %d file refs and %d RESREFs. This may take ages" %(core.keys.header['num_of_bifs'], core.keys.header['num_of_resrefs'])
@@ -56,7 +58,8 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
     stream.close ()
 
     # LOAD STRREF index file (DIALOG.TLK)
-    stream = FileStream ().open (os.path.join (game_dir, dialog_file))
+    dialog_file = core.find_file (dialog_file)
+    stream = FileStream ().open (dialog_file)
     core.strrefs = core.get_format ('TLK') ()
     core.strrefs.read_header (stream)
     print "Loading %d STRREFs. This may take eternity" %(core.strrefs.header['num_of_strrefs'])

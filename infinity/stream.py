@@ -257,7 +257,7 @@ class Stream (object):
 
 
     def load_object (self, type = 0):
-        print self
+        #print self
         fmt = self.get_format ()
         obj = fmt ()
         self.seek (0)
@@ -431,9 +431,21 @@ class ResourceStream (MemoryStream):
             raise RuntimeError, "More than one result"
 
         o = oo[index]
-     
+
+        # First look for the object in cache and override directories.
+        # We have to attach filename extension to the name based on its type when searching
+        exts = core.type_to_ext (o['type'])
+        for ext in exts:
+            obj_file = core.find_file (name + ext)
+            if obj_file is not None:
+                return FileStream ().open (obj_file)
+
+        # The object was not found in the filesystem, so look for it in BIF archives.
+        # Lookup the BIF archive file containing the object
         src_file = core.keys.bif_list[o['locator_src_ndx']]
-        bif_stream = FileStream ().open (os.path.join (core.game_dir, src_file['file_name']))
+        bif_file = core.find_file (src_file['file_name'])
+        
+        bif_stream = FileStream ().open (bif_file)
         b = core.get_format ('BIFF') ()
         b.read (bif_stream)
         obj = b.file_list[o['locator_ntset_ndx']]
@@ -447,7 +459,7 @@ class ResourceStream (MemoryStream):
 
 
     def __repr__ (self):
-        return "<ResourceStream: %s at 0x%08x>" %(self.resref, self (id))
+        return "<ResourceStream: %s at 0x%08x>" %(self.resref, id (self))
 
 
 class CompressedStream (MemoryStream):
@@ -457,7 +469,7 @@ class CompressedStream (MemoryStream):
         return MemoryStream.open (self, gzip.zlib.decompress (membuffer),  name)
 
     def __repr__ (self):
-        return "<CompressedStream: %s at 0x%08x>" %(self.name, self (id))
+        return "<CompressedStream: %s at 0x%08x>" %(self.name, id (self))
         
 # End of file stream.py
 

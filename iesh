@@ -192,7 +192,7 @@ def save (name = ''):
     save files than just one."""
     if name != '':
         name = '-' + name
-    data = [core.game_dir,  core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs]
+    data = [core.game_dir, core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs, core.game_data_path ]
     fh = open (os.path.expanduser (IESH_RESTORE_FILE + name),  'w')
     cPickle.dump (data,  fh)
     fh.close ()
@@ -208,7 +208,7 @@ def restore (name = ''):
     fh = open (os.path.expanduser (IESH_RESTORE_FILE + name))
     data = cPickle.load (fh)
     fh.close ()
-    core.game_dir,  core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs = data
+    core.game_dir,  core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs, core.game_data_path = data
 
 ###################################################
 ###################################################

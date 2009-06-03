@@ -1,4 +1,4 @@
-1. use search path for files
+1. use search path for files, possibly caching the paths
 2. Format.read_struc(): allow for offset based on size of other field (STRSIZED, as in BIFC_Format)
 3. make the MemoryStream data buffer autostrech (shrink/grow)
 4. canonize field names and labels
@@ -6,6 +6,7 @@
         door_cnt or doors_cnt ?
         # of doors or Doors count?
 5. load objects in cache and override dirs as well
+6.  allow for more than one game loaded?
         
 Data types:
 
