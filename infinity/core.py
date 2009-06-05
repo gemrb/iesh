@@ -197,23 +197,41 @@ restype_rev_hash = {
     'WMAP' : 0x03f7,
     }
 
-def find_res_type (type, sig = None, ext = None):
+def find_res_type (**kw):
+    """Return list of resource types matching the given parameters.
+    
+    Parameter can be type, sig, sig4, or ext. If more than one parameter is given, the
+    result must satisfy each of them.
+        type - numerical RESREF type
+        sig - signature, trailing spaces are ignored
+        sig4 - signature, trailing spaces must be exact
+        ext - filename extension, leading dot is added automagically
+        tag - 
+        any -
+    
+    Example:
+        find_res_type (sig='ITM')"""
+        
     rtl = restype_list
-    if type is not None:
-        rtl = [ r for r in rtl if r[0] == type ]
-    if sig is not None:
-        rtl = [ r for r in rtl if r[1] == sig ]
-    if ext is not None:
-        sig = sig.lower ()
-        if not sig.startswith ('.'):
-            sig = '.' + sig
-        rtl = [ r for r in rtl if r[2] == sig ]
+    for key, value in kw.items ():
+        if key == 'type':
+            rtl = [ r for r in rtl if r[0] == value ]
+        elif key == 'sig':
+            value = "%-4s" %value
+            rtl = [ r for r in rtl if r[1] == value ]
+        elif key == 'sig4':
+            rtl = [ r for r in rtl if r[1] == value ]
+        elif key == 'ext':
+            value = value.lower ()
+            if not value.startswith ('.'):
+                value = '.' + value
+            rtl = [ r for r in rtl if r[2] == value ]
     
     return rtl
 
 
 def type_to_ext (type):
-    return [ r[2] for r in find_res_type (type) ]
+    return [ r[2] for r in find_res_type (type=type) ]
     
 
 #def sig_to_type (signature,  game_type = None):
@@ -277,10 +295,18 @@ def id_to_symbol (idsfile, id):
     
 
 def find_file (filename):
+    """Find file in some of the dirs specified in core.game_data_path and return its path.
+    It tries lowercase filename if it can't find it in the exact same case, but it does not do
+    case insensitive search yet."""
+    
+    filename_lower = filename.lower()
     dirs = game_data_path.split (':')
     for dir in dirs:
         if os.access (os.path.join (dir,  filename), os.F_OK):
             return os.path.join (dir,  filename)
+        # try to search for lowercase variant. This is common on Unix to keep Weidu working anyway
+        if os.access (os.path.join (dir,  filename_lower), os.F_OK):
+            return os.path.join (dir,  filename_lower)
     
     return None
 
