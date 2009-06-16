@@ -62,9 +62,9 @@ class Format (object):
 
     def read_list (self, stream, name,  header = None, desc = None, list = None):
         if desc is None:
-            desc = self.__class__.__dict__ [name + '_desc']
+            desc = self.__getattribute__ (name + '_desc')
         if list is None:
-            list = self.__dict__ [name + '_list']
+            list = self.__getattribute__ (name + '_list')
         if header is None:
             header = self.header
 
@@ -79,9 +79,9 @@ class Format (object):
 
     def write_list (self, stream, offset, name,  header = None, desc = None, list = None):
         if desc is None:
-            desc = self.__class__.__dict__ [name + '_desc']
+            desc = self.__getattribute__ (name + '_desc')
         if list is None:
-            list = self.__dict__ [name + '_list']
+            list = self.__getattribute__ (name + '_list')
         if header is None:
             header = self.header
 
@@ -98,9 +98,9 @@ class Format (object):
 
     def print_list (self, name, desc = None, list = None):
         if desc is None:
-            desc = self.__class__.__dict__ [name + '_desc']
+            desc = self.__getattribute__ (name + '_desc')
         if list is None:
-            list = self.__dict__ [name + '_list']
+            list = self.__getattribute__ (name + '_list')
 
         i = 0
         for obj in list:

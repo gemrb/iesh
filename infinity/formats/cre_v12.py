@@ -492,7 +492,7 @@ class CRE_V12_Format (Format):
             { 'key': 'unknown_270',
                 'type': 'BYTES',
                 'off': 0x0270,
-                'size': 52,
+                'size': 36,
                 'label': 'Unknown 270' },
 
             { 'key': 'overlay_off',
@@ -831,7 +831,7 @@ class CRE_V12_Format (Format):
             { 'key': 'item',
                 'type': 'WORD',
                 'off': 0x0000,
-                'count': 45,
+                'count': 46,
                 'label': 'Item' },
     )
 
@@ -868,5 +868,14 @@ class CRE_V12_Format (Format):
         self.print_struc (self.slots, self.item_slot_desc)
 
 
+class CRE_V11_Format (CRE_V12_Format):
+    item_slot_desc = (
+            { 'key': 'item',
+                'type': 'WORD',
+                'off': 0x0000,
+                'count': 38,
+                'label': 'Item' },
+    )
 
 register_format ('CRE', 'V1.2', CRE_V12_Format)
+register_format ('CRE', 'V1.1', CRE_V11_Format)
