@@ -49,15 +49,21 @@ class Format (object):
         self.options = {}
 
 
-    def read_header (self, stream):
-        self.header = {}
-        self.read_struc (stream, 0x0000, self.header_desc, self.header)
+    def read_header (self, stream, desc = None):
+        if desc is None:
+            self.header = {}
+            desc = self.header_desc
+        self.read_struc (stream, 0x0000, desc, self.header)
 
-    def write_header (self, stream):
-        self.write_struc (stream, 0x0000, self.header_desc, self.header)
+    def write_header (self, stream, desc = None):
+        if desc is None:
+            desc = self.header_desc
+        self.write_struc (stream, 0x0000, desc, self.header)
 
-    def print_header (self):
-        self.print_struc (self.header, self.header_desc)
+    def print_header (self, desc = None):
+        if desc is None:
+            desc = self.header_desc
+        self.print_struc (self.header, desc)
 
 
     def read_list (self, stream, name,  header = None, desc = None, list = None):

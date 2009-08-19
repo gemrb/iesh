@@ -292,6 +292,9 @@ class ARE_Format (Format):
               'off': 0x00C4,
               'label': 'Automap notes offset (non PST)'}, # PST has 0xFFFFFFFF here
 
+            )
+    
+    header2_desc = (
             { 'key': 'automap_note_cnt',
               'type': 'DWORD',
               'off': 0x00C8,
@@ -312,7 +315,29 @@ class ARE_Format (Format):
               'off': 0x00D4,
               'size': 4 * 18,
               'label': 'Unknown D4'},
+            )
 
+    header2_pst_desc = (
+            { 'key': 'automap_note_pst_off',
+              'type': 'DWORD',
+              'off': 0x00C8,
+              'label': 'Automap notes offset (PST)'}, # non-PST have automap_note_cnt here
+
+            { 'key': 'automap_note_pst_cnt',
+              'type': 'DWORD',
+              'off': 0x00CC,
+              'label': '# of automap notes (PST)'}, # non-PST have projectile_trap_off here
+
+            { 'key': 'projectile_trap_cnt',
+              'type': 'DWORD',
+              'off': 0x00D0,
+              'label': '# of projectile traps'},
+
+            { 'key': 'unknown_D4',
+              'type': 'BYTES',
+              'off': 0x00D4,
+              'size': 4 * 18,
+              'label': 'Unknown D4'},
             )
 
     actor_desc = (
@@ -1289,7 +1314,7 @@ class ARE_Format (Format):
                 
             )
 
-    automap_note_bg_desc = (
+    automap_note_desc = (
             { 'key': 'x',
                 'type': 'WORD',
                 'off': 0x0000,
@@ -1330,8 +1355,6 @@ class ARE_Format (Format):
                 
             )
 
-    # FIXME: find a method to distinguish between PST and non-PST ARE files
-    automap_note_desc = automap_note_bg_desc
 
     tiled_object_desc = (
             { 'key': 'name',
@@ -1669,7 +1692,10 @@ class ARE_Format (Format):
     def __init__ (self):
         Format.__init__ (self)
         self.expect_signature = 'AREA'
-
+        
+        # pst and bg/bg2/iwd formats differ in automap_note
+        self.is_pst = False;
+        
         self.actor_list = []
         self.infopoint_list = []
         self.spawnpoint_list = []
@@ -1683,6 +1709,7 @@ class ARE_Format (Format):
         self.door_list = []
         self.animation_list = []
         self.automap_note_list = []
+        self.automap_note_pst_list = []
         self.tiled_object_list = []
         self.projectile_trap_list = []
         self.song = None
@@ -1691,7 +1718,13 @@ class ARE_Format (Format):
 
     def read (self, stream):
         self.read_header (stream)
-
+        self.is_pst = self.header['automap_note_off'] == 0xffffffff
+        
+        if self.is_pst:
+            self.read_header (stream, self.header2_pst_desc)
+        else:
+            self.read_header (stream, self.header2_desc)
+        
         self.read_list (stream, 'actor')
         self.read_list (stream, 'infopoint')
         self.read_list (stream, 'spawnpoint')
@@ -1704,9 +1737,15 @@ class ARE_Format (Format):
         self.explored_bitmask = stream.read_blob (self.header['explored_bitmask_off'], self.header['explored_bitmask_size'])
         self.read_list (stream, 'door')
         self.read_list (stream, 'animation') 
-        self.read_list (stream, 'automap_note')
+        if self.is_pst:
+            self.read_list (stream, 'automap_note_pst')
+        else:
+            self.read_list (stream, 'automap_note')
+            
         self.read_list (stream, 'tiled_object')
-        self.read_list (stream, 'projectile_trap')
+        
+        if not self.is_pst:
+            self.read_list (stream, 'projectile_trap')
 
         obj = {}
         self.read_struc (stream, self.header['song_off'], self.song_desc, obj)
@@ -1735,9 +1774,13 @@ class ARE_Format (Format):
 
         off = self.write_list (stream, off, 'door')
         off = self.write_list (stream, off, 'animation')
-        off = self.write_list (stream, off, 'automap_note')
+        if self.is_pst:
+            off = self.write_list (stream, off, 'automap_note_pst')
+        else:
+            off = self.write_list (stream, off, 'automap_note')
         off = self.write_list (stream, off, 'tiled_object')
-        off = self.write_list (stream, off, 'projectile_trap')
+        if not self.is_pst:
+            off = self.write_list (stream, off, 'projectile_trap')
 
         self.header['song_off'] = off
         self.write_struc (stream, off, self.song_desc, self.song)
@@ -1748,10 +1791,18 @@ class ARE_Format (Format):
         off += self.get_struc_size (self.rest_interrupt_desc)
 
         self.write_header (stream)
+        if self.is_pst:
+            self.write_header (stream, self.header2_pst_desc)
+        else:
+            self.write_header (stream, self.header2_desc)
 
     def printme (self):
         self.print_header ()
-
+        if self.is_pst:
+            self.print_header (self.header2_pst_desc)
+        else:
+            self.print_header (self.header2_desc)
+            
         self.print_list ('actor')
         self.print_list ('infopoint')
         self.print_list ('spawnpoint')
@@ -1764,9 +1815,13 @@ class ARE_Format (Format):
         # "Explored" bitmask. We need map width and height to print the mask, though and they're not in the ARE structure
         self.print_list ('door')
         self.print_list ('animation') 
-        self.print_list ('automap_note')
+        if self.is_pst:
+            self.print_list ('automap_note_pst')
+        else:
+            self.print_list ('automap_note')
         self.print_list ('tiled_object')
-        self.print_list ('projectile_trap')
+        if not self.is_pst:
+            self.print_list ('projectile_trap')
         self.print_struc (self.song, self.song_desc)
         self.print_struc (self.rest_interrupt, self.rest_interrupt_desc)
 
