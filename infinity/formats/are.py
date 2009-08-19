@@ -1289,8 +1289,49 @@ class ARE_Format (Format):
                 
             )
 
-    automap_note_desc = automap_note_pst_desc
+    automap_note_bg_desc = (
+            { 'key': 'x',
+                'type': 'WORD',
+                'off': 0x0000,
+                'label': 'X coordinate' },
+                
+            { 'key': 'y',
+                'type': 'WORD',
+                'off': 0x0002,
+                'label': 'Y coordinate' },
+                         
+            { 'key': 'text',
+                'type': 'STRREF',
+                'off': 0x0004,
+                'label': 'Note text' },
+                
+            { 'key': 'strref_location',
+                'type': 'WORD',
+                'off': 0x0008,
+                'enum': {0 : 'External (TOH/TOT)', 1: 'Internal (TLK)' },
+                'label': 'STRREF location' },
+                
+            { 'key': 'color',
+                'type': 'WORD',
+                'off': 0x000A,
+                'enum': {0 : 'Gray', 1: 'Violet', 2: 'Green', 3: 'Orange', 4: 'Red', 5: 'Blue', 6: 'Dark blue', 7: 'Light gray' },
+                'label': 'Note pin color / type' },
+                
+            { 'key': 'note_count_plus_10',
+                'type': 'DWORD',
+                'off': 0x000C,
+                'label': 'Note count + 10' },
+                
+            { 'key': 'unknown_10',
+                'type': 'BYTES',
+                'off': 0x0010,
+                'size': 36,
+                'label': 'Unknown 10' },
+                
+            )
 
+    # FIXME: find a method to distinguish between PST and non-PST ARE files
+    automap_note_desc = automap_note_bg_desc
 
     tiled_object_desc = (
             { 'key': 'name',
@@ -1329,12 +1370,12 @@ class ARE_Format (Format):
                 'label': 'Secondary search squares count' },
 
             { 'key': 'unknown_3C',
-            'type': 'BYTES',
-            'off': 0x003C,
-            'size': 48,
-            'label': 'Unknown 3C' },
+                'type': 'BYTES',
+                'off': 0x003C,
+                'size': 48,
+                'label': 'Unknown 3C' },
 
-    )
+            )
 
 
     projectile_trap_desc = (
