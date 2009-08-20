@@ -1758,6 +1758,10 @@ class ARE_Format (Format):
 
     def write (self, stream):
         off = self.get_struc_size (self.header_desc)
+        if self.is_pst:
+            off += self.get_struc_size (self.header2_pst_desc)
+        else:
+            off += self.get_struc_size (self.header2_desc)
 
         off = self.write_list (stream, off, 'actor')
         off = self.write_list (stream, off, 'infopoint')
