@@ -19,8 +19,9 @@
 
 from infinity import core
 from infinity.format import Format, register_format
+from infinity.formats import enums
 
-class ARE_Format (Format):
+class ARE_V91_Format (Format):
     header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
@@ -47,10 +48,10 @@ class ARE_Format (Format):
               'type': 'DWORD',
               'off': 0x0014,
               'mask': {
-                  0x01: 'can save',
-                  0x02: 'tutorial',
-                  0x04: 'dead magic',
-                  0x08: 'dream'
+                  0x01: 'Save disabled',
+                  0x02: 'Rest disabled',
+                  0x04: 'Unknown bit2',
+                  0x08: 'Lock battle music'
                   },
               'label': 'Area flag (AREAFLAG.IDS)'},
 
@@ -62,7 +63,7 @@ class ARE_Format (Format):
             { 'key': 'unknown_20',
               'type': 'DWORD',
               'off': 0x0020,
-              'label': 'Unknown north 20'},
+              'label': 'Unknown 20'},
 
             { 'key': 'east_area',
               'type': 'RESREF',
@@ -72,7 +73,7 @@ class ARE_Format (Format):
             { 'key': 'unknown_2C',
               'type': 'DWORD',
               'off': 0x002C,
-              'label': 'Unknown east 20'},
+              'label': 'Unknown 2C'},
 
             { 'key': 'south_area',
               'type': 'RESREF',
@@ -82,7 +83,7 @@ class ARE_Format (Format):
             { 'key': 'unknown_38',
               'type': 'DWORD',
               'off': 0x0038,
-              'label': 'Unknown south 38'},
+              'label': 'Unknown 38'},
 
             { 'key': 'west_area',
               'type': 'RESREF',
@@ -92,7 +93,7 @@ class ARE_Format (Format):
             { 'key': 'unknown_44',
               'type': 'DWORD',
               'off': 0x0044,
-              'label': 'Unknown west 44'},
+              'label': 'Unknown 44'},
 
 
             { 'key': 'flags',
@@ -136,209 +137,170 @@ class ARE_Format (Format):
               'off': 0x0052,
               'label': 'Unknown 52'},
 
+            { 'key': 'unknown_54',
+              'type': 'BYTES',
+              'off': 0x0054,
+              'size': 16,
+              'label': 'Unknown 54'},
 
             { 'key': 'actor_off',
               'type': 'DWORD',
-              'off': 0x0054,
+              'off': 0x0064,
               'label': 'Actors offset'},
 
             { 'key': 'actor_cnt',
               'type': 'WORD',
-              'off': 0x0058,
+              'off': 0x0068,
               'label': '# of actors'},
 
-            { 'key': 'infopoint_cnt',
+            { 'key': 'region_cnt',
               'type': 'WORD',
-              'off': 0x005A,
-              'label': '# of infopoints, triggerpoints and exits'},
+              'off': 0x006A,
+              'label': '# of regions'},
 
-            { 'key': 'infopoint_off',
+            { 'key': 'region_off',
               'type': 'DWORD',
-              'off': 0x005C,
-              'label': 'Offset of infopoints, triggerpoints and exits'},
+              'off': 0x006C,
+              'label': 'Regions offset'},
 
             { 'key': 'spawnpoint_off',
               'type': 'DWORD',
-              'off': 0x0060,
+              'off': 0x0070,
               'label': 'Spawnpoint offset'},
 
             { 'key': 'spawnpoint_cnt',
               'type': 'DWORD',
-              'off': 0x0064,
+              'off': 0x0074,
               'label': '# of spawnpoints'},
 
             { 'key': 'entrance_off',
               'type': 'DWORD',
-              'off': 0x0068,
+              'off': 0x0078,
               'label': 'Entrances offset'},
 
             { 'key': 'entrance_cnt',
               'type': 'DWORD',
-              'off': 0x006C,
+              'off': 0x007C,
               'label': '# of entrances'},
 
             { 'key': 'container_off',
               'type': 'DWORD',
-              'off': 0x0070,
+              'off': 0x0080,
               'label': 'Containers offset'},
 
             { 'key': 'container_cnt',
               'type': 'WORD',
-              'off': 0x0074,
+              'off': 0x0084,
               'label': '# of containers'},
 
             { 'key': 'item_cnt',
               'type': 'WORD',
-              'off': 0x0076,
+              'off': 0x0086,
               'label': '# of items'},
 
             { 'key': 'item_off',
               'type': 'DWORD',
-              'off': 0x0078,
+              'off': 0x0088,
               'label': 'Item offset'},
 
             { 'key': 'vertex_off',
               'type': 'DWORD',
-              'off': 0x007C,
+              'off': 0x008C,
               'label': 'Vertices offset'},
 
             { 'key': 'vertex_cnt',
               'type': 'WORD',
-              'off': 0x0080,
+              'off': 0x0090,
               'label': '# of vertices'},
 
             { 'key': 'ambient_cnt',
               'type': 'WORD',
-              'off': 0x0082,
+              'off': 0x0092,
               'label': '# of ambient sounds'},
 
             { 'key': 'ambient_off',
               'type': 'DWORD',
-              'off': 0x0084,
+              'off': 0x0094,
               'label': 'Ambients offset'},
 
             { 'key': 'variable_off',
               'type': 'DWORD',
-              'off': 0x0088,
+              'off': 0x0098,
               'label': 'Variables offset'},
 
             { 'key': 'variable_cnt',
               'type': 'DWORD',
-              'off': 0x008C,
+              'off': 0x009C,
               'label': '# of variables'},
 
-            { 'key': 'unknown_90',
+            { 'key': 'unknown_A0',
               'type': 'DWORD',
-              'off': 0x0090,
-              'label': 'Unknown 90'},
+              'off': 0x00A0,
+              'label': 'Unknown A0'},
 
             { 'key': 'area_script',
               'type': 'RESREF',
-              'off': 0x0094,
+              'off': 0x00A4,
               'label': 'Area Script Resref'},
 
             { 'key': 'explored_bitmask_size',
               'type': 'DWORD',
-              'off': 0x009C,
+              'off': 0x00AC,
               'label': 'Explored bitmask size'},
 
             { 'key': 'explored_bitmask_off',
               'type': 'DWORD',
-              'off': 0x00A0,
+              'off': 0x00B0,
               'label': 'Explored bitmask offset'},
 
             { 'key': 'door_cnt',
               'type': 'DWORD',
-              'off': 0x00A4,
+              'off': 0x00B4,
               'label': '# of doors'},
 
             { 'key': 'door_off',
               'type': 'DWORD',
-              'off': 0x00A8,
+              'off': 0x00B8,
               'label': 'Doors offset'},
 
             { 'key': 'animation_cnt',
               'type': 'DWORD',
-              'off': 0x00AC,
+              'off': 0x00BC,
               'label': '# of animations'},
 
             { 'key': 'animation_off',
               'type': 'DWORD',
-              'off': 0x00B0,
+              'off': 0x00C0,
               'label': 'Animations offset'},
 
             { 'key': 'tiled_object_cnt',
               'type': 'DWORD',
-              'off': 0x00B4,
+              'off': 0x00C4,
               'label': '# of tiled of objects'},
 
             { 'key': 'tiled_object_off',
               'type': 'DWORD',
-              'off': 0x00B8,
+              'off': 0x00C8,
               'label': 'Tiled objects offset'},
 
             { 'key': 'song_off',
               'type': 'DWORD',
-              'off': 0x00BC,
+              'off': 0x00CC,
               'label': 'Song entries offset'},
 
             { 'key': 'rest_interrupt_off',
               'type': 'DWORD',
-              'off': 0x00C0,
+              'off': 0x00D0,
               'label': 'Interruption of rest party option offset'},
 
-            { 'key': 'automap_note_off',
-              'type': 'DWORD',
-              'off': 0x00C4,
-              'label': 'Automap notes offset (non PST)'}, # PST has 0xFFFFFFFF here
+            { 'key': 'unknown_D4',
+              'type': 'BYTES',
+              'off': 0x00D4,
+              'size': 88,
+              'label': 'Unknown D4' },
 
             )
     
-    header2_desc = (
-            { 'key': 'automap_note_cnt',
-              'type': 'DWORD',
-              'off': 0x00C8,
-              'label': '# of automap notes (non PST)'}, # PST has automap_note_off here
-
-            { 'key': 'projectile_trap_off',
-              'type': 'DWORD',
-              'off': 0x00CC,
-              'label': 'Projectile traps offset (non PST)'}, # PST has automap_note_cnt here
-
-            { 'key': 'projectile_trap_cnt',
-              'type': 'DWORD',
-              'off': 0x00D0,
-              'label': '# of projectile traps'},
-
-            { 'key': 'unknown_D4',
-              'type': 'BYTES',
-              'off': 0x00D4,
-              'size': 4 * 18,
-              'label': 'Unknown D4'},
-            )
-
-    header2_pst_desc = (
-            { 'key': 'automap_note_pst_off',
-              'type': 'DWORD',
-              'off': 0x00C8,
-              'label': 'Automap notes offset (PST)'}, # non-PST have automap_note_cnt here
-
-            { 'key': 'automap_note_pst_cnt',
-              'type': 'DWORD',
-              'off': 0x00CC,
-              'label': '# of automap notes (PST)'}, # non-PST have projectile_trap_off here
-
-            { 'key': 'projectile_trap_cnt',
-              'type': 'DWORD',
-              'off': 0x00D0,
-              'label': '# of projectile traps'},
-
-            { 'key': 'unknown_D4',
-              'type': 'BYTES',
-              'off': 0x00D4,
-              'size': 4 * 18,
-              'label': 'Unknown D4'},
-            )
 
     actor_desc = (
             { 'key': 'actor_name',
@@ -359,13 +321,13 @@ class ARE_Format (Format):
             { 'key': 'flags',
                 'type': 'DWORD',
                 'off': 0x0028,
-                'mask': { 0x01: 'CRE not attached', 0x02: 'Unknown 0x02', 0x04: 'Unknown 0x04', 0x08: 'Actor name as death var' },
+                'mask': { 0x01: 'CRE not attached', 0x02: 'Unknown 0x02', 0x04: 'Unknown 0x04', 0x08: 'Override script name' },
                 'label': 'Flags' },
         
             { 'key': 'spawned_flag',
                 'type': 'DWORD',
                 'off': 0x002C,
-                'label': 'Spawned flag (in memory)' },
+                'label': 'Spawned flag' },
         
             { 'key': 'animation',
                 'type': 'DWORD',
@@ -391,7 +353,7 @@ class ARE_Format (Format):
             { 'key': 'appearance_time',
                 'type': 'DWORD',
                 'off': 0x0040,
-                'mask': { 2^0: '00:30-01:29', 2^1: '01:30-02:29', 2^2: '02:30-03:29', 2^3: '03:30-04:29', 2^4: '04:30-05:29', 2^5: '05:30-06:29', 2^6: '06:30-07:29', 2^7: '07:30-08:29', 2^8: '08:30-09:29', 2^9: '09:30-10:29', 2^10: '10:30-11:29', 2^11: '11:30-12:29', 2^12: '12:30-13:29', 2^13: '13:30-14:29', 2^14: '14:30-15:29', 2^15: '15:30-16:29', 2^16: '16:30-17:29', 2^17: '17:30-18:29', 2^18: '18:30-19:29', 2^19: '19:30-20:29', 2^20: '20:30-21:29 (dusk)', 2^21: '21:30-22:29 (night)', 2^22: '22:30-23:29', 2^23: '23:30-00:29' },
+                'mask': enums.schedule_mask,
                 'label': 'Actor appearance time' },
         
             { 'key': 'times_spoken_to',
@@ -404,32 +366,32 @@ class ARE_Format (Format):
                 'off': 0x0048,
                 'label': 'Dialog (overrides CRE dialog)' },
         
-            { 'key': 'script',
+            { 'key': 'script_override',
                 'type': 'RESREF',
                 'off': 0x0050,
                 'label': 'Script (override)' },
         
-            { 'key': 'script',
+            { 'key': 'script_general',
                 'type': 'RESREF',
                 'off': 0x0058,
-                'label': 'Script (class)' },
-        
-            { 'key': 'script',
-                'type': 'RESREF',
-                'off': 0x0060,
-                'label': 'Script (race)' },
-        
-            { 'key': 'script',
-                'type': 'RESREF',
-                'off': 0x0068,
                 'label': 'Script (general)' },
         
-            { 'key': 'script',
+            { 'key': 'script_class',
+                'type': 'RESREF',
+                'off': 0x0060,
+                'label': 'Script (class)' },
+        
+            { 'key': 'script_race',
+                'type': 'RESREF',
+                'off': 0x0068,
+                'label': 'Script (race)' },
+        
+            { 'key': 'script_default',
                 'type': 'RESREF',
                 'off': 0x0070,
                 'label': 'Script (default)' },
         
-            { 'key': 'script',
+            { 'key': 'script_specific',
                 'type': 'RESREF',
                 'off': 0x0078,
                 'label': 'Script (specific)' },
@@ -442,32 +404,32 @@ class ARE_Format (Format):
             { 'key': 'cre_off',
                 'type': 'DWORD',
                 'off': 0x0088,
-                'label': 'CRE structure offset' },
+                'label': 'Embedded CRE offset' },
         
             { 'key': 'cre_size',
                 'type': 'DWORD',
                 'off': 0x008C,
-                'label': 'CRE structure size' },
+                'label': 'Embedded CRE size' },
         
             { 'key': 'unknown_90',
                 'type': 'BYTES',
                 'off': 0x0090,
                 'size': 128,
                 'label': 'Unknown 90' },
-    )
+            )
 
-    # These are called info points in IESDP, but include info points, triggers and exits
-    infopoint_desc = (
+    # These used to be called info points in IESDP, but include info points, triggers and exits
+    region_desc = (
             { 'key': 'name',
                 'type': 'STR32',
                 'off': 0x0000,
-                'label': 'Hotspot/Infopoint name (for editors)' },
+                'label': 'Region name (for editors)' },
 
             { 'key': 'type',
                 'type': 'WORD',
                 'off': 0x0020,
                 'enum': { 0: 'Proximity', 1: 'Info', 2: 'Travel' },
-                'label': 'Hotspot/Infopoint type' },
+                'label': 'Region type' },
 
             { 'key': 'bounding_box',
                 'type': 'RECT',
@@ -527,31 +489,30 @@ class ARE_Format (Format):
                 'off': 0x006A,
                 'label': 'Trap removal difficulty (%)' },
 
-            { 'key': 'trapped_flag',
+            { 'key': 'trapped',
                 'type': 'WORD',
                 'off': 0x006C,
-                'label': 'Trapped flag' },
+                'label': 'Region is trapped' },
 
             { 'key': 'trap_detected',
                 'type': 'WORD',
                 'off': 0x006E,
-                'label': 'Trap detected flag' },
+                'label': 'Trap has been detected' },
 
             { 'key': 'trap_launch_location',
                 'type': 'POINT',
                 'off': 0x0070,
                 'label': 'Trap launch location' },
 
-            { 'key': 'key_type',
-                'type': 'BYTES',
+            { 'key': 'key_item',
+                'type': 'RESREF',
                 'off': 0x0074,
-                'size': 8,
-                'label': 'Key type (usage unknown)' },
+                'label': 'Key item' },
 
             { 'key': 'script',
                 'type': 'RESREF',
                 'off': 0x007C,
-                'label': 'Script (if trigger point)' },
+                'label': 'Region script' },
 
             { 'key': 'alternative_use_point',
                 'type': 'POINT',
@@ -569,21 +530,7 @@ class ARE_Format (Format):
                 'size': 44,
                 'label': 'Unknown 8C' },
 
-            { 'key': 'unknown_B4',
-                'type': 'POINT',
-                'off': 0x00B4,
-                'label': 'Unknown B4' },
-
-            { 'key': 'unknown_B8',
-                'type': 'DWORD',
-                'off': 0x00B8,
-                'label': 'Unknown B8' },
-
-            { 'key': 'dialog_pst',
-                'type': 'RESREF',
-                'off': 0x00BC,
-                'label': 'Dialog Resref (PST only?)' },
-    )
+            )
 
     spawnpoint_desc = (
             { 'key': 'name',
@@ -596,55 +543,11 @@ class ARE_Format (Format):
                 'off': 0x0020,
                 'label': 'Spawnpoint location' },
 
-            { 'key': 'cre_resref_0',
+            { 'key': 'cre_resref',
                 'type': 'RESREF',
                 'off': 0x0024,
-                'label': 'CRE Resref 0' },
-
-            { 'key': 'cre_resref_1',
-                'type': 'RESREF',
-                'off': 0x002C,
-                'label': 'CRE Resref 1' },
-
-            { 'key': 'cre_resref_2',
-                'type': 'RESREF',
-                'off': 0x0034,
-                'label': 'CRE Resref 2' },
-
-            { 'key': 'cre_resref_3',
-                'type': 'RESREF',
-                'off': 0x003C,
-                'label': 'CRE Resref 3' },
-
-            { 'key': 'cre_resref_4',
-                'type': 'RESREF',
-                'off': 0x0044,
-                'label': 'CRE Resref 4' },
-
-            { 'key': 'cre_resref_5',
-                'type': 'RESREF',
-                'off': 0x004C,
-                'label': 'CRE Resref 5' },
-
-            { 'key': 'cre_resref_6',
-                'type': 'RESREF',
-                'off': 0x0054,
-                'label': 'CRE Resref 6' },
-
-            { 'key': 'cre_resref_7',
-                'type': 'RESREF',
-                'off': 0x005C,
-                'label': 'CRE Resref 7' },
-
-            { 'key': 'cre_resref_8',
-                'type': 'RESREF',
-                'off': 0x0064,
-                'label': 'CRE Resref 8' },
-
-            { 'key': 'cre_resref_9',
-                'type': 'RESREF',
-                'off': 0x006C,
-                'label': 'CRE Resref 9' },
+                'count': 10,
+                'label': 'CRE Resref' },
 
             { 'key': 'cre_resref_cnt',
                 'type': 'WORD',
@@ -668,9 +571,8 @@ class ARE_Format (Format):
                 'label': 'Spawn method' },
 
             { 'key': 'unknown_7C',
-                'type': 'WORD',
+                'type': 'DWORD',
                 'off': 0x007C,
-                'enum': { 0: 'Disable spawnpoint' },
                 'label': 'Unknown 7C' },
 
             { 'key': 'unknown_80',
@@ -696,7 +598,7 @@ class ARE_Format (Format):
             { 'key': 'appearance_time',
                 'type': 'DWORD',
                 'off': 0x0088,
-                'mask': { 2^0: '00:30-01:29', 2^1: '01:30-02:29', 2^2: '02:30-03:29', 2^3: '03:30-04:29', 2^4: '04:30-05:29', 2^5: '05:30-06:29', 2^6: '06:30-07:29', 2^7: '07:30-08:29', 2^8: '08:30-09:29', 2^9: '09:30-10:29', 2^10: '10:30-11:29', 2^11: '11:30-12:29', 2^12: '12:30-13:29', 2^13: '13:30-14:29', 2^14: '14:30-15:29', 2^15: '15:30-16:29', 2^16: '16:30-17:29', 2^17: '17:30-18:29', 2^18: '18:30-19:29', 2^19: '19:30-20:29', 2^20: '20:30-21:29 (dusk)', 2^21: '21:30-22:29 (night)', 2^22: '22:30-23:29', 2^23: '23:30-00:29' },
+                'mask': enums.schedule_mask,
                 'label': 'Spawnpoint appearance time' },
         
             { 'key': 'day_chance',
@@ -714,7 +616,7 @@ class ARE_Format (Format):
                 'off': 0x0090,
                 'size': 56,
                 'label': 'Unknown 90' },
-    )
+            )
 
     entrance_desc = (
             { 'key': 'name',
@@ -735,7 +637,7 @@ class ARE_Format (Format):
             { 'key': 'unknown_26',
                 'type': 'BYTES',
                 'off': 0x0026,
-                'size': 66,    # FIXME: IESDP has 62 here....
+                'size': 66,
                 'label': 'Unknown 26' },
             )
 
@@ -777,12 +679,12 @@ class ARE_Format (Format):
                 'off': 0x002E,
                 'label': 'Trap removal difficulty' },
 
-            { 'key': 'is_trapped',
+            { 'key': 'trapped',
                 'type': 'WORD',
                 'off': 0x0030,
                 'label': 'Container is trapped' },
 
-            { 'key': 'is_detected',
+            { 'key': 'trap_detected',
                 'type': 'WORD',
                 'off': 0x0032,
                 'label': 'Trap has been detected' },
@@ -818,7 +720,7 @@ class ARE_Format (Format):
                 'label': 'First vertex index' },
 
             { 'key': 'vertex_cnt',
-                'type': 'WORD',
+                'type': 'DWORD',
                 'off': 0x0054,
                 'label': 'Count of border vertices' },
 
@@ -837,17 +739,17 @@ class ARE_Format (Format):
                 'off': 0x0080,
                 'label': 'Unknown 80' },
 
-            { 'key': 'unlockable_tlk_ref',
-                'type': 'DWORD',
+            { 'key': 'lockpick_strref',
+                'type': 'STRREF',
                 'off': 0x0084,
-                'label': 'TLK ref when lockpicking unlockable container' },
+                'label': 'Strref when lockpicking' },
 
             { 'key': 'unknown_88',
                 'type': 'BYTES',
                 'off': 0x0088,
                 'size': 56,
                 'label': 'Unknown 88' },
-    )
+            )
 
 
     item_desc = (
@@ -890,7 +792,7 @@ class ARE_Format (Format):
                 'type': 'POINT',
                 'off': 0x0000,
                 'label': 'Vertex' },
-    )
+            )
 
     ambient_desc = (
             { 'key': 'name',
@@ -909,7 +811,7 @@ class ARE_Format (Format):
                 'label': 'Sound radius' },
 
             { 'key': 'height',
-                'type': 'BYTES',
+                'type': 'BYTES', # FIXME: should not be WORD?
                 'off': 0x0026,
                 'size': 2,
                 'label': 'Sound height' },
@@ -923,67 +825,23 @@ class ARE_Format (Format):
             { 'key': 'volume',
                 'type': 'WORD',
                 'off': 0x002E,
-                'label': 'Sound volume' },
+                'label': 'Sound volume (%)' },
 
-            { 'key': 'sound_resref_0',
+            { 'key': 'sound_resref',
                 'type': 'RESREF',
                 'off': 0x0030,
-                'label': 'Sound Resref 0' },
-
-            { 'key': 'sound_resref_1',
-                'type': 'RESREF',
-                'off': 0x0038,
-                'label': 'Sound Resref 1' },
-
-            { 'key': 'sound_resref_2',
-                'type': 'RESREF',
-                'off': 0x0040,
-                'label': 'Sound Resref 2' },
-
-            { 'key': 'sound_resref_3',
-                'type': 'RESREF',
-                'off': 0x0048,
-                'label': 'Sound Resref 3' },
-
-            { 'key': 'sound_resref_4',
-                'type': 'RESREF',
-                'off': 0x0050,
-                'label': 'Sound Resref 4' },
-
-            { 'key': 'sound_resref_5',
-                'type': 'RESREF',
-                'off': 0x0058,
-                'label': 'Sound Resref 5' },
-
-            { 'key': 'sound_resref_6',
-                'type': 'RESREF',
-                'off': 0x0060,
-                'label': 'Sound Resref 6' },
-
-            { 'key': 'sound_resref_7',
-                'type': 'RESREF',
-                'off': 0x0068,
-                'label': 'Sound Resref 7' },
-
-            { 'key': 'sound_resref_8',
-                'type': 'RESREF',
-                'off': 0x0070,
-                'label': 'Sound Resref 8' },
-
-            { 'key': 'sound_resref_9',
-                'type': 'RESREF',
-                'off': 0x0078,
-                'label': 'Sound Resref 9' },
+                'count': 10,
+                'label': 'Sound Resref' },
 
             { 'key': 'sound_resref_cnt',
                 'type': 'WORD',
                 'off': 0x0080,
                 'label': 'Count of sound Resrefs' },
 
-            { 'key': 'sound_resref_cnt2',
+            { 'key': 'unknown_82',
                 'type': 'WORD',
                 'off': 0x0082,
-                'label': 'Count of sound Resrefs or 0' },
+                'label': 'Unknown 82' },
 
             { 'key': 'base_time_interval',
                 'type': 'DWORD',
@@ -998,13 +856,13 @@ class ARE_Format (Format):
             { 'key': 'appearance_time',
                 'type': 'DWORD',
                 'off': 0x008C,
-                'mask': { 2^0: '00:30-01:29', 2^1: '01:30-02:29', 2^2: '02:30-03:29', 2^3: '03:30-04:29', 2^4: '04:30-05:29', 2^5: '05:30-06:29', 2^6: '06:30-07:29', 2^7: '07:30-08:29', 2^8: '08:30-09:29', 2^9: '09:30-10:29', 2^10: '10:30-11:29', 2^11: '11:30-12:29', 2^12: '12:30-13:29', 2^13: '13:30-14:29', 2^14: '14:30-15:29', 2^15: '15:30-16:29', 2^16: '16:30-17:29', 2^17: '17:30-18:29', 2^18: '18:30-19:29', 2^19: '19:30-20:29', 2^20: '20:30-21:29 (dusk)', 2^21: '21:30-22:29 (night)', 2^22: '22:30-23:29', 2^23: '23:30-00:29' },
+                'mask': enums.schedule_mask,
                 'label': 'Ambient appearance time' },
 
             { 'key': 'flags',
                 'type': 'DWORD',
                 'off': 0x0090,
-                'mask': { 0x01: 'Ambient enabled', 0x02: 'Reverb', 0x04: 'Global', 0x08: 'Random ambient selection', 0x10: 'Unknown bit4', 0x20: 'Unknown bit5', 0x40: 'Unknown bit6', 0x80: 'Unknown bit7' },
+                'mask': { 0x01: 'Ambient enabled', 0x02: 'Disable environmental fx', 0x04: 'Global', 0x08: 'Random ambient selection', 0x10: 'Unknown bit4', 0x20: 'Unknown bit5', 0x40: 'Unknown bit6', 0x80: 'Unknown bit7' },
                 'label': 'Flags' },
 
             { 'key': 'unknown_94',
@@ -1012,7 +870,7 @@ class ARE_Format (Format):
                 'off': 0x0094,
                 'size': 64,
                 'label': 'Unknown 94' },
-    )
+            )
 
 
     variable_desc = (
@@ -1046,10 +904,10 @@ class ARE_Format (Format):
                 'off': 0x0000,
                 'label': 'Long name' },
 
-            { 'key': 'short_name',
+            { 'key': 'door_id',
                 'type': 'STR8',
                 'off': 0x0020,
-                'label': 'Short name' },
+                'label': 'Door ID (WED link)' },
 
             { 'key': 'flags',
                 'type': 'DWORD',
@@ -1087,25 +945,25 @@ class ARE_Format (Format):
                 'off': 0x0040,
                 'label': 'Closed door bounding box' },
 
-            { 'key': 'impeded_open_vertex_ndx',
+            { 'key': 'impeded_closed_vertex_ndx',
                 'type': 'DWORD',
                 'off': 0x0048,
-                'label': 'First vertex index of open door impeded cell block' },
-
-            { 'key': 'impeded_open_vertex_cnt',
-                'type': 'WORD',
-                'off': 0x004C,
-                'label': 'Count of vertices in open door impeded cell block' },
+                'label': 'First vertex index of closed door impeded cell block' },
 
             { 'key': 'impeded_closed_vertex_cnt',
                 'type': 'WORD',
-                'off': 0x004E,
+                'off': 0x004C,
                 'label': 'Count of vertices in closed door impeded cell block' },
 
-            { 'key': 'impeded_closed_vertex_ndx',
+            { 'key': 'impeded_open_vertex_cnt',
+                'type': 'WORD',
+                'off': 0x004E,
+                'label': 'Count of vertices in open door impeded cell block' },
+
+            { 'key': 'impeded_open_vertex_ndx',
                 'type': 'DWORD',
                 'off': 0x0050,
-                'label': 'First vertex index of closed door impeded cell block' },
+                'label': 'First vertex index of open door impeded cell block' },
 
             { 'key': 'unknown_54',
                 'type': 'WORD',
@@ -1142,15 +1000,15 @@ class ARE_Format (Format):
                 'off': 0x006E,
                 'label': 'Trap removal difficulty' },
 
-            { 'key': 'trapped_flag',
+            { 'key': 'trapped',
                 'type': 'WORD',
                 'off': 0x0070,
-                'label': 'Trapped flag' },
+                'label': 'Door is trapped' },
 
-            { 'key': 'trap_detected_flag',
+            { 'key': 'trap_detected',
                 'type': 'WORD',
                 'off': 0x0072,
-                'label': 'Trap detected flag' },
+                'label': 'Trap has been detected' },
 
             { 'key': 'trap_launch_target',
                 'type': 'POINT',
@@ -1162,10 +1020,10 @@ class ARE_Format (Format):
                 'off': 0x0078,
                 'label': 'Key item Resref' },
 
-            { 'key': 'key_script',
+            { 'key': 'door_script',
                 'type': 'RESREF',
                 'off': 0x0080,
-                'label': 'Key item script Resref' },
+                'label': 'Door script Resref' },
 
             { 'key': 'detection_difficulty',
                 'type': 'DWORD',
@@ -1177,20 +1035,16 @@ class ARE_Format (Format):
                 'off': 0x008C,
                 'label': 'Lock difficulty [%]' },
 
-            { 'key': 'approach_location_0',
+            { 'key': 'approach_location',
                 'type': 'POINT',
                 'off': 0x0090,
-                'label': 'First location to approach the door' },
+                'count': 2,
+                'label': 'Location to approach the door' },
 
-            { 'key': 'approach_location_1',
-                'type': 'POINT',
-                'off': 0x0094,
-                'label': 'Second location to approach the door' },
-
-            { 'key': 'unpickable_strref',
+            { 'key': 'lockpick_strref',
                 'type': 'STRREF',
                 'off': 0x0098,
-                'label': 'Picklock attempt on unpickable door strref' },
+                'label': 'Lockpick strref' },
 
             { 'key': 'region_link',
                 'type': 'STR32',
@@ -1206,7 +1060,7 @@ class ARE_Format (Format):
                 'type': 'RESREF',
                 'off': 0x00C0,
                 'label': 'Door\'s dialog Resref' },
-    )
+            )
     
     animation_desc = (
             { 'key': 'name',
@@ -1222,7 +1076,7 @@ class ARE_Format (Format):
             { 'key': 'appearance_time',
                 'type': 'DWORD',
                 'off': 0x0024,
-                'mask': { 2^0: '00:30-01:29', 2^1: '01:30-02:29', 2^2: '02:30-03:29', 2^3: '03:30-04:29', 2^4: '04:30-05:29', 2^5: '05:30-06:29', 2^6: '06:30-07:29', 2^7: '07:30-08:29', 2^8: '08:30-09:29', 2^9: '09:30-10:29', 2^10: '10:30-11:29', 2^11: '11:30-12:29', 2^12: '12:30-13:29', 2^13: '13:30-14:29', 2^14: '14:30-15:29', 2^15: '15:30-16:29', 2^16: '16:30-17:29', 2^17: '17:30-18:29', 2^18: '18:30-19:29', 2^19: '19:30-20:29', 2^20: '20:30-21:29 (dusk)', 2^21: '21:30-22:29 (night)', 2^22: '22:30-23:29', 2^23: '23:30-00:29' },
+                'mask': enums.schedule_mask,
                 'label': 'Appearance time' },
 
             { 'key': 'bam_resref',
@@ -1280,80 +1134,49 @@ class ARE_Format (Format):
                 'type': 'DWORD',
                 'off': 0x0048,
                 'label': 'Unknown 48' },
-    )
-
-
-    automap_note_pst_desc = (
-            { 'key': 'x',
-                'type': 'DWORD',
-                'off': 0x0000,
-                'label': 'X coordinate' },
-                
-            { 'key': 'y',
-                'type': 'DWORD',
-                'off': 0x0004,
-                'label': 'Y coordinate' },
-                
-            { 'key': 'text',
-                'type': 'BYTES',
-                'off': 0x0008,
-                'size': 500,
-                'label': 'Note text' },
-                
-            { 'key': 'color',
-                'type': 'DWORD',
-                'off': 0x01FC,
-                'enum': {0 : 'Blue (user)', 1: 'Red (game)' },
-                'label': 'Note pin color / type' },
-                
-            { 'key': 'unknown_200',
-                'type': 'BYTES',
-                'off': 0x0200,
-                'size': 5 * 4,
-                'label': 'Unknown 200' },
-                
             )
 
-    automap_note_desc = (
-            { 'key': 'x',
-                'type': 'WORD',
-                'off': 0x0000,
-                'label': 'X coordinate' },
-                
-            { 'key': 'y',
-                'type': 'WORD',
-                'off': 0x0002,
-                'label': 'Y coordinate' },
-                         
-            { 'key': 'text',
-                'type': 'STRREF',
-                'off': 0x0004,
-                'label': 'Note text' },
-                
-            { 'key': 'strref_location',
-                'type': 'WORD',
-                'off': 0x0008,
-                'enum': {0 : 'External (TOH/TOT)', 1: 'Internal (TLK)' },
-                'label': 'STRREF location' },
-                
-            { 'key': 'color',
-                'type': 'WORD',
-                'off': 0x000A,
-                'enum': {0 : 'Gray', 1: 'Violet', 2: 'Green', 3: 'Orange', 4: 'Red', 5: 'Blue', 6: 'Dark blue', 7: 'Light gray' },
-                'label': 'Note pin color / type' },
-                
-            { 'key': 'note_count_plus_10',
-                'type': 'DWORD',
-                'off': 0x000C,
-                'label': 'Note count + 10' },
-                
-            { 'key': 'unknown_10',
-                'type': 'BYTES',
-                'off': 0x0010,
-                'size': 36,
-                'label': 'Unknown 10' },
-                
-            )
+
+#    automap_note_desc = (
+#            { 'key': 'x',
+#                'type': 'WORD',
+#                'off': 0x0000,
+#                'label': 'X coordinate' },
+#                
+#            { 'key': 'y',
+#                'type': 'WORD',
+#                'off': 0x0002,
+#                'label': 'Y coordinate' },
+#                         
+#            { 'key': 'text',
+#                'type': 'STRREF',
+#                'off': 0x0004,
+#                'label': 'Note text' },
+#                
+#            { 'key': 'strref_location',
+#                'type': 'WORD',
+#                'off': 0x0008,
+#                'enum': {0 : 'External (TOH/TOT)', 1: 'Internal (TLK)' },
+#                'label': 'STRREF location' },
+#                
+#            { 'key': 'color',
+#                'type': 'WORD',
+#                'off': 0x000A,
+#                'enum': {0 : 'Gray', 1: 'Violet', 2: 'Green', 3: 'Orange', 4: 'Red', 5: 'Blue', 6: 'Dark blue', 7: 'Light gray' },
+#                'label': 'Note pin color / type' },
+#                
+#            { 'key': 'note_count_plus_10',
+#                'type': 'DWORD',
+#                'off': 0x000C,
+#                'label': 'Note count + 10' },
+#                
+#            { 'key': 'unknown_10',
+#                'type': 'BYTES',
+#                'off': 0x0010,
+#                'size': 36,
+#                'label': 'Unknown 10' },
+#                
+#            )
 
 
     tiled_object_desc = (
@@ -1372,25 +1195,25 @@ class ARE_Format (Format):
                 'off': 0x0028,
                 'label': 'Unknown 28' },
 
-            { 'key': 'primary_search_squares_start',
+            { 'key': 'open_search_squares_start',
                 'type': 'DWORD',
                 'off': 0x002C,
-                'label': 'Primary search squares start' },
+                'label': 'Open search squares start' },
 
-            { 'key': 'primary_search_squares_cnt',
+            { 'key': 'open_search_squares_cnt',
                 'type': 'DWORD',
                 'off': 0x0030,
-                'label': 'Primary search squares count' },
+                'label': 'Open search squares count' },
 
-            { 'key': 'secondary_search_squares_start',
+            { 'key': 'closed_search_squares_start',
                 'type': 'DWORD',
                 'off': 0x0034,
-                'label': 'Secondary search squares start' },
+                'label': 'Closed search squares start' },
 
-            { 'key': 'secondary_search_squares_cnt',
+            { 'key': 'closed_search_squares_cnt',
                 'type': 'DWORD',
                 'off': 0x0038,
-                'label': 'Secondary search squares count' },
+                'label': 'Closed search squares count' },
 
             { 'key': 'unknown_3C',
                 'type': 'BYTES',
@@ -1400,39 +1223,6 @@ class ARE_Format (Format):
 
             )
 
-
-    projectile_trap_desc = (
-            { 'key': 'projectile_resref',
-                'type': 'RESREF',
-                'off': 0x0000,
-                'label': 'Projectile resref' },
-
-            { 'key': 'effect_block_off',
-                'type': 'DWORD',
-                'off': 0x0008,
-                'label': 'Effect block offset' },
-
-            { 'key': 'effect_block_size',
-                'type': 'DWORD',
-                'off': 0x000C,
-                'label': 'Effect block size' },
-
-            { 'key': 'unknown_10',
-                'type': 'DWORD',
-                'off': 0x0010,
-                'label': 'Unknown 10' },
-
-            { 'key': 'position',
-                'type': 'POINT',
-                'off': 0x0014,
-                'label': 'Position' },
-
-            { 'key': 'unknown_18',
-                'type': 'WORD',
-                'off': 0x0018,
-                'label': 'Unknown 18' },
-    )
-    
 
     song_desc = (
             { 'key': 'day_song_ref_no',
@@ -1463,27 +1253,8 @@ class ARE_Format (Format):
             { 'key': 'unknown_14',
                 'type': 'DWORD',
                 'off': 0x0014,
+                'count': 5,
                 'label': 'Unknown 14' },
-
-            { 'key': 'unknown_18',
-                'type': 'DWORD',
-                'off': 0x0018,
-                'label': 'Unknown 18' },
-
-            { 'key': 'unknown_1C',
-                'type': 'DWORD',
-                'off': 0x001C,
-                'label': 'Unknown 1C' },
-
-            { 'key': 'unknown_20',
-                'type': 'DWORD',
-                'off': 0x0020,
-                'label': 'Unknown 20' },
-
-            { 'key': 'unknown_24',
-                'type': 'DWORD',
-                'off': 0x0024,
-                'label': 'Unknown 24' },
 
             { 'key': 'main_day_ambient_1',
                 'type': 'RESREF',
@@ -1515,18 +1286,18 @@ class ARE_Format (Format):
                 'off': 0x004C,
                 'label': 'Main night ambient volume [%]' },
 
-            { 'key': 'pst_songflag_ids',
+            { 'key': 'reverb',
                 'type': 'DWORD',
                 'off': 0x0050,
-                'enum': 'songflag',
-                'label': 'PST SongFlag.IDS link' },
+                'enum': 'reverb',
+                'label': 'Reverb (if REVERB.IDS exists)' },
 
             { 'key': 'unknown_54',
                 'type': 'BYTES',
                 'off': 0x0054,
                 'size': 60,
                 'label': 'Unknown 54' },
-    )
+            )
 
     
     rest_interrupt_desc = (
@@ -1535,105 +1306,17 @@ class ARE_Format (Format):
                 'off': 0x0000,
                 'label': 'Name' },
 
-            { 'key': 'strref_0',
+            { 'key': 'strref',
                 'type': 'STRREF',
                 'off': 0x0020,
-                'label': 'Strref 0' },
+                'count': 10,
+                'label': 'Interrupt explanation Strref' },
 
-            { 'key': 'strref_1',
-                'type': 'STRREF',
-                'off': 0x0024,
-                'label': 'Strref 1' },
-
-            { 'key': 'strref_2',
-                'type': 'STRREF',
-                'off': 0x0028,
-                'label': 'Strref 2' },
-
-            { 'key': 'strref_3',
-                'type': 'STRREF',
-                'off': 0x002C,
-                'label': 'Strref 3' },
-
-            { 'key': 'strref_4',
-                'type': 'STRREF',
-                'off': 0x0030,
-                'label': 'Strref 4' },
-
-            { 'key': 'strref_5',
-                'type': 'STRREF',
-                'off': 0x0034,
-                'label': 'Strref 5' },
-
-            { 'key': 'strref_6',
-                'type': 'STRREF',
-                'off': 0x0038,
-                'label': 'Strref 6' },
-
-            { 'key': 'strref_7',
-                'type': 'STRREF',
-                'off': 0x003C,
-                'label': 'Strref 7' },
-
-            { 'key': 'strref_8',
-                'type': 'STRREF',
-                'off': 0x0040,
-                'label': 'Strref 8' },
-
-            { 'key': 'strref_9',
-                'type': 'STRREF',
-                'off': 0x0044,
-                'label': 'Strref 9' },
-
-            { 'key': 'cre_resref_0',
+            { 'key': 'cre_resref',
                 'type': 'RESREF',
                 'off': 0x0048,
-                'label': 'CRE resref 0' },
-
-            { 'key': 'cre_resref_1',
-                'type': 'RESREF',
-                'off': 0x0050,
-                'label': 'CRE resref 1' },
-
-            { 'key': 'cre_resref_2',
-                'type': 'RESREF',
-                'off': 0x0058,
-                'label': 'CRE resref 2' },
-
-            { 'key': 'cre_resref_3',
-                'type': 'RESREF',
-                'off': 0x0060,
-                'label': 'CRE resref 3' },
-
-            { 'key': 'cre_resref_4',
-                'type': 'RESREF',
-                'off': 0x0068,
-                'label': 'CRE resref 4' },
-
-            { 'key': 'cre_resref_5',
-                'type': 'RESREF',
-                'off': 0x0070,
-                'label': 'CRE resref 5' },
-
-            { 'key': 'cre_resref_6',
-                'type': 'RESREF',
-                'off': 0x0078,
-                'label': 'CRE resref 6' },
-
-            { 'key': 'cre_resref_7',
-                'type': 'RESREF',
-                'off': 0x0080,
-                'label': 'CRE resref 7' },
-
-            { 'key': 'cre_resref_8',
-                'type': 'RESREF',
-                'off': 0x0088,
-                'label': 'CRE resref 8' },
-
-            { 'key': 'cre_resref_9',
-                'type': 'RESREF',
-                'off': 0x0090,
-                'label': 'CRE resref 9' },
+                'count': 10,
+                'label': 'CRE resref to spawn' },
 
             { 'key': 'cre_cnt',
                 'type': 'WORD',
@@ -1685,7 +1368,7 @@ class ARE_Format (Format):
                 'off': 0x00AC,
                 'size': 56,
                 'label': 'Unknown AC' },
-    )
+            )
 
 
 
@@ -1693,11 +1376,8 @@ class ARE_Format (Format):
         Format.__init__ (self)
         self.expect_signature = 'AREA'
         
-        # pst and bg/bg2/iwd formats differ in automap_note
-        self.is_pst = False;
-        
         self.actor_list = []
-        self.infopoint_list = []
+        self.region_list = []
         self.spawnpoint_list = []
         self.entrance_list = []
         self.container_list = []
@@ -1708,25 +1388,17 @@ class ARE_Format (Format):
         self.explored_bitmask = None
         self.door_list = []
         self.animation_list = []
-        self.automap_note_list = []
-        self.automap_note_pst_list = []
+        ##self.automap_note_list = []
         self.tiled_object_list = []
-        self.projectile_trap_list = []
         self.song = None
         self.rest_interrupt = None
 
 
     def read (self, stream):
         self.read_header (stream)
-        self.is_pst = self.header['automap_note_off'] == 0xffffffff
-        
-        if self.is_pst:
-            self.read_header (stream, self.header2_pst_desc)
-        else:
-            self.read_header (stream, self.header2_desc)
         
         self.read_list (stream, 'actor')
-        self.read_list (stream, 'infopoint')
+        self.read_list (stream, 'region')
         self.read_list (stream, 'spawnpoint')
         self.read_list (stream, 'entrance')
         self.read_list (stream, 'container')
@@ -1737,15 +1409,9 @@ class ARE_Format (Format):
         self.explored_bitmask = stream.read_blob (self.header['explored_bitmask_off'], self.header['explored_bitmask_size'])
         self.read_list (stream, 'door')
         self.read_list (stream, 'animation') 
-        if self.is_pst:
-            self.read_list (stream, 'automap_note_pst')
-        else:
-            self.read_list (stream, 'automap_note')
+        ##self.read_list (stream, 'automap_note')
             
         self.read_list (stream, 'tiled_object')
-        
-        if not self.is_pst:
-            self.read_list (stream, 'projectile_trap')
 
         obj = {}
         self.read_struc (stream, self.header['song_off'], self.song_desc, obj)
@@ -1758,13 +1424,9 @@ class ARE_Format (Format):
 
     def write (self, stream):
         off = self.get_struc_size (self.header_desc)
-        if self.is_pst:
-            off += self.get_struc_size (self.header2_pst_desc)
-        else:
-            off += self.get_struc_size (self.header2_desc)
 
         off = self.write_list (stream, off, 'actor')
-        off = self.write_list (stream, off, 'infopoint')
+        off = self.write_list (stream, off, 'region')
         off = self.write_list (stream, off, 'spawnpoint')
         off = self.write_list (stream, off, 'entrance')
         off = self.write_list (stream, off, 'container')
@@ -1778,13 +1440,8 @@ class ARE_Format (Format):
 
         off = self.write_list (stream, off, 'door')
         off = self.write_list (stream, off, 'animation')
-        if self.is_pst:
-            off = self.write_list (stream, off, 'automap_note_pst')
-        else:
-            off = self.write_list (stream, off, 'automap_note')
+        ##off = self.write_list (stream, off, 'automap_note')
         off = self.write_list (stream, off, 'tiled_object')
-        if not self.is_pst:
-            off = self.write_list (stream, off, 'projectile_trap')
 
         self.header['song_off'] = off
         self.write_struc (stream, off, self.song_desc, self.song)
@@ -1795,20 +1452,12 @@ class ARE_Format (Format):
         off += self.get_struc_size (self.rest_interrupt_desc)
 
         self.write_header (stream)
-        if self.is_pst:
-            self.write_header (stream, self.header2_pst_desc)
-        else:
-            self.write_header (stream, self.header2_desc)
 
     def printme (self):
         self.print_header ()
-        if self.is_pst:
-            self.print_header (self.header2_pst_desc)
-        else:
-            self.print_header (self.header2_desc)
             
         self.print_list ('actor')
-        self.print_list ('infopoint')
+        self.print_list ('region')
         self.print_list ('spawnpoint')
         self.print_list ('entrance')
         self.print_list ('container')
@@ -1819,15 +1468,10 @@ class ARE_Format (Format):
         # "Explored" bitmask. We need map width and height to print the mask, though and they're not in the ARE structure
         self.print_list ('door')
         self.print_list ('animation') 
-        if self.is_pst:
-            self.print_list ('automap_note_pst')
-        else:
-            self.print_list ('automap_note')
+        ##self.print_list ('automap_note')
         self.print_list ('tiled_object')
-        if not self.is_pst:
-            self.print_list ('projectile_trap')
         self.print_struc (self.song, self.song_desc)
         self.print_struc (self.rest_interrupt, self.rest_interrupt_desc)
 
 
-register_format ('AREA', 'V1.0', ARE_Format)
+register_format ('AREA', 'V9.1', ARE_V91_Format)

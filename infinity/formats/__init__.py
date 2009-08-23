@@ -1,6 +1,7 @@
 # -*-python-*-
 
-import are
+import are_v10
+import are_v91
 #import baf
 import bam
 import bcs
