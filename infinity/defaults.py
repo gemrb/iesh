@@ -45,6 +45,8 @@ options = {
     'format.mos.print_tiles': [True,  "Print MOS tiles"], 
     'format.mos.print_palettes': [False,  "Print MOS palettes"], 
 
+    'format.sav.read_data': [False,  "When reading SAV file read its data too"], 
+    
     'format.tis.print_tiles': [False,  "Print TIS tiles"], 
     'format.tis.print_palettes': [False,  "Print TIS palettes"], 
     

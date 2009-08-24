@@ -6,8 +6,12 @@
         door_cnt or doors_cnt ?
         # of doors or Doors count?
 5. load objects in cache and override dirs as well
-6.  allow for more than one game loaded?
-        
+6. allow for more than one game loaded?
+7. create set_translation() fn in core
+8. look at options again, make them more ie-file-format-agnostic
+9. put some more enums/masks to formats/enums.py
+10. case insensitive files searching
+
 Data types:
 
 1. OFFSET/COUNT data type?
@@ -17,6 +21,9 @@ Data types:
 5. Signed data types (SWORD, SDWORD,...). Ugly, Adding unsigned ones would be better
 6. allow for name enums desc items with count > 1 (e.g. 100 strrefs in CRE)
 7. change all *_desc tuples to lists to allow patching in subclasses for other versions of data file
+8. change prints in printme() to fh.write() to allow for better output redirection
+9. generalize prints to allow printing to HTML tables, for example.
+10. filter out non-printable chars in BYTES or STRn output to prevent garbage hosing the terminal
 
 Streams:
 1. Base streams on Python's native file interface, so normal files can be used for reading structures and also the streams can be used with normal python functions. This would require moving the read_(resref|word|...) functions elsewhere, though

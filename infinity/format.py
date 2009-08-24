@@ -371,8 +371,11 @@ class Format (object):
                 size = 4
             elif type == 'STRSIZED':
                 # FIXME: encoding
-                value = obj[key]
-                size = 4 + len (value)
+                if obj is not None:
+                    value = obj[key]
+                    size = 4 + len (value)
+                else:
+                    size = 4 # FIXME: eek!
             elif type == 'BYTES':
                 size = d['size']
                 #value = obj[key]
