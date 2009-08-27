@@ -316,8 +316,8 @@ class Format (object):
                 #raise RuntimeError (type + " not implemented")
             elif type == 'STRSIZED':
                 # FIXME: encoding
-                stream.write_dword (len (value), offset + local_offset)
-                stream.write_sized_string (value, offset + local_offset, len (value))
+                stream.write_dword (len (value) + 1, offset + local_offset)
+                stream.write_sized_string (value + '\0', offset + local_offset + 4, len (value) + 1)
             elif type == 'BYTES':
                 value = stream.write_blob (value, offset + local_offset)
             elif type.startswith ('_'):

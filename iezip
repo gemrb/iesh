@@ -1,0 +1,195 @@
+#!/usr/bin/env python
+# iesh / ie_shell.py - Simple shell for Infinity Engine-based game files
+# Copyright (C) 2004-2009 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+from optparse import OptionParser
+import os
+import os.path
+import sys
+
+from infinity import core, stream
+from infinity.formats import *
+
+overwrite_mode = 'ask' # ask|skip|overwite
+case_mode = None
+
+def ask_user_replace (fname):
+    global overwrite_mode
+    if overwrite_mode != 'ask':
+        return overwrite_mode
+    
+    while True:
+        sys.stderr.write ('replace %s? [y]es, [n]o, [A]ll, [N]one, [r]ename: ' %fname)
+        res = raw_input ()
+        if res == 'y':
+            return 'overwrite'
+        elif res == 'A':
+            overwrite_mode = 'overwrite'
+            return overwrite_mode
+        elif res == 'n':
+            return 'skip'
+        elif res == 'N':
+            overwrite_mode = 'skip'
+            return overwrite_mode
+        elif res == 'r':
+            new_name = ''
+            while not new_name:
+                sys.stderr.write ('new name: ')
+                new_name = raw_input ().strip ()
+            return 'rename:' + new_name            
+
+
+def uncompress (stream, fmt):
+    for file in fmt.file_list:
+        fname = os.path.basename (file['filename'])
+        if case_mode == 'upper':
+            fname = fname.upper ()
+        elif case_mode == 'lower':
+            fname = fname.lower ()
+        
+        res = ''
+        while os.path.lexists (fname):
+            res = ask_user_replace (fname)
+            if res == 'skip':
+                print 'Skipping', fname
+                break
+            elif res.startswith ('rename:'):
+                fname = res.split (':', 1)[1]
+
+        if res == 'skip':
+            continue
+        
+        print 'Extracting', fname,
+        try:
+            data = fmt.get_file_data (src, file)
+            fh = open (fname, 'wb')
+            fh.write (data)
+            fh.close ()
+        except Exception, e:
+            print 'ERROR', e
+            continue
+        
+        print 'ok'
+        del (file['data']) # release the memory
+
+
+def compress (stream, fmt, srcfiles):
+    # FIXME: ugly, because it loads all data to memory at once
+    for file in srcfiles:
+        print 'adding:',file,
+        fh = open (file, 'rb')
+        data = fh.read ()
+        fh.close ()
+        fmt.append_file (file, data)
+        print "  (%d%%)" %(100.0 * fmt.file_list[-1]['compressed_size'] / fmt.file_list[-1]['uncompressed_size'] )
+
+    fmt.write (stream)
+
+
+def list (stream, fmt):
+    size = 0
+    cnt = len (fmt.file_list)
+    print '    Size   Stored    Name'
+    print '  ------   ------    ----'
+    for file in fmt.file_list:
+        print "%8d %8d    %s" %(file['uncompressed_size'], file['compressed_size'], file['filename'])
+        size += file['uncompressed_size']
+    print '  ------             ----'
+    print '%8d             %d file(s)' %(size, cnt)
+    
+
+#
+# main
+#
+
+parser = OptionParser()
+parser.add_option("-c", "--create",
+                  action="store_true", dest="create", default=False,
+                  help="create a new archive from specified files")
+
+parser.add_option("-x", "--extract",
+                  action="store_true", dest="extract", default=False,
+                  help="extract files from the archive")
+
+parser.add_option("-l", "--list",
+                  action="store_true", dest="list", default=False,
+                  help="list contents of the archive")
+
+parser.add_option("-o", "--option", 
+                  action="append", dest="optlist", default=[],
+                  help="set `infinity' module's option", metavar="OPTION")
+
+parser.add_option("-v", "--verbose",
+                  action="store_true", dest="verbose", default=False,
+                  help="print debug output")
+
+parser.add_option("-q", "--quiet",
+                  action="store_true", dest="quiet", default=False,
+                  help="don't print progress messages")
+
+(options, args) = parser.parse_args()
+
+if options.create + options.extract + options.list > 1:
+    print >>sys.stderr, "Error: You can specify only one of -c, -x, -l !"
+    sys.exit (1)
+
+
+if options.verbose:
+    core.set_option ('format.print_offset', True) 
+    core.set_option ('format.print_size', True) 
+    core.set_option ('format.print_type', True) 
+    core.set_option ('format.mos.print_tiles', True) 
+    core.set_option ('format.mos.print_palettes', True)
+    core.set_option ('format.tis.print_tiles', True)
+    core.set_option ('format.tis.print_palettes', True)
+
+for opt in options.optlist:
+    core.set_option (opt, True)
+
+
+if not args:
+    print >>sys.stderr, "Error: you have to specify archive file"
+    sys.exit (1)
+
+
+archive = args[0]
+files = args[1:]
+
+if options.list:
+    src = stream.FileStream ().open (archive)
+    fmt = src.load_object ()
+    list (src, fmt)
+
+elif options.extract:
+    src = stream.FileStream ().open (archive)
+    fmt = src.load_object ()
+    uncompress (src, fmt)
+
+elif options.create:
+    while os.path.lexists (archive):
+        res = ask_user_replace (archive)
+        if res == 'overwrite':
+            break
+        if res == 'skip':
+            sys.exit (0)
+        elif res.startswith ('rename:'):
+            archive = res.split (':', 1)[1]
+
+    fmt = sav.SAV_Format ()
+    tgt = stream.FileStream ().open (archive, 'wb')
+    compress (tgt, fmt, files)
+    tgt.close ()

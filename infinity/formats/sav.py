@@ -95,6 +95,23 @@ class SAV_Format (Format):
         if self.get_option ('format.sav.read_data'):
             self.read_all_data (stream)
 
+    def write (self, stream):
+        # FIXME: rather do reset_struc()
+        self.header = {}
+        self.header['signature'] = 'SAV '
+        self.header['version'] = 'V1.0'
+        self.write_header (stream)
+        off = self.get_struc_size (self.header_desc)
+        
+        for obj in self.file_list:
+            self.write_struc (stream, off, self.file_desc, obj)
+            off += len (obj['filename']) + 1
+            self.write_struc (stream, off, self.file2_desc, obj)
+            off += self.get_struc_size (self.file2_desc)
+            stream.write_blob (obj['data'], off, obj['compressed_size'])
+            off += obj['compressed_size']
+            
+
     def printme (self):
         self.print_header ()
 
@@ -105,6 +122,16 @@ class SAV_Format (Format):
             self.print_struc (obj, self.file2_desc)
             i = i + 1
             
+    def append_file (self, filename, data):
+        obj = {}
+        obj['filename'] = filename
+        obj['uncompressed_size'] = len (data)
+        data = gzip.zlib.compress (data)
+        obj['compressed_size'] = len (data)
+        obj['data'] = data
+        self.file_list.append (obj)
+        
+
 
 
         
@@ -116,7 +143,12 @@ class SAV_Format (Format):
     def read_data (self, stream, obj):
         data = stream.read_blob (obj['data_offset'], obj['compressed_size'])
         stream2 = CompressedStream ().open (data)
-        obj['data'] = stream.read_blob (obj['data_offset'], obj['compressed_size'])
+        obj['data'] = stream2.read_blob (0, obj['uncompressed_size'])
+        return obj['data']
+
+    # FIXME: there should be a fn, which would just return a stream. That stream
+    #   would (if read) on-demand read the original file and uncompress it on the fly 
+    #   to minimize memory consumption
 
     # FIXME: the following API is ugly
 
