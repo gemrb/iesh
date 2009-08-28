@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-from optparse import OptionParser
+from optparse import OptionParser, TitledHelpFormatter
 import os
 import os.path
 import sys
@@ -24,10 +24,35 @@ import sys
 from infinity import core, stream
 from infinity.formats import *
 
-overwrite_mode = 'ask' # ask|skip|overwite
-case_mode = None
+usage = "%prog {-c,-x,-l} [options] ARCHIVEFILE [FILE ...]"
+
+description = """
+Create, extract and list contents of Infinity Engine archive files.
+
+Infinity Engine is the engine used in Baldur's Gate, Icewind Dale and Planescape: Torment 
+role playing games. This utility allows you to work with its' archive files similar to
+zip or rar archives.
+
+At the moment, the only supported IE archive format is SAV.
+"""
+
+
+# What to do if target file already exists. Might be one of "ask", "skip", "overwrite"
+overwrite_mode = 'ask'
+
+# How to convert names of extracted files. Might be either None, "upper" or "lower"
+convert_case = None
+
+# If True, ignore filename case when specifying list of files to extract
+ignore_case = False
+
+# If True, do not print list of files extracted or archived. Error messages will be printed o sderr instead
+quiet = False
 
 def ask_user_replace (fname):
+    """Ask user what to do if a file to be written already exists. 
+    Return either 'overwrite', 'skip' or 'rename:newname'."""
+
     global overwrite_mode
     if overwrite_mode != 'ask':
         return overwrite_mode
@@ -53,44 +78,60 @@ def ask_user_replace (fname):
             return 'rename:' + new_name            
 
 
-def uncompress (stream, fmt):
+def extract_archive (stream, fmt, files):
+    """Extract contents of an archive FMT from STREAM into the current directory.
+    If FILES are not empty, extract only named files. """
+    
+    if ignore_case:
+        files = [ f.upper () for f in files ]
+
     for file in fmt.file_list:
         fname = os.path.basename (file['filename'])
-        if case_mode == 'upper':
+        if files and (fname, fname.upper ())[ignore_case]  not in files:
+            continue
+            
+        if convert_case == 'upper':
             fname = fname.upper ()
-        elif case_mode == 'lower':
+        elif convert_case == 'lower':
             fname = fname.lower ()
         
         res = ''
         while os.path.lexists (fname):
             res = ask_user_replace (fname)
-            if res == 'skip':
-                print 'Skipping', fname
+            if res == 'overwrite':
+                break
+            elif res == 'skip':
                 break
             elif res.startswith ('rename:'):
                 fname = res.split (':', 1)[1]
 
         if res == 'skip':
+            if not quiet: print 'Skipping', fname
             continue
         
-        print 'Extracting', fname,
+        if not quiet: print 'Extracting', fname, ' ',
         try:
-            data = fmt.get_file_data (src, file)
+            data = fmt.get_file_data (stream, file)
             fh = open (fname, 'wb')
             fh.write (data)
             fh.close ()
+            if not quiet: print 'ok'
         except Exception, e:
-            print 'ERROR', e
+            if not quiet: print 'ERROR', e
+            else: print >>sys.stderr, e
             continue
+        finally:
+            if file.has_key (data):
+                del (file['data']) # release the memory
         
-        print 'ok'
-        del (file['data']) # release the memory
 
 
-def compress (stream, fmt, srcfiles):
+def create_archive (stream, fmt, srcfiles):
+    """Create a new archive with specified FMT and STREAM and add named FILES to it."""
     # FIXME: ugly, because it loads all data to memory at once
+    
     for file in srcfiles:
-        print 'adding:',file,
+        print 'Adding:',file,
         fh = open (file, 'rb')
         data = fh.read ()
         fh.close ()
@@ -100,7 +141,9 @@ def compress (stream, fmt, srcfiles):
     fmt.write (stream)
 
 
-def list (stream, fmt):
+def list_archive (stream, fmt):
+    """List contents of an archive."""
+    
     size = 0
     cnt = len (fmt.file_list)
     print '    Size   Stored    Name'
@@ -112,84 +155,148 @@ def list (stream, fmt):
     print '%8d             %d file(s)' %(size, cnt)
     
 
+class MyOptionParser (OptionParser):
+    """Option parser with a slightly more sane help"""
+
+    def format_help(self, formatter=None):
+        """Print help with description at the end, not in the middle."""
+        if formatter is None:
+            formatter = self.formatter
+        result = []
+        if self.usage:
+            result.append(self.get_usage() + "\n")
+        result.append(self.format_option_help(formatter))
+        result.append("\n")
+        if self.description:
+            result.append(self.format_description(formatter) + "\n")
+        result.append(self.format_epilog(formatter))
+        return "".join(result)
+
+
+    
 #
 # main
 #
 
-parser = OptionParser()
-parser.add_option("-c", "--create",
-                  action="store_true", dest="create", default=False,
-                  help="create a new archive from specified files")
+def parse_options ():
+    """Parse program options"""
+    global convert_case, ignore_case, overwrite_mode, quiet
+    
+    name = os.path.basename (sys.argv[0])
+    if name == 'ieunzip':
+        command = 'extract'
+    else:
+        command = None
 
-parser.add_option("-x", "--extract",
-                  action="store_true", dest="extract", default=False,
-                  help="extract files from the archive")
+    #parser = MyOptionParser (usage=usage, description=description, formatter=TitledHelpFormatter ())
+    parser = MyOptionParser (usage=usage, description=description)
+    parser.set_defaults (command=command, ignore_case=ignore_case, convert_case=convert_case, overwrite_mode=overwrite_mode, quiet=quiet)
+    
+    parser.add_option ("-c", "--create",
+                      action="store_const", const='create', dest='command',
+                      help="create a new ARCHIVE from specified FILEs")
+    
+    parser.add_option ("-x", "--extract",
+                      action="store_const", const='extract', dest='command',
+                      help="extract all or specified FILEs from the ARCHIVE")
+    
+    parser.add_option ("-l", "--list",
+                      action="store_const", const='list', dest='command',
+                      help="list contents of the ARCHIVE")
+    
+    parser.add_option ("-i", "--ignore-case", 
+                      action="store_true", dest='ignore_case',
+                      help="ignore case when specifying files to extract")
+    
+    parser.add_option ("-w", "--lower", 
+                      action="store_const", const='lower', dest='convert_case',
+                      help="lowercase extracted files")
+    
+    parser.add_option ("-u", "--upper", 
+                      action="store_const", const='upper', dest='convert_case',
+                      help="uppercase extracted files")
+    
+    parser.add_option ("-y", "--yes", 
+                      action="store_const", const='overwrite', dest='overwrite_mode',
+                      help="always overwrite existing files")
+    
+    parser.add_option ("-n", "--no", 
+                      action="store_const", const='skip', dest='overwrite_mode',
+                      help="never overwrite existing files")
+    
+    parser.add_option ("-o", "--option", 
+                      action="append", dest="optlist", default=[],
+                      help="set Infinity module's option", metavar="OPTION")
+    
+    parser.add_option ("-v", "--verbose",
+                      action="store_true", dest="verbose", default=False,
+                      help="print debug output")
+    
+    parser.add_option ("-q", "--quiet",
+                      action="store_true", dest="quiet",
+                      help="don't print progress messages")
+    
+    (options, args) = parser.parse_args ()
+    
+    if options.command is None:
+        parser.error ("You have to specify either --create, --extract or --list !")
+    
+    if not args:
+        parser.error ("You have to specify archive file")
 
-parser.add_option("-l", "--list",
-                  action="store_true", dest="list", default=False,
-                  help="list contents of the archive")
+    convert_case = options.convert_case
+    ignore_case = options.ignore_case
+    overwrite_mode = options.overwrite_mode
+    quiet = options.quiet
+    
+    if options.verbose:
+        core.set_option ('format.print_offset', True) 
+        core.set_option ('format.print_size', True) 
+        core.set_option ('format.print_type', True) 
+        core.set_option ('format.mos.print_tiles', True) 
+        core.set_option ('format.mos.print_palettes', True)
+        core.set_option ('format.tis.print_tiles', True)
+        core.set_option ('format.tis.print_palettes', True)
+    
+    for opt in options.optlist:
+        core.set_option (opt, True)
 
-parser.add_option("-o", "--option", 
-                  action="append", dest="optlist", default=[],
-                  help="set `infinity' module's option", metavar="OPTION")
-
-parser.add_option("-v", "--verbose",
-                  action="store_true", dest="verbose", default=False,
-                  help="print debug output")
-
-parser.add_option("-q", "--quiet",
-                  action="store_true", dest="quiet", default=False,
-                  help="don't print progress messages")
-
-(options, args) = parser.parse_args()
-
-if options.create + options.extract + options.list > 1:
-    print >>sys.stderr, "Error: You can specify only one of -c, -x, -l !"
-    sys.exit (1)
-
-
-if options.verbose:
-    core.set_option ('format.print_offset', True) 
-    core.set_option ('format.print_size', True) 
-    core.set_option ('format.print_type', True) 
-    core.set_option ('format.mos.print_tiles', True) 
-    core.set_option ('format.mos.print_palettes', True)
-    core.set_option ('format.tis.print_tiles', True)
-    core.set_option ('format.tis.print_palettes', True)
-
-for opt in options.optlist:
-    core.set_option (opt, True)
+    archive = args[0]
+    files = args[1:]
+    
+    return (options.command, archive, files)
 
 
-if not args:
-    print >>sys.stderr, "Error: you have to specify archive file"
-    sys.exit (1)
+def main ():
+    command, archive, files = parse_options ()
+    
+    if command == 'list':
+        src = stream.FileStream ().open (archive)
+        fmt = src.load_object ()
+        list_archive (src, fmt)
+    
+    elif command == 'extract':
+        src = stream.FileStream ().open (archive)
+        fmt = src.load_object ()
+        extract_archive (src, fmt, files)
+    
+    elif command == 'create':
+        while os.path.lexists (archive):
+            res = ask_user_replace (archive)
+            if res == 'overwrite':
+                break
+            if res == 'skip':
+                sys.exit (0)
+            elif res.startswith ('rename:'):
+                archive = res.split (':', 1)[1]
+    
+        fmt = sav.SAV_Format ()
+        tgt = stream.FileStream ().open (archive, 'wb')
+        create_archive (tgt, fmt, files)
+        tgt.close ()
+
+if __name__ == '__main__':
+    main ()
 
 
-archive = args[0]
-files = args[1:]
-
-if options.list:
-    src = stream.FileStream ().open (archive)
-    fmt = src.load_object ()
-    list (src, fmt)
-
-elif options.extract:
-    src = stream.FileStream ().open (archive)
-    fmt = src.load_object ()
-    uncompress (src, fmt)
-
-elif options.create:
-    while os.path.lexists (archive):
-        res = ask_user_replace (archive)
-        if res == 'overwrite':
-            break
-        if res == 'skip':
-            sys.exit (0)
-        elif res.startswith ('rename:'):
-            archive = res.split (':', 1)[1]
-
-    fmt = sav.SAV_Format ()
-    tgt = stream.FileStream ().open (archive, 'wb')
-    compress (tgt, fmt, files)
-    tgt.close ()
+# End of file iezip
