@@ -2,7 +2,7 @@
 
 import are_v10
 import are_v91
-#import baf
+import baf
 import bam
 import bcs
 import biff

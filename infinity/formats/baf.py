@@ -22,7 +22,7 @@ from infinity import core
 from infinity.format import Format, register_format
 
 
-class BCS_Format (Format):
+class BAF_Format (Format):
     fn_spec_re = re.compile ('([A-Za-z0-9_]+)\s*\((.*)\)')
 
     def __init__ (self):
@@ -59,19 +59,12 @@ class BCS_Format (Format):
             return None
             
         elif c == '[':
-            #res = c
-            res = ''
+            res = c
             while True:
                 c = getc ()
+                res = res + c
                 if c == ']':
                     break
-                res = res + c
-            res2 = res.split (',')
-            if len (res2) != 2:
-                res2 = res.split ('.')
-                if len (res2) != 4:
-                    raise ValueError ("[]  len")
-            res = [ int (n) for n in res2 ]
             return res
             
         elif c == '"':
@@ -83,6 +76,9 @@ class BCS_Format (Format):
                     break
             return res
             
+        elif c in ['#', '(', ')', ',']:
+            return c
+    
         elif c.isdigit () or (c == '-' and nextc ().isdigit ()):
             if c == '-':
                 signum = -1
@@ -109,13 +105,13 @@ class BCS_Format (Format):
     def get_token (self, stream):
         if self.token is None:
             tok = self.read_token (stream)
-            #p='.'
+            p='.'
         else:
             tok = self.token
             self.token = None
-            #p='x'
+            p='x'
 
-        #print '>>' + p+':'+repr(tok) + '<<'
+        print '>>' + p+':'+repr(tok) + '<<'
         return tok
 
     def next_token (self, stream):
@@ -133,20 +129,13 @@ class BCS_Format (Format):
 
 
     def read (self, stream):
-        ### <SC> -> SC <SCtail>
-        ### <SCtail> -> <CR> <SCtail>
-        ### <SCtail> -> SC
-
         obj = []
-        
-        obj.append (self.expect_token (stream, 'SC'))
-        while self.next_token (stream) == 'CR':
+
+        while self.next_token (stream) != None:
             obj.append (self.read_condition_response_block (stream))
-        self.expect_token (stream, 'SC')
 
         self.script = obj
         return self
-
 
     def read_condition_response_block (self, stream):
         ### <CR> -> CR <CRtail>
@@ -155,11 +144,17 @@ class BCS_Format (Format):
         
         obj = []
         
-        obj.append (self.expect_token (stream, 'CR'))
-        while self.next_token (stream) == 'CO':
-            obj.append (self.read_condition (stream))
-            obj.append (self.read_response_set (stream))
-        self.expect_token (stream, 'CR')
+        self.expect_token (stream, 'IF')
+        obj.append (self.read_condition (stream))
+        self.expect_token (stream, 'THEN')
+        obj.append (self.read_response_set (stream))
+        self.expect_token (stream, 'END')
+        
+#        obj.append (self.expect_token (stream, 'CR'))
+#        while self.next_token (stream) == 'CO':
+#            obj.append (self.read_condition (stream))
+#            obj.append (self.read_response_set (stream))
+#        self.expect_token (stream, 'CR')
     
         return obj
 
@@ -170,33 +165,47 @@ class BCS_Format (Format):
         ### <COtail> -> CO
 
         obj = []
-        
-        obj.append (self.expect_token (stream, 'CO'))
-        while self.next_token (stream) == 'TR':
+
+        while self.next_token (stream) != 'THEN':
             obj.append (self.read_trigger (stream))
-        self.expect_token (stream, 'CO')
+
+
+#        obj.append (self.expect_token (stream, 'CO'))
+#        while self.next_token (stream) == 'TR':
+#            obj.append (self.read_trigger (stream))
+#        self.expect_token (stream, 'CO')
         
         return obj
 
     def read_trigger (self, stream):
-        # pst:  id, 4*I, point, 2*S, O
-        # FIXME: not correct, one of the ints is flags field
         obj = []
         
-        obj.append (self.expect_token (stream, 'TR'))
         obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.read_object (stream))
-        self.expect_token (stream, 'TR')
-        
-        self.add_ids_code('TRIGGER', obj[1])
-        #print core.id_to_symbol ('TRIGGER', obj[1])
+        self.expect_token (stream, '(')
+        while self.next_token (stream) != ')':
+            obj.append (self.get_token (stream))
+            if self.next_token (stream) != ')':
+                self.expect_token (stream, ',')
+
+        self.expect_token (stream, ')')
+
+#        # pst:  id, 4*I, point, 2*S, O
+#        # FIXME: not correct, one of the ints is flags field
+#        
+#        obj.append (self.expect_token (stream, 'TR'))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.read_object (stream))
+#        self.expect_token (stream, 'TR')
+#        
+#        self.add_ids_code('TRIGGER', obj[1])
+#        #print core.id_to_symbol ('TRIGGER', obj[1])
         return obj
 
     def read_response_set (self, stream):
@@ -205,10 +214,15 @@ class BCS_Format (Format):
         ### <RStail> -> RS
 
         obj = []
-        obj.append (self.expect_token (stream, 'RS'))
-        while self.next_token (stream) == 'RE':
+        
+        while self.next_token (stream) == 'RESPONSE':
             obj.append (self.read_response (stream))
-        self.expect_token (stream, 'RS')
+
+                
+#        obj.append (self.expect_token (stream, 'RS'))
+#        while self.next_token (stream) == 'RE':
+#            obj.append (self.read_response (stream))
+#        self.expect_token (stream, 'RS')
         
         return obj
     
@@ -220,64 +234,96 @@ class BCS_Format (Format):
         #   each response has only one action, but e.g. look at PST's 0202FD1.BCS
         
         obj = []
-        obj.append (self.expect_token (stream, 'RE'))
+        self.expect_token (stream, 'RESPONSE')
+        self.expect_token (stream, '#')
         obj.append (self.get_token (stream))
-        while self.next_token (stream) == 'AC':
+        
+        while self.next_token (stream) != 'RESPONSE' and self.next_token (stream) != 'END':
             obj.append (self.read_action (stream))
-        self.expect_token (stream, 'RE')
+                
+#        obj.append (self.expect_token (stream, 'RE'))
+#        obj.append (self.get_token (stream))
+#        while self.next_token (stream) == 'AC':
+#            obj.append (self.read_action (stream))
+#        self.expect_token (stream, 'RE')
         
         return obj
     
     def read_action (self, stream):
+        obj = []
+
+        obj.append (self.get_token (stream))
+        self.expect_token (stream, '(')
+        args = self.read_action_args (stream)
+        self.expect_token (stream, ')')
+        obj.append (args)
+
         #pst:  id, 3*O, 5*I, 2*S
-        obj = []
-        obj.append (self.expect_token (stream, 'AC'))
-        obj.append (self.get_token (stream))
-        obj.append (self.read_object (stream))
-        obj.append (self.read_object (stream))
-        obj.append (self.read_object (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        self.expect_token (stream, 'AC')
-        self.add_ids_code('ACTION', obj[1])
+#        obj.append (self.expect_token (stream, 'AC'))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.read_object (stream))
+#        obj.append (self.read_object (stream))
+#        obj.append (self.read_object (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        self.expect_token (stream, 'AC')
+#        self.add_ids_code('ACTION', obj[1])
         return obj
     
-    
-    def read_object (self, stream):
+    def read_action_args (self, stream):
         obj = []
-        # PST: id, 13*I, rect, S 
-        obj.append (self.expect_token (stream, 'OB'))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        #print obj
-        #if self.next_token (stream) == 'OB':
-        #    print "short object"
-        #    self.get_token (stream)
-        #    return obj
-            
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        self.expect_token (stream, 'OB')
-        
-        #print core.id_to_symbol ('OBJECT', obj[10])
+        while self.next_token (stream) != ')':
+            tok = self.get_token (stream)
+            args = None
+            if self.next_token (stream) == '(':
+                self.expect_token (stream, '(')
+                args = self.read_action_args (stream)
+                self.expect_token (stream, ')')
+            obj.append ((tok, args))
+            if self.next_token (stream) == ',':
+                self.expect_token (stream, ',')
+            elif self.next_token (stream) == ')':
+                pass
+            else:
+                raise ValueError ("Expected ) or ,") 
         return obj
+                
+    
+#    def read_object (self, stream):
+#        obj = []
+#        # PST: id, 13*I, rect, S 
+#        obj.append (self.expect_token (stream, 'OB'))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        #print obj
+#        #if self.next_token (stream) == 'OB':
+#        #    print "short object"
+#        #    self.get_token (stream)
+#        #    return obj
+#            
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        obj.append (self.get_token (stream))
+#        self.expect_token (stream, 'OB')
+#        
+#        #print core.id_to_symbol ('OBJECT', obj[10])
+#        return obj
 
     def printme (self):
         odef = {
@@ -293,7 +339,7 @@ class BCS_Format (Format):
                            'id': (0,),
                            'O': (2,3,1),
                            'I': (4, 7, 8),
-                           'P': (5,), # actually, it consists of list of two integers
+                           'P': (5,), # actually, it consists of two integers
                            'S': (9, 10),
                            },
                 }
@@ -412,7 +458,7 @@ class BCS_Format (Format):
                     res_args.append (v)
 
                 elif type == 'P':
-                    res_args.append ('[%d.%d]' %(obj[aindex][0], obj[aindex][1]))
+                    res_args.append ('[%d.%d]' %(obj[aindex], obj[aindex+1]))
 
                 elif type == 'S':
                     if split_string_arg:
@@ -431,30 +477,39 @@ class BCS_Format (Format):
 
             return fn_name, res_args
 
+        def resolve_action (ac):
+            res = str (ac[0])
+            if ac[1] is not None:
+                args = [ resolve_action (arg)  for arg in ac[1] ]
+                res += '(' + ','.join (args) + ')'
+            return res
 
 
 
-        for cr in self.script[1:]:
-            co = cr[1]
-            rs = cr[2]
+        for cr in self.script:
+            co = cr[0]
+            rs = cr[1]
             print 'IF'
-            for tr in co[1:]:
+            for tr in co:
+                print '    ', tr
+                continue
                 fn_spec = core.id_to_symbol ('TRIGGER', tr[1])
                 neg = ('!', '')[not tr[3]] # FIXME: hack, use odef[]
                 
-                #print fn_spec
+                #print tr_decl
                 fn_name, res_args = resolve_args (fn_spec, 'tr', tr)
                 print '    ' + neg + fn_name + '(' + ','.join (res_args) + ')'
                 #print '    TR', tr_name + '#0x%04x' %tr[1]
             print 'THEN'
-            for re in rs[1:]:
-                print '    RESPONSE #%d' %re[1]
-                for ac in re[2:]:
+            for re in rs:
+                print '    RESPONSE #%d' %re[0]
+                for ac in re[1:]:
                     #print 'AC', ac[1]
+                    print ac, resolve_action (ac)
+                    continue
                     fn_spec = core.id_to_symbol ('ACTION', ac[1])
                     fn_name, res_args = resolve_args (fn_spec, 'ac', ac)
-                    #print 'res_args:', res_args
-                    print '        ' + fn_name + '(' + ','.join ([ str (a) for a in res_args]) + ')'
+                    print '        ' + fn_name + '(' + ','.join (res_args) + ')'
             print 'END\n'
 
 
@@ -473,5 +528,34 @@ class BCS_Format (Format):
         except:
             return False
 
+    def compile (self):
+        obj = []
+        obj.append ('SC\n')
+        for CR in self.script:
+            obj.append ('CR\n')
+            # FIXME: can there be really conditions with more than one CO+RS pair?
+            CO = CR[0]
+            RS = CR[1]
+            
+            obj.append ('CO\n')
+            for TR in CO:
+                obj.append ('TR\n')
+                obj.extend (TR)
+                obj.append ('TR\n')
+            obj.append ('CO\n')
+            obj.append ('RS\n')
+            for RE in RS:
+                obj.append ('RE\n')
+                obj.append (RE[0])
+                for AC in RE[1:]:
+                    obj.append ('AC\n')
+                    obj.extend (AC)
+                    obj.append ('AC\n')
+                obj.append ('RE\n')
+            obj.append ('RS\n')
+            obj.append ('CR\n')
+            
+        obj.append ('SC\n')
+        return obj
 
-register_format ('BCS', '', BCS_Format)
+register_format ('BAF', '', BAF_Format)

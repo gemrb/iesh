@@ -240,6 +240,9 @@ class Stream (object):
         elif s == "SC\nCR\nCO" or s == "SC\r\nCR\r\n":
             signature = "BCS"
             version = ""
+        elif s.startswith ("IF\n") or s.startswith ("IF\r\n"):
+            signature = "BAF"
+            version = ""
         else:
             signature = s[0:4].strip ()
             version = s[4:8].strip ()
