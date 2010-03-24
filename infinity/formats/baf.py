@@ -182,12 +182,10 @@ class BAF_Format (Format):
         
         obj.append (self.get_token (stream))
         self.expect_token (stream, '(')
-        while self.next_token (stream) != ')':
-            obj.append (self.get_token (stream))
-            if self.next_token (stream) != ')':
-                self.expect_token (stream, ',')
-
+        args = self.read_action_args (stream)
         self.expect_token (stream, ')')
+        obj.append (args)
+
 
 #        # pst:  id, 4*I, point, 2*S, O
 #        # FIXME: not correct, one of the ints is flags field
@@ -491,7 +489,7 @@ class BAF_Format (Format):
             rs = cr[1]
             print 'IF'
             for tr in co:
-                print '    ', tr
+                print '    ', resolve_action (tr)
                 continue
                 fn_spec = core.id_to_symbol ('TRIGGER', tr[1])
                 neg = ('!', '')[not tr[3]] # FIXME: hack, use odef[]
@@ -505,7 +503,7 @@ class BAF_Format (Format):
                 print '    RESPONSE #%d' %re[0]
                 for ac in re[1:]:
                     #print 'AC', ac[1]
-                    print ac, resolve_action (ac)
+                    print '        ' + resolve_action (ac)
                     continue
                     fn_spec = core.id_to_symbol ('ACTION', ac[1])
                     fn_name, res_args = resolve_args (fn_spec, 'ac', ac)
