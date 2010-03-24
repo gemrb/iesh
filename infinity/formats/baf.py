@@ -539,6 +539,7 @@ class BAF_Format (Format):
             for TR in CO:
                 obj.append ('TR\n')
                 obj.extend (TR)
+                print core.symbol_to_id ('TRIGGER', TR[0])
                 obj.append ('TR\n')
             obj.append ('CO\n')
             obj.append ('RS\n')
