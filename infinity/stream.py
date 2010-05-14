@@ -256,6 +256,9 @@ class Stream (object):
         if fmt is None and type != 0:
             fmt = core.get_format_by_type (type)
 
+        if fmt is None:
+            raise RuntimeError, "Unknown format: %s %s"%(signature, version)
+
         return fmt
 
 
