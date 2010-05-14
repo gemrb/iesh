@@ -103,3 +103,4 @@ class CHR_V20_Format (Format):
 
         
 register_format ('CHR', 'V2.0', CHR_V20_Format)
+register_format ('CHR', 'V2.1', CHR_V20_Format)
