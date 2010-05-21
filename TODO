@@ -11,6 +11,8 @@
 8. look at options again, make them more ie-file-format-agnostic
 9. put some more enums/masks to formats/enums.py
 10. case insensitive files searching
+11. decode strings from a specified encoding to Unicode on load,
+    encode to (possibly another) system encoding on write
 
 Data types:
 
