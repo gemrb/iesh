@@ -833,6 +833,16 @@ class CRE_V12_Format (Format):
                 'off': 0x0000,
                 'count': 46,
                 'label': 'Item' },
+
+            { 'key': 'selected_weapon', # IESDP: Values are from slots.ids - 35, with 1000 meaning "fist".
+                'type': 'WORD',
+                'off': 0x005C,
+                'label': 'Selected Weapon' },
+
+            { 'key': 'selected_weapon_ability',
+                'type': 'WORD',
+                'off': 0x005E,
+                'label': 'Selected Weapon Ability' },
     )
 
     def __init__ (self):
@@ -875,6 +885,16 @@ class CRE_V11_Format (CRE_V12_Format):
                 'off': 0x0000,
                 'count': 38,
                 'label': 'Item' },
+
+            { 'key': 'selected_weapon', # IESDP: Values are from slots.ids - 35, with 1000 meaning "fist".
+                'type': 'WORD',
+                'off': 0x004C,
+                'label': 'Selected Weapon' },
+
+            { 'key': 'selected_weapon_ability',
+                'type': 'WORD',
+                'off': 0x004E,
+                'label': 'Selected Weapon Ability' },
     )
 
 register_format ('CRE', 'V1.2', CRE_V12_Format)

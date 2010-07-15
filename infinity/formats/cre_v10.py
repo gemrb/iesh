@@ -728,8 +728,18 @@ class CRE_V10_Format (Format):
             { 'key': 'item',
                 'type': 'WORD',
                 'off': 0x0000,
-                'count': 45,
+                'count': 38,
                 'label': 'Item' },
+
+            { 'key': 'selected_weapon', # IESDP: Values are from slots.ids - 35, with 1000 meaning "fist".
+                'type': 'WORD',
+                'off': 0x004C,
+                'label': 'Selected Weapon' },
+
+            { 'key': 'selected_weapon_ability',
+                'type': 'WORD',
+                'off': 0x004E,
+                'label': 'Selected Weapon Ability' },
     )
 
 
@@ -742,6 +752,7 @@ class CRE_V10_Format (Format):
         self.item_list = []
         self.memorized_spell_list = []
         self.slots = None
+        self.selected = None
 
 
     def read (self, stream):
