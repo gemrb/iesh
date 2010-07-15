@@ -13,6 +13,9 @@
 10. case insensitive files searching
 11. decode strings from a specified encoding to Unicode on load,
     encode to (possibly another) system encoding on write
+12. let formats register not only for sig+version, but for type, extension, game_type, some regexp as well. 
+    And combinations of the above, with more specific registations taking precedence. Unimplemented formats could
+    be handled by "Unimplemented_Format"
 
 Data types:
 
