@@ -21,6 +21,7 @@ import atexit
 import cPickle
 import os
 import os.path
+import pdb
 import rlcompleter
 import readline
 import subprocess
@@ -277,13 +278,17 @@ while 1:
     save_stdout = sys.stdout
     save_stderr = sys.stdout
     
-    if core.get_option ('pager') and not current_command.startswith ('help') and not current_command.startswith ('load_game'):
+    if core.get_option ('pager') and not current_command.startswith ('help') and not current_command.startswith ('load_game') and not current_command.startswith ('~'):
         pager = subprocess.Popen (core.get_option ('pager'),  shell = True,  stdin=subprocess.PIPE)
         sys.stdout = pager.stdin
         sys.stderr = pager.stdin
     
     try:
-        exec (current_command)
+        if not current_command.startswith ('~'):
+            exec (current_command)
+        else:
+            pdb.run (current_command[1:])
+
     except:
         print "\n*** Exception in command ***\n"
         traceback.print_exc ()
