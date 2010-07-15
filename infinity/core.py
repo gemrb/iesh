@@ -344,27 +344,27 @@ def symbol_to_id (idsfile, sym):
         
 
 def find_file (filename, type = None):
-    """Find file in some of the dirs specified in core.game_data_path and return its path.
-    It tries exact filename first and then case insensitive one."""
-    
-    # TODO: new find_file()
-    # Split filename to subdir, name
-    # NOT IMPLEMENTED: If name has no extension, generate names with extensions allowed by a specified type
-    #   (possibly if no type is specified, maybe it could be acquired from keys.resref_hash?)
-    # Possibly try different extension even if one was specified, e.g. wav -> wavc, bif -> cbf
-    # For each dir in core.game_data_path:
-    #   For each filename subdir:
-    #       First try to find exact any of the name variants
-    #       ??If unsuccesfull, do lowercase search??
-    #       Else do os.listdir() (if not already cached) and try case insensitive. Cache listdir() results
-    # If still unsuccesful, look into core.keys.resref_hash
+    """Find file in the dirs specified in core.game_data_path and return its path.
+    It tries exact filename match first and then case insensitive one."""
 
-    subdirs = filename.split ('/')  # FIXME: platform specific separator
+    # FIXME: use just normal match on case insensitive sysems (e.g. Windows)
+
+    # FIXME: what about absolute filenames?
+    
+    # TODO: If filename has no extension, generate names with extensions allowed by a specified type
+    #   (if no type is specified, maybe it could be acquired from keys.resref_hash?)
+    #   Possibly try different extension even if one was specified, e.g. wav -> wavc, bif -> cbf
+
+    # NOTE: it could cache os.listdir() results, but IMO it would be an overkill
+    #   for probable use cases
+
+    filename = filename.replace ('\\', '/')
+    subdirs = filename.split (os.path.sep)  # FIXME: platform specific separator
     names = [ subdirs[-1] ]
     subdirs = subdirs[0:-1]
 
     try:
-        dirs = game_data_path.split (':')
+        dirs = game_data_path.split (os.path.pathsep) # FIXME: use list instead of string for path
     except AttributeError:
         dirs = [ '.' ]
 
