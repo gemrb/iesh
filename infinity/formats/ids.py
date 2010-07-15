@@ -28,6 +28,8 @@ class IDS_Format (Format):
 
         self.ids = {}
         self.ids_re = {}
+        self.ids2 = {}
+        self.ids2_re = {}
         self.ids_list = []
 
     def read (self, stream):
@@ -66,18 +68,56 @@ class IDS_Format (Format):
             else:
                 self.ids[ikey] = value
 
+            if self.ids2.has_key (ikey):
+                self.ids2[ikey].append (value)
+            else:
+                self.ids2[ikey] = [ value ]
+
             if self.ids_re.has_key (value):
                 print "Warning: %s: Duplicate value %s" %(stream, value)
             else:
                 self.ids_re[value] = ikey
 
+            if self.ids2_re.has_key (value):
+                self.ids2_re[value].append (ikey)
+            else:
+                self.ids2_re[value] = [ ikey ]
+
+            # FIXME: this is a hack for TRIGGER and ACTION files
+            try:
+                value2 = value.split ('(', 1)[0]
+                self.ids_re[value2] = ikey
+            except:
+                pass
                 
+
+    def key_to_format (self, key):
+        if key.startswith ("0x") or key.startswith ("0X"):
+            format = key[0:2] + '%0' + str (len (key)-2) + 'X'
+        else:
+            format = '%d'
+        
+    def key_to_int (self, key):
+        if key.startswith ("0x") or key.startswith ("0X"):
+            return int (key[2:], 16)
+        else:
+            return int (key)
 
     def printme (self):
         for key, value in self.ids_list:
 
             print "%s\t%s" %(key, value)
             
-
+    def find (self, key, index=-1):
+	if type (key) == type (0):
+            if index is None:
+                return self.ids2[key]
+            else:
+                return self.ids2[key][index]
+        else:
+            if index is None:
+                return self.ids2_re[key]
+            else:
+                return self.ids2_re[key][index]
 
 register_format ('IDS', '', IDS_Format)

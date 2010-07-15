@@ -73,6 +73,13 @@ def cond (c, a, b):
 def translate_to_ord (s):
     return map (lambda c: (cond (ord (c) < 128, c, "\\x%02X" %(ord (c))), s))
 
+#
+# FIXME: this should be possibly refactored into its own file
+#   with some controlling class.
+# FIXME: also, it would be nice if it could be dynamically
+#   created by format registrations, but that would leave out
+#   unimplemented formats.
+#
 restype_list = [
     # type,    sig,     ext,  gametype, desc
     [ None,  'KEY ', '.key' ], 
@@ -125,77 +132,96 @@ restype_list = [
     [ None,  None,   '.var' ],
     ]
 
-restype_hash = {
-    0x0001 : 'BMP',
-    0x0002 : 'MVE',
-    0x0004 : 'WAV', # also WAVC
-    0x0005 : 'WFX',
-    0x0006 : 'PLT',
-    0x03e8 : 'BAM', # also BAMC
-    0x03e9 : 'WED',
-    0x03ea : 'CHUI',
-    0x03eb : 'TIS',
-    0x03ec : 'MOS', # also MOSC
-    0x03ed : 'ITM',
-    0x03ee : 'SPL',
-    0x03ef : 'BCS',
-    0x03f0 : 'IDS',
-    0x03f1 : 'CRE',
-    0x03f2 : 'ARE',
-    0x03f3 : 'DLG',
-    0x03f4 : '2DA',
-    0x03f5 : 'GAME',
-    0x03f6 : 'STOR',
-    0x03f7 : 'WMAP',
-    0x03f8 : 'CHR', # also  EFF
-    0x03f9 : 'BS',
-    0x03fa : 'CHR',
-    0x03fb : 'VVC',
-    0x03fc : 'VEF',
-    0x03fd : 'PRO',
-    0x03fe : 'BIO',
-    0x044c : 'BAH',
-    0x0802 : 'INI',
-    0x0803 : 'SRC',
-    }
+restype_hash = {}
+restype_rev_hash = {}
 
-restype_rev_hash = {
-    '2DA'  : 0x03f4,
-    'ARE'  : 0x03f2,
-    'BAH'  : 0x044c,
-    'BAM'  : 0x03e8,
-    'BAMC' : 0x03e8,
-    'BCS'  : 0x03ef,
-    'BIO'  : 0x03fe,
-    'BMP'  : 0x0001,
-    'BS'   : 0x03f9,
-    'CHR'  : 0x03fa,
-    #'CHR' : 0x03f8,
-    'CHUI' : 0x03ea,
-    'CRE'  : 0x03f1,
-    'DLG'  : 0x03f3,
-    'EFF'  : 0x03f8,
-    'GAME' : 0x03f5,
-    'IDS'  : 0x03f0,
-    'INI'  : 0x0802,
-    'ITM'  : 0x03ed,
-    'MOS'  : 0x03ec,
-    'MOSC' : 0x03ec,
-    'MVE'  : 0x0002,
-    'PLT'  : 0x0006,
-    'PRO'  : 0x03fd,
-    'SPL'  : 0x03ee,
-    'SRC'  : 0x0803,
-    'STOR' : 0x03f6,
-    'TIS'  : 0x03eb,
-    'VEF'  : 0x03fc,
-    'VVC'  : 0x03fb,
-    'WAV'  : 0x0004,
-    'WAVC' : 0x0004,
-    'WED'  : 0x03e9,
-    'WFX'  : 0x0005,
-    'WMAP' : 0x03f7,
-    }
+def build_restype_tables (gametype = None):
+    global restype_hash
+    global restype_rev_hash
+
+    restype_hash = {}
+    restype_rev_hash = {}
+
+    for restype in reversed (restype_list):
+        type, sig, ext = restype
+
+        if type is not None and sig is not None:
+            restype_hash[type] = sig.strip ()
+            restype_rev_hash[sig.strip ()] = type
+
+
+
+#restype_hash = {
+#    0x0001 : 'BMP',
+#    0x0002 : 'MVE',
+#    0x0004 : 'WAV', # also WAVC
+#    0x0005 : 'WFX',
+#    0x0006 : 'PLT',
+#    0x03e8 : 'BAM', # also BAMC
+#    0x03e9 : 'WED',
+#    0x03ea : 'CHUI',
+#    0x03eb : 'TIS',
+#    0x03ec : 'MOS', # also MOSC
+#    0x03ed : 'ITM',
+#    0x03ee : 'SPL',
+#    0x03ef : 'BCS',
+#    0x03f0 : 'IDS',
+#    0x03f1 : 'CRE',
+#    0x03f2 : 'ARE',
+#    0x03f3 : 'DLG',
+#    0x03f4 : '2DA',
+#    0x03f5 : 'GAME',
+#    0x03f6 : 'STOR',
+#    0x03f7 : 'WMAP',
+#    0x03f8 : 'CHR', # also  EFF
+#    0x03f9 : 'BS',
+#    0x03fa : 'CHR',
+#    0x03fb : 'VVC',
+#    0x03fc : 'VEF',
+#    0x03fd : 'PRO',
+#    0x03fe : 'BIO',
+#    0x044c : 'BAH',
+#    0x0802 : 'INI',
+#    0x0803 : 'SRC',
+#    }
+#
+#restype_rev_hash = {
+#    '2DA'  : 0x03f4,
+#    'ARE'  : 0x03f2,
+#    'BAH'  : 0x044c,
+#    'BAM'  : 0x03e8,
+#    'BAMC' : 0x03e8,
+#    'BCS'  : 0x03ef,
+#    'BIO'  : 0x03fe,
+#    'BMP'  : 0x0001,
+#    'BS'   : 0x03f9,
+#    'CHR'  : 0x03fa,
+#    #'CHR' : 0x03f8,
+#    'CHUI' : 0x03ea,
+#    'CRE'  : 0x03f1,
+#    'DLG'  : 0x03f3,
+#    'EFF'  : 0x03f8,
+#    'GAME' : 0x03f5,
+#    'IDS'  : 0x03f0,
+#    'INI'  : 0x0802,
+#    'ITM'  : 0x03ed,
+#    'MOS'  : 0x03ec,
+#    'MOSC' : 0x03ec,
+#    'MVE'  : 0x0002,
+#    'PLT'  : 0x0006,
+#    'PRO'  : 0x03fd,
+#    'SPL'  : 0x03ee,
+#    'SRC'  : 0x0803,
+#    'STOR' : 0x03f6,
+#    'TIS'  : 0x03eb,
+#    'VEF'  : 0x03fc,
+#    'VVC'  : 0x03fb,
+#    'WAV'  : 0x0004,
+#    'WAVC' : 0x0004,
+#    'WED'  : 0x03e9,
+#    'WFX'  : 0x0005,
+#    'WMAP' : 0x03f7,
+#    }
 
 def find_res_type (**kw):
     """Return list of resource types matching the given parameters.
@@ -292,23 +318,84 @@ def id_to_symbol (idsfile, id):
     #    return core.ids[idsfile.upper ()].ids[id]
     #except:
     #    return None
-    
 
-def find_file (filename):
+def symbol_to_id (idsfile, sym):
+    # FIXME: ugly
+    import traceback
+    from stream import ResourceStream
+    idsfile = idsfile.upper ()
+
+    if not ids.has_key (idsfile):
+        try:
+            # FIXME: ugly & should use 'IDS' instead of 0x3F0
+            idsobj = ResourceStream ().open (idsfile, 0x03F0).load_object ()
+            #idsobj.read ()
+            ids[idsfile] = idsobj
+        except Exception, e:
+            traceback.print_exc()
+            print e
+            return id
+
+    try:
+        return ids[idsfile].ids_re[sym]
+    except KeyError, e:
+        sys.stderr.write ("Warning: No such symbol %s in %s\n" %(sym, idsfile))
+        return sym
+        
+
+def find_file (filename, type = None):
     """Find file in some of the dirs specified in core.game_data_path and return its path.
-    It tries lowercase filename if it can't find it in the exact same case, but it does not do
-    case insensitive search yet."""
+    It tries exact filename first and then case insensitive one."""
     
-    filename_lower = filename.lower()
-    dirs = game_data_path.split (':')
+    # TODO: new find_file()
+    # Split filename to subdir, name
+    # NOT IMPLEMENTED: If name has no extension, generate names with extensions allowed by a specified type
+    #   (possibly if no type is specified, maybe it could be acquired from keys.resref_hash?)
+    # Possibly try different extension even if one was specified, e.g. wav -> wavc, bif -> cbf
+    # For each dir in core.game_data_path:
+    #   For each filename subdir:
+    #       First try to find exact any of the name variants
+    #       ??If unsuccesfull, do lowercase search??
+    #       Else do os.listdir() (if not already cached) and try case insensitive. Cache listdir() results
+    # If still unsuccesful, look into core.keys.resref_hash
+
+    subdirs = filename.split ('/')  # FIXME: platform specific separator
+    names = [ subdirs[-1] ]
+    subdirs = subdirs[0:-1]
+
+    try:
+        dirs = game_data_path.split (':')
+    except AttributeError:
+        dirs = [ '.' ]
+
+
     for dir in dirs:
-        if os.access (os.path.join (dir,  filename), os.F_OK):
-            return os.path.join (dir,  filename)
-        # try to search for lowercase variant. This is common on Unix to keep Weidu working anyway
-        if os.access (os.path.join (dir,  filename_lower), os.F_OK):
-            return os.path.join (dir,  filename_lower)
-    
+        for subdir in subdirs:
+            if os.path.exists (os.path.join (dir, subdir)):
+                dir = os.path.join (dir, subdir)
+                continue
+            dirents = os.listdir (dir)
+            matches = filter (lambda de: de.lower () == subdir.lower (), dirents)
+            if matches:
+                dir = os.path.join (dir, matches[0])
+                continue
+            else:
+                dir = None
+                break
+
+        if dir is None:
+            continue
+
+        dirents = os.listdir (dir)
+        for name in names:
+            if os.access (os.path.join (dir,  name), os.F_OK):
+                return os.path.join (dir,  name)
+            matches = filter (lambda de: de.lower () == name.lower (), dirents)
+            if matches:
+                return os.path.join (dir,  matches[0])
+
     return None
+
 
 def get_option (key):
     try:
@@ -326,5 +413,7 @@ def set_option (key,  value,  desc = None):
             raise RuntimeError ("Unknown option `%s', `desc' required to create it" %key)
         options[key] = [value,  desc]
 
+
+build_restype_tables ()
 
 # End of file core.py
