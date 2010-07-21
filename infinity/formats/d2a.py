@@ -21,6 +21,9 @@ import re
 import sys
 from infinity.format import Format, register_format
 
+num_re = re.compile ('^[0-9]*$')
+
+
 class D2A_Format (Format):
     def __init__ (self):
         Format.__init__ (self)
@@ -28,7 +31,9 @@ class D2A_Format (Format):
 
         self.rows = []
         self.cols = []
-        self.cells = {}
+        self.rows_hash = {}
+        self.cols_hash = {}
+        self.cells = []
 
 
     def read (self, stream):
@@ -43,7 +48,9 @@ class D2A_Format (Format):
         s = stream.get_line ()
         s = s.strip ()
         # FIXME: canonize the column names
-        self.cols = map (lambda s: s.strip (), s.split (None))
+        self.cols = s.split (None)
+        self.cols_hash = dict ([ (i, n.upper ()) for i, n in enumerate (self.cols) ])
+
         line_no = 3
         
         while s is not None:
@@ -57,89 +64,100 @@ class D2A_Format (Format):
             if s == '':
                 continue
 
-##            if line_no == 1 and (re.match ("^[0-9]+$", s) or re.match ("^IDS", s)):
-##                continue
-##            if line_no == 2 and (re.match ("^[0-9]+$", s) or re.match ("^IDS", s)):
-##                continue
-##            if line_no == 3 and (re.match ("^[0-9]+$", s) or re.match ("^IDS", s)):
-##                continue
-
             values = s.split (None)
-            key = values[0]
-            values = values[1:]
-            key = key.strip ()
-            values = map (lambda v: v.strip (), values)
+            key = values.pop (0)
             self.rows.append (key)
+            self.rows_hash[key.upper ()] = len (self.rows)
 
-            for col in self.cols:
-                try: 
-                    value = values[0]
-                    values.pop (0)
-                except: 
-                    value = None
-                
-                self.cells[(key, col)] = value
-
-    def get (self, row, col):
-        row = self.get_row_name (row)
-        col = self.get_col_name (col)
-
-        if row != '' and col != '':
-            return self.cells[(row, col)]
-        elif row != '':
-            return row
-        elif col != '':
-            return col
-        else:
-            return ''
+            if len (values) < len (self.cols):
+                values.extend ([''] * (len (self.cols) - len (values)))
+            self.cells.append (values)
 
 
-    def get_row_name (self, row):
-        # FIXME: canonize
-        if row == -1 or row == '':
-            return ''
-        elif type (row) == type (''):
-            if self.rows.index (row) >= 0:
-                return row
-        else:
+    def get (self, row, col, fill_blanks=True):
+        row = self.get_row_id (row)
+        col = self.get_col_id (col)
+
+        if row >= 0 and col >= 0:
+            if self.cells[row][col] != '' or not fill_blanks:
+                return self.cells[row][col]
+            else:
+                return self.default_value
+        elif row != -1:
             return self.rows[row]
-
-
-    def get_col_name (self, col):
-        # FIXME: canonize
-        if col == -1 or col == '':
-            return ''
-        elif type (col) == type (''):
-            if self.cols.index (col) >= 0:
-                return col
-        else:
+        elif col != -1:
             return self.cols[col]
+        else:
+            return ''
 
+
+#    def get_row_name (self, row):
+#        # FIXME: canonize
+#        if row == -1 or row == '':
+#            return ''
+#        elif type (row) == type (''):
+#            if self.rows.index (row) >= 0:
+#                return row
+#        else:
+#            return self.rows[row]
+#
+#
+#    def get_col_name (self, col):
+#        # FIXME: canonize
+#        if col == -1 or col == '':
+#            return ''
+#        elif type (col) == type (''):
+#            if self.cols.index (col) >= 0:
+#                return col
+#        else:
+#            return self.cols[col]
+
+    def get_row_id (self, name):
+        if name == '':
+            return -1
+        if type (name) == type (''):
+            return self.rows_hash[name.upper ()]
+        else:
+            return name
+
+    def get_col_id (self, name):
+        if name == '':
+            return -1
+        if type (name) == type (''):
+            return self.cols_hash[upper (name)]
+        else:
+            return name
 
     def get_row (self, row, include_heading = False):
-        res = []
-        row = self.get_row_name (row)
-        
-        if include_heading:
-            res.append (self.get (row, ''))
-            
-        for col in self.cols:
-            res.append (self.get (row, col))
+        start = (0, -1)[include_heading == True]
+        return [ self.get (row, i, False)  for i in range (start, len (self.cells[self.get_row_id (row)])) ]
 
-        return res
+#        res = []
+#        row = self.get_row_id (row)
+#        
+#        if include_heading:
+#            res.append (self.get (row, ''))
+#            
+#        for col in self.cols:
+#            res.append (self.get (row, col))
+#
+#        return res
 
 
     def get_col (self, col, include_heading = False):
-        res = []
-        col = self.get_col_name (col)
-        
-        if include_heading:
-            res.append (self.get ('', col))
-            
-        for row in self.rows:
-            res.append (self.get (row, col))
+        start = (0, -1)[include_heading == True]
+        return [ self.get (i, col, False)  for i in range (start, len (self.cells)) ]
 
-        return res
+#        res = []
+#        col = self.get_col_id (col)
+#        
+#        if include_heading:
+#            res.append (self.get ('', col))
+#            
+#        for row in self.rows:
+#            res.append (self.get (row, col))
+#
+#        return res
 
 
     def trim (self):
@@ -148,34 +166,31 @@ class D2A_Format (Format):
 
 
     def get_col_width (self, col):
-        cols = self.get_col (col, include_heading = True)
-        return reduce (lambda m, n: max (m, len (n)), cols, 0)
+        cells = self.get_col (col, True)
+        return reduce (lambda m, n: max (m, len (n)), cells, 0)
+
+    def get_col_justification (self, col):
+        cells = self.get_col (col, False)
+        return reduce (lambda m, n: max (m, num_re.match (n) is not None), cells, False)
 
 
     # FIXME: options for same column width, minimal width, using tabs, left alignment, ...
     def printme (self):
         print 'Signature:', self.signature
         print 'Default value:', self.default_value
-        print self.cols
-        for row in self.rows:
-            values = self.get_row (row)
-            print row + ':', 
-            for v in values:
-                if v is None:
-                    break
-                print v,
-            print
+        sizes = map (self.get_col_width, range (-1, len (self.cols)))
+        rjusts = map (self.get_col_justification, range (-1, len (self.cols)))
+        #print self.cols
+        for row in range (-1, len (self.rows)):
+            values = self.get_row (row, True)
+            for val, size, rjust in zip (values, sizes, rjusts):
+                if rjust:
+                    print val.rjust (size),
+                else:
+                    print val.ljust (size),
+                #print "%*s" %(size, val),
         
-        hsize = self.get_col_width (-1) 
-        sizes = map (self.get_col_width, self.get_row (-1))
-        
-        for row_name in self.get_col (-1, include_heading = True):
-            values = self.get_row (row_name, include_heading = False)
-            
-            print row_name.ljust (hsize),
-            for i in range (len (values)):
-                value = values[i]
-                print value.rjust (sizes[i]),
             print
+
 
 register_format ('2DA', '', D2A_Format)
