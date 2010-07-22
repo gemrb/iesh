@@ -453,9 +453,18 @@ class ResourceStream (MemoryStream):
         # Lookup the BIF archive file containing the object
         src_file = core.keys.bif_list[o['locator_src_ndx']]
         bif_file = core.find_file (src_file['file_name'])
-        
+        if bif_file is not None:
+            b = core.get_format ('BIFF') ()
+        else:
+            bif_file = os.path.splitext (src_file['file_name'])[0] + '.cbf'
+            bif_file = core.find_file (bif_file)
+            if bif_file is not None:
+                b = core.get_format ('BIF ') ()
+            else:
+                raise RuntimeError ("File not found in path: %s" %src_file['file_name'])
+                
+
         bif_stream = FileStream ().open (bif_file)
-        b = core.get_format ('BIFF') ()
         b.read (bif_stream)
         obj = b.file_list[o['locator_ntset_ndx']]
         b.get_file_data (bif_stream, obj)
