@@ -240,7 +240,7 @@ class KEY_Format (Format):
         return filter (lambda s, rx=rx: rx.search (s['resref_name']), self.resref_list)
 
     def get_resref_by_name (self, name):
-        return filter (lambda s, name=name: s['resref_name'] == name, self.resref_list)
+        return filter (lambda s, name=name.upper (): s['resref_name'].upper () == name, self.resref_list)
 
     def get_resref_by_type (self, type):
         return filter (lambda s, type=type: s['type'] == type, self.resref_list)
