@@ -322,7 +322,7 @@ class PRO_Format (Format):
     def read (self, stream):
         self.read_header (stream)
         if self.header['projectile_type'] == 3:
-            self.read_area_header ()
+            self.read_area_header (stream)
 
 
     def printme (self):

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# iediff.sh - Simple wrapper around ieparse and diff
+# Copyright (C) 2010 by Jaka Kranjc, <lynxlupodian@users.sf.net>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+function usage ()
+{
+  echo "$(basename $0) [options to diff] FILE1 FILE2"
+  echo "Set IEPARSE to point to your ieparse.py if you have it somewhere special."
+  echo "Set PAGER to less or some other pager if you don't have it set."
+  exit 1
+}
+
+IEPARSE="$(dirname $0)/ieparse.py"
+
+for i in $@; do
+  if [[ -f $i ]]; then
+    if [[ -z $FILE1 ]]; then
+      FILE1="$i"
+      continue
+    fi
+    if [[ -z $FILE2 ]]; then
+      FILE2="$i"
+      continue
+    fi
+    usage
+  else
+    DIFFOPTS="$DIFFOPTS $i"
+  fi
+done
+
+if [[ -z $FILE1 || -z $FILE2 ]]; then
+  usage
+fi
+if [[ -z $DIFFOPTS ]]; then
+  DIFFOPTS="-aus"
+fi
+if [[ -z $PAGER ]]; then
+  PAGER=cat
+fi
+
+diff "$DIFFOPTS" <($IEPARSE "$FILE1") <($IEPARSE "$FILE2") | $PAGER || exit 2
