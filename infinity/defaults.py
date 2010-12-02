@@ -23,6 +23,7 @@ options = {
     'core.chitin_file': ['CHITIN.KEY', ""], 
     'core.dialog_file': ['dialog.tlk', ""],  
     'pager': ['more', "Program to use for paging command output"],  
+    'use_cache': [True, "Cache open BIF files"],
  
     'stream.debug_coverage': [False, "On stream close print info on offsets not read or read more than once"], 
     'format.debug_read': [False, "Print each read op to stdout"], 

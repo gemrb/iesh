@@ -59,7 +59,8 @@ class Stream (object):
     def __del__ (self):
         """Destructor"""
         # FIXME: possibly close() only when autoclose flag is set
-        self.close ()
+        # NOTE: cached streams tend to be deleted with self=None
+        if not self is None: self.close ()
 
 
     def open (self, name,  mode = 'r'):
@@ -452,20 +453,28 @@ class ResourceStream (MemoryStream):
         # The object was not found in the filesystem, so look for it in BIF archives.
         # Lookup the BIF archive file containing the object
         src_file = core.keys.bif_list[o['locator_src_ndx']]
-        bif_file = core.find_file (src_file['file_name'])
-        if bif_file is not None:
-            b = core.get_format ('BIFF') ()
+        use_cache = core.get_option ('use_cache')
+        if use_cache and src_file['file_name'] in core.bif_files:
+            # FIXME: convert to uppercase?
+            b, bif_stream = core.bif_files[src_file['file_name']]
         else:
-            bif_file = os.path.splitext (src_file['file_name'])[0] + '.cbf'
-            bif_file = core.find_file (bif_file)
+            bif_file = core.find_file (src_file['file_name'])
             if bif_file is not None:
-                b = core.get_format ('BIF ') ()
+                b = core.get_format ('BIFF') ()
             else:
-                raise RuntimeError ("File not found in path: %s" %src_file['file_name'])
-                
+                bif_file = os.path.splitext (src_file['file_name'])[0] + '.cbf'
+                bif_file = core.find_file (bif_file)
+                if bif_file is not None:
+                    b = core.get_format ('BIF ') ()
+                else:
+                    raise RuntimeError ("File not found in path: %s" %src_file['file_name'])
+                    
 
-        bif_stream = FileStream ().open (bif_file)
-        b.read (bif_stream)
+            bif_stream = FileStream ().open (bif_file)
+            b.read (bif_stream)
+            if use_cache:
+                core.bif_files[src_file['file_name']] = (b, bif_stream)
+
         obj = b.file_list[o['locator_ntset_ndx']]
         b.get_file_data (bif_stream, obj)
 

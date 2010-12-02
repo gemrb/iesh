@@ -43,6 +43,9 @@ options = defaults.options
 global ids
 ids = {}
 
+global bif_files
+bif_files = {}
+
 # These variables are filled after call to load_game()
 game_dir = None
 chitin_file = None
