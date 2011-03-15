@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+# Compliant with IELister 40d421d0c87c570434ae5e46f4ea60703ac70671 and IESDP 2011-03-15 (more or less)
 
 from infinity import core
 from infinity.format import Format, register_format
@@ -35,7 +36,7 @@ class PRO_Format (Format):
             { 'key': 'projectile_type',
               'type': 'WORD',
               'off': 0x0008,
-              'enum': { 2: 'single target', 3: 'area target' },
+              'enum': { 1: 'no BAM', 2: 'single target', 3: 'area target' },
               'label': 'Projectile type' },
 
             { 'key': 'speed',
@@ -45,15 +46,10 @@ class PRO_Format (Format):
 
 
             { 'key': 'sparking_flag',
-              'type': 'WORD',
+              'type': 'DWORD',
               'off': 0x000C,
-              'mask': { 0x01: 'sparks', 0x02: 'flying projectile', 0x04: 'looping sound', 0x08: 'unknown', 0x10: 'ignore centre' },
+              'mask': { 0x01: 'sparks', 0x02: 'use z coordinate', 0x04: 'loop sound', 0x08: 'loop sound2', 0x10: 'do not affect direct target', 0x20: 'draw below animate objects' },
               'label': 'Sparking flag'},
-
-            { 'key': 'unknown',
-              'type': 'WORD',
-              'off': 0x000E,
-              'label': 'Unknown'},
 
             { 'key': 'wavc',
               'type': 'RESREF',
@@ -73,23 +69,77 @@ class PRO_Format (Format):
             { 'key': 'spark_color',
               'type': 'DWORD',
               'off': 0x0028,
+              'enum': 'SPRKCLR',
               'label': 'Spark color'},
 
-
-
-            { 'key': 'unknown2C',
-              'type': 'BYTES',
+            { 'key': 'x_gemrb_flags',
+              'type': 'DWORD',
               'off': 0x002C,
-              'size': 212,
-              'label': 'Unknown 2C'},
+              'label': '*GemRB flags'},
 
-            { 'key': 'flags',
+            { 'key': 'x_string_reference',
+              'type': 'DWORD',
+              'off': 0x0030,
+              'label': '*String reference'},
+
+            { 'key': 'x_color',
+              'type': 'DWORD',
+              'off': 0x0034,
+              'label': '*Color'},
+
+            { 'key': 'x_color_speed',
+              'type': 'WORD',
+              'off': 0x0038,
+              'label': '*Color speed'},
+
+            { 'key': 'x_shake',
+              'type': 'WORD',
+              'off': 0x003A,
+              'label': '*Shake'},
+
+            { 'key': 'x_ids_value',
+              'type': 'WORD',
+              'off': 0x003C,
+              'label': '*IDS value'},
+
+            { 'key': 'x_ids_type',
+              'type': 'WORD',
+              'off': 0x003E,
+              'label': '*IDS type'},
+
+            { 'key': 'x_ids_value_2',
+              'type': 'WORD',
+              'off': 0x0040,
+              'label': '*IDS value 2'},
+
+            { 'key': 'x_ids_type_2',
+              'type': 'WORD',
+              'off': 0x0042,
+              'label': '*IDS type 2'},
+
+            { 'key': 'x_fail_spell',
+              'type': 'RESREF',
+              'off': 0x0044,
+              'label': '*Fail spell resref'},
+
+            { 'key': 'x_success_spell',
+              'type': 'RESREF',
+              'off': 0x004C,
+              'label': '*Success spell resref'},
+
+            { 'key': 'unknown54',
+              'type': 'BYTES',
+              'off': 0x0054,
+              'size': 172,
+              'label': 'Unknown 54'},
+
+            { 'key': 'travel_flags',
               'type': 'DWORD',
               'off': 0x0100,
-              'mask': { 0x01: 'enable BAM coloring', 0x02: 'enable smoke', 0x04: 'unknown', 0x08: 'darken projectile', 0x10: 'unknown2', 0x20: 'enable shadow', 0x40: 'enable light spot', 0x80: 'colored shadow' },
-              'label': 'Flags'},
+              'mask': { 0x01: 'enable BAM coloring', 0x02: 'enable smoke', 0x04: 'unused', 0x08: 'enable area lighting usage', 0x10: 'enable area height usage', 0x20: 'enable shadow', 0x40: 'enable light spot', 0x80: 'enable brighten flags', 0x100: 'low level brighten', 0x200: 'high level brighten' },
+              'label': 'Travel flags'},
 
-            { 'key': 'projectile_bam',
+            { 'key': 'travel_bam',
               'type': 'RESREF',
               'off': 0x0104,
               'label': 'BAM for travelling projectile'},
@@ -99,7 +149,7 @@ class PRO_Format (Format):
               'off': 0x010C,
               'label': 'BAM for projectile shadow'},
 
-            { 'key': 'projectile_bam_cycle',
+            { 'key': 'travel_cycle',
               'type': 'BYTE',
               'off': 0x0114,
               'label': 'BAM cycle for main projectile'},
@@ -115,60 +165,45 @@ class PRO_Format (Format):
               'label': 'Light spot intensity'},
 
             { 'key': 'light_spot_x_size',
-              'type': 'BYTE',
+              'type': 'WORD',
               'off': 0x0118,
               'label': 'Light spot X-size'},
-
-            { 'key': 'invisible',
-              'type': 'BYTE',
-              'off': 0x0119,
-              'label': 'Invisible'},
 
             { 'key': 'light_spot_y_size',
               'type': 'WORD',
               'off': 0x011A,
               'label': 'Light spot Y-size'},
 
-            { 'key': 'travel_type_color_bmp',
+            { 'key': 'palette',
               'type': 'RESREF',
               'off': 0x011C,
-              'label': 'Travel-type projectile color BMP'},
+              'label': 'Palette BMP'},
 
             { 'key': 'projectile_color',
               'type': 'BYTE',
               'off': 0x0124,
+              'count': 7,
               'label': 'Projectile color'},
 
-            { 'key': 'projectile_color_gradients',
-              'type': 'BYTES',
-              'off': 0x0125,
-              'size': 6,
-              'label': 'Projectile color gradients'},
-
-            { 'key': 'smoke_puff_timing',
+            { 'key': 'smoke_puff_frequency',
               'type': 'BYTE',
               'off': 0x012B,
-              'label': 'Smoke puff timing'},
+              'label': 'Smoke puff frequency'},
 
-            { 'key': 'smoke_color',
+            { 'key': 'smoke_puff_color',
               'type': 'BYTE',
               'off': 0x012C,
-              'label': 'Smoke color'},
-
-            { 'key': 'smoke_color_gradients',
-              'type': 'BYTES',
-              'off': 0x012D,
-              'size': 6,
-              'label': 'Smoke color gradients'},
+              'count': 7,
+              'label': 'Smoke puff color'},
 
             { 'key': 'face_target',
               'type': 'BYTE',
               'off': 0x0133,
-              'enum': { 1: 'dont face', 5: 'face' },
+              'enum': { 1: 'dont face', 5: 'mirrored eastern direction (reduced granularity)', 9: 'reduced eastern direction (full granularity)', 16: 'not mirrored, not reduced' },
               'label': 'Face target'},
 
-            { 'key': 'smoke_reference',
-              'type': 'WORD', # FIXME: should be signed??
+            { 'key': 'smoke_animation',
+              'type': 'WORD',
               'off': 0x0134,
               'enum': 'ANIMATE',
               'label': 'Smoke reference to ANIMATE.IDS'},
@@ -206,47 +241,42 @@ class PRO_Format (Format):
             { 'key': 'unknown154',
               'type': 'BYTES',
               'off': 0x0154,
-              'size': 176,
+              'size': 172, # FIXME: IESDP has 176 here ..., ielister 172
               'label': 'Unknown 154'},
 
             )
 
     area_header_desc = (
-            { 'key': 'aoe_target',
-              'type': 'WORD',
+            { 'key': 'aoe_flags',
+              'type': 'DWORD',
               'off': 0x0200,
-              'mask': {0x0001: 'trap object visible',
+              'mask': {0x0001: 'stay visible at destination',
                        0x0002: 'triggered by inanimate objects',
                        0x0004: 'triggered on condition',
-                       0x0008: 'single explosion',
-                       0x0010: 'no allies',
+                       0x0008: 'trigger during delay',
+                       0x0010: 'use secondary projectile',
                        0x0020: 'draw fragments',
                        0x0040: 'no self',
                        0x0080: 'no enemies',
-                       0x0100: 'unknown 8',
-                       0x0200: 'multiple set off',
+                       0x0100: 'num of triggers eq to mage caster level',
+                       0x0200: 'num of triggers eq to cleric caster level',
                        0x0400: 'use VVC',
                        0x0800: 'cone shape',
-                       0x1000: 'unknown 12',
-                       0x2000: 'no explosion?',
-                       0x4000: 'delayed explosion?',
+                       0x1000: 'ignore obstacles',
+                       0x2000: 'check triggers from anim frame 30',
+                       0x4000: 'delayed explosion',
                        0x8000: 'affect only one' },
               'label': 'AOE target (enemies/allies)'},
-
-            { 'key': 'unknown202',
-              'type': 'WORD',
-              'off': 0x0202,
-              'label': 'Unknown 202'},
 
             { 'key': 'trigger_radius',
               'type': 'WORD',
               'off': 0x0204,
               'label': 'Trigger radius'},
 
-            { 'key': 'area_of_effect',
+            { 'key': 'effect_radius',
               'type': 'WORD',
               'off': 0x0206,
-              'label': 'Area of Effect'},
+              'label': 'Effect radius'},
 
             { 'key': 'trigger_sound',
               'type': 'RESREF',
@@ -264,12 +294,13 @@ class PRO_Format (Format):
               'enum': 'ANIMATE',
               'label': 'Explosion fragments to ANIMATE.IDS'},
 
-            { 'key': 'unknown214',
+            { 'key': 'secondary_projectile',
               'type': 'WORD',
               'off': 0x0214,
-              'label': 'Unknown 214'},
+              'enum': 'PROJECTL',
+              'label': 'Secondary projectile PROJECTL-1'},
 
-            { 'key': 'duration_count',
+            { 'key': 'trigger_count',
               'type': 'BYTE',
               'off': 0x0216,
               'label': 'Duration/Trigger count'},
@@ -281,14 +312,9 @@ class PRO_Format (Format):
               'label': '1st explosion projectile ref to FIREBALL.IDS'},
 
             { 'key': '1st_explosion_color',
-              'type': 'BYTE',
+              'type': 'WORD',
               'off': 0x0218,
               'label': '1st explosion color'},
-
-            { 'key': 'unknown219',
-              'type': 'BYTE',
-              'off': 0x0219,
-              'label': 'Unknown 219'},
 
             { 'key': 'explosion_projectile',
               'type': 'WORD',
@@ -299,7 +325,7 @@ class PRO_Format (Format):
             { 'key': 'vvc',
               'type': 'RESREF',
               'off': 0x021C,
-              'label': 'VVC'},
+              'label': 'Explosion animation VVC'},
 
             { 'key': 'cone_width',
               'type': 'WORD',
@@ -307,10 +333,45 @@ class PRO_Format (Format):
               'label': 'Cone width'},
 
             { 'key': 'unknown226',
-              'type': 'BYTES',
+              'type': 'WORD',
               'off': 0x0226,
-              'size': 218,
-              'label': 'Unknown 218'},
+              'label': 'Unknown 226'},
+
+            { 'key': 'x_spread_animation',
+              'type': 'RESREF',
+              'off': 0x0228,
+              'label': '*Spread animation'},
+
+            { 'key': 'x_secondary_animation',
+              'type': 'RESREF',
+              'off': 0x0230,
+              'label': '*Secondary animation'},
+
+            { 'key': 'x_area_sound',
+              'type': 'RESREF',
+              'off': 0x0238,
+              'label': '*Area sound'},
+
+            { 'key': 'x_gemrb_aoe_flags',
+              'type': 'DWORD',
+              'off': 0x0240,
+              'label': '*GemRB AOE flags'},
+
+            { 'key': 'x_dice_count',
+              'type': 'WORD',
+              'off': 0x0244,
+              'label': '*Dice count'},
+
+            { 'key': 'x_dice_sides',
+              'type': 'WORD',
+              'off': 0x0246,
+              'label': '*Dice sides'},
+
+            { 'key': 'unknown248',
+              'type': 'BYTES',
+              'off': 0x0248,
+              'size': 176,
+              'label': 'Unknown 248'},
 
             )
 
