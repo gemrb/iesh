@@ -454,7 +454,7 @@ class PRO_Format (Format):
             { 'key': 'unknown248',
               'type': 'BYTES',
               'off': 0x0248,
-              'size': 176,
+              'size': 184,
               'label': 'Unknown 248'},
 
             { 'type': '_DEDENT',
