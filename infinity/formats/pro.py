@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2011 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -16,10 +16,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# Compliant with IELister 40d421d0c87c570434ae5e46f4ea60703ac70671 and IESDP 2011-03-15 (more or less)
+# Conforms to
+#   IELister 40d421d0c87c570434ae5e46f4ea60703ac70671
+#   IESDP 2011-03-15 (more or less)
+#   GemRB 791fc422b23fa508588e9d616f78df8c5a6f655f
 
 from infinity import core
 from infinity.format import Format, register_format
+
 
 class PRO_Format (Format):
     header_desc = (
@@ -36,7 +40,9 @@ class PRO_Format (Format):
             { 'key': 'projectile_type',
               'type': 'WORD',
               'off': 0x0008,
-              'enum': { 1: 'no BAM', 2: 'single target', 3: 'area target' },
+              'enum': {1: 'no BAM', 
+                       2: 'single target', 
+                       3: 'aoe target' },
               'label': 'Projectile type' },
 
             { 'key': 'speed',
@@ -48,7 +54,12 @@ class PRO_Format (Format):
             { 'key': 'sparking_flag',
               'type': 'DWORD',
               'off': 0x000C,
-              'mask': { 0x01: 'sparks', 0x02: 'use z coordinate', 0x04: 'loop sound', 0x08: 'loop sound2', 0x10: 'do not affect direct target', 0x20: 'draw below animate objects' },
+              'mask': {0x01: 'sparks', 
+                       0x02: 'use z coordinate', 
+                       0x04: 'loop sound', 
+                       0x08: 'loop sound2', 
+                       0x10: 'do not affect direct target', 
+                       0x20: 'draw below animate objects' },
               'label': 'Sparking flag'},
 
             { 'key': 'wavc',
@@ -72,60 +83,90 @@ class PRO_Format (Format):
               'enum': 'SPRKCLR',
               'label': 'Spark color'},
 
-            { 'key': 'x_gemrb_flags',
+            { 'key': 'gemrb_flags',
               'type': 'DWORD',
               'off': 0x002C,
-              'label': '*GemRB flags'},
+              'mask': {0x00000001: 'bounce',
+                       0x00000002: 'continue',
+                       0x00000004: 'freeze',
+                       0x00000008: 'no travel',
+                       0x00000010: 'trail',
+                       0x00000020: 'curved path',
+                       0x00000040: 'random starting frame',
+                       0x00000080: 'pile cycles',
+                       0x00000100: 'half transparent',
+                       0x00000200: 'tint',
+                       0x00000400: 'iteration',
+                       0x00000800: 'tiled',
+                       0x00001000: 'falling',
+                       0x00002000: 'incoming',
+                       0x00004000: 'line',
+                       0x00008000: 'wall',
+                       0x00010000: 'draw under target',
+                       0x00020000: 'pop',
+                       0x00040000: 'unpop',
+                       0x00080000: 'fade',
+                       0x00100000: 'has setup text',
+                       0x00200000: 'wandering',
+                       0x00400000: 'random cycle',
+                       0x00800000: 'rgb',
+                       0x01000000: 'touch attack',
+                       0x02000000: 'notids',
+                       0x04000000: 'notids2',
+                       0x08000000: 'both ids',
+                       0x10000000: 'delay payload',
+                       },
+              'label': 'GemRB flags'},
 
-            { 'key': 'x_string_reference',
+            { 'key': 'gemrb_string_reference',
               'type': 'DWORD',
               'off': 0x0030,
-              'label': '*String reference'},
+              'label': 'GemRB String reference'},
 
-            { 'key': 'x_color',
+            { 'key': 'gemrb_color',
               'type': 'DWORD',
               'off': 0x0034,
-              'label': '*Color'},
+              'label': 'GemRB Color'},
 
-            { 'key': 'x_color_speed',
+            { 'key': 'gemrb_color_speed',
               'type': 'WORD',
               'off': 0x0038,
-              'label': '*Color speed'},
+              'label': 'GemRB Color speed'},
 
-            { 'key': 'x_shake',
+            { 'key': 'gemrb_shake',
               'type': 'WORD',
               'off': 0x003A,
-              'label': '*Shake'},
+              'label': 'GemRB Shake'},
 
-            { 'key': 'x_ids_value',
+            { 'key': 'gemrb_ids_value',
               'type': 'WORD',
               'off': 0x003C,
-              'label': '*IDS value'},
+              'label': 'GemRB IDS value'},
 
-            { 'key': 'x_ids_type',
+            { 'key': 'gemrb_ids_type',
               'type': 'WORD',
               'off': 0x003E,
-              'label': '*IDS type'},
+              'label': 'GemRB IDS type'},
 
-            { 'key': 'x_ids_value_2',
+            { 'key': 'gemrb_ids_value_2',
               'type': 'WORD',
               'off': 0x0040,
-              'label': '*IDS value 2'},
+              'label': 'GemRB IDS value 2'},
 
-            { 'key': 'x_ids_type_2',
+            { 'key': 'gemrb_ids_type_2',
               'type': 'WORD',
               'off': 0x0042,
-              'label': '*IDS type 2'},
+              'label': 'GemRB IDS type 2'},
 
-            { 'key': 'x_fail_spell',
+            { 'key': 'gemrb_fail_spell',
               'type': 'RESREF',
               'off': 0x0044,
-              'label': '*Fail spell resref'},
+              'label': 'GemRB Fail spell resref'},
 
-            { 'key': 'x_success_spell',
+            { 'key': 'gemrb_success_spell',
               'type': 'RESREF',
               'off': 0x004C,
-              'label': '*Success spell resref'},
+              'label': 'GemRB Success spell resref'},
 
             { 'key': 'unknown54',
               'type': 'BYTES',
@@ -133,10 +174,25 @@ class PRO_Format (Format):
               'size': 172,
               'label': 'Unknown 54'},
 
+            { 'type': '_LABEL',
+              'label': '\nTravel section:'},
+
+            { 'type': '_INDENT',
+              'label': '    '},
+
             { 'key': 'travel_flags',
               'type': 'DWORD',
               'off': 0x0100,
-              'mask': { 0x01: 'enable BAM coloring', 0x02: 'enable smoke', 0x04: 'unused', 0x08: 'enable area lighting usage', 0x10: 'enable area height usage', 0x20: 'enable shadow', 0x40: 'enable light spot', 0x80: 'enable brighten flags', 0x100: 'low level brighten', 0x200: 'high level brighten' },
+              'mask': {0x0001: 'fake BAM colors', 
+                       0x0002: 'has smoke', 
+                       0x0004: 'unknown bit 2', 
+                       0x0008: 'use area lighting', 
+                       0x0010: 'use area height', 
+                       0x0020: 'has shadow', 
+                       0x0040: 'has light spot', 
+                       0x0080: 'has brighten flags', 
+                       0x0100: 'low level brighten', 
+                       0x0200: 'high level brighten' },
               'label': 'Travel flags'},
 
             { 'key': 'travel_bam',
@@ -164,15 +220,10 @@ class PRO_Format (Format):
               'off': 0x0116,
               'label': 'Light spot intensity'},
 
-            { 'key': 'light_spot_x_size',
-              'type': 'WORD',
+            { 'key': 'light_spot_size',
+              'type': 'POINT',
               'off': 0x0118,
-              'label': 'Light spot X-size'},
-
-            { 'key': 'light_spot_y_size',
-              'type': 'WORD',
-              'off': 0x011A,
-              'label': 'Light spot Y-size'},
+              'label': 'Light spot size'},
 
             { 'key': 'palette',
               'type': 'RESREF',
@@ -184,6 +235,15 @@ class PRO_Format (Format):
               'off': 0x0124,
               'count': 7,
               'label': 'Projectile color'},
+
+            { 'type': '_DEDENT',
+              'label': ''},
+
+            { 'type': '_LABEL',
+              'label': '\nSmoke section:'},
+
+            { 'type': '_INDENT',
+              'label': '    '},
 
             { 'key': 'smoke_puff_frequency',
               'type': 'BYTE',
@@ -199,7 +259,10 @@ class PRO_Format (Format):
             { 'key': 'face_target',
               'type': 'BYTE',
               'off': 0x0133,
-              'enum': { 1: 'dont face', 5: 'mirrored eastern direction (reduced granularity)', 9: 'reduced eastern direction (full granularity)', 16: 'not mirrored, not reduced' },
+              'enum': {1: 'dont face', 
+                       5: 'mirrored eastern direction (reduced granularity)', 
+                       9: 'reduced eastern direction (full granularity)', 
+                       16: 'not mirrored, not reduced' },
               'label': 'Face target'},
 
             { 'key': 'smoke_animation',
@@ -241,12 +304,21 @@ class PRO_Format (Format):
             { 'key': 'unknown154',
               'type': 'BYTES',
               'off': 0x0154,
-              'size': 172, # FIXME: IESDP has 176 here ..., ielister 172
+              'size': 172, # FIXME: IESDP has wrongly 176 here
               'label': 'Unknown 154'},
+
+            { 'type': '_DEDENT',
+              'label': ''},
 
             )
 
-    area_header_desc = (
+    aoe_header_desc = (
+            { 'type': '_LABEL',
+              'label': '\nAOE section:'},
+              
+            { 'type': '_INDENT',
+              'label': '    '},
+              
             { 'key': 'aoe_flags',
               'type': 'DWORD',
               'off': 0x0200,
@@ -256,8 +328,8 @@ class PRO_Format (Format):
                        0x0008: 'trigger during delay',
                        0x0010: 'use secondary projectile',
                        0x0020: 'draw fragments',
-                       0x0040: 'no self',
-                       0x0080: 'no enemies',
+                       0x0040: 'target party or not party',
+                       0x0080: 'target party',
                        0x0100: 'num of triggers eq to mage caster level',
                        0x0200: 'num of triggers eq to cleric caster level',
                        0x0400: 'use VVC',
@@ -337,41 +409,56 @@ class PRO_Format (Format):
               'off': 0x0226,
               'label': 'Unknown 226'},
 
-            { 'key': 'x_spread_animation',
+            { 'key': 'gemrb_spread_animation',
               'type': 'RESREF',
               'off': 0x0228,
-              'label': '*Spread animation'},
+              'label': 'GemRB Spread animation'},
 
-            { 'key': 'x_secondary_animation',
+            { 'key': 'gemrb_secondary_animation',
               'type': 'RESREF',
               'off': 0x0230,
-              'label': '*Secondary animation'},
+              'label': 'GemRB Secondary animation'},
 
-            { 'key': 'x_area_sound',
+            { 'key': 'gemrb_area_sound',
               'type': 'RESREF',
               'off': 0x0238,
-              'label': '*Area sound'},
+              'label': 'GemRB Area sound'},
 
-            { 'key': 'x_gemrb_aoe_flags',
+            { 'key': 'gemrb_aoe_flags',
               'type': 'DWORD',
               'off': 0x0240,
-              'label': '*GemRB AOE flags'},
+              'mask': {0x00000001: 'tint',
+                       0x00000002: 'fill',
+                       0x00000004: 'scatter',
+                       0x00000008: 'vvcpal',
+                       0x00000010: 'spread',
+                       0x00000020: 'palette',
+                       0x00000040: 'both anims',
+                       0x00000080: 'more children',
+                       0x00000100: 'spellfail',
+                       0x00000200: 'multi directional',
+                       0x00000400: 'target hd',
+                       0x00000800: 'invert target' },
+              'label': 'GemRB AoE flags'},
 
-            { 'key': 'x_dice_count',
+            { 'key': 'gemrb_dice_count',
               'type': 'WORD',
               'off': 0x0244,
-              'label': '*Dice count'},
+              'label': 'GemRB Dice count'},
 
-            { 'key': 'x_dice_sides',
+            { 'key': 'gemrb_dice_sides',
               'type': 'WORD',
               'off': 0x0246,
-              'label': '*Dice sides'},
+              'label': 'GemRB Dice sides'},
 
             { 'key': 'unknown248',
               'type': 'BYTES',
               'off': 0x0248,
               'size': 176,
               'label': 'Unknown 248'},
+
+            { 'type': '_DEDENT',
+              'label': ''},
 
             )
 
@@ -383,21 +470,20 @@ class PRO_Format (Format):
     def read (self, stream):
         self.read_header (stream)
         if self.header['projectile_type'] == 3:
-            self.read_area_header (stream)
+            self.read_struc (stream, 0x0000, self.aoe_header_desc, self.header)
+
+
+    def write (self, stream):
+        self.write_header (stream)
+        if self.header['projectile_type'] == 3:
+            self.write_struc (stream, 0x0000, self.aoe_header_desc, self.header)
 
 
     def printme (self):
         self.print_header ()
         if self.header['projectile_type'] == 3:
-            self.print_area_header ()
+            self.print_struc (self.header, self.aoe_header_desc)
         
-
-    def read_area_header (self, stream):
-        self.area_header = {}
-        self.read_struc (stream, 0x0000, self.area_header_desc, self.area_header)
-        
-    def print_area_header (self):
-        self.print_struc (self.area_header, self.area_header_desc)
 
         
 register_format ('PRO', 'V1.0', PRO_Format)
