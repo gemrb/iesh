@@ -59,25 +59,10 @@ class CHUI_Format (Format):
           'off': 0x0002,
           'label': 'Unknown 1' },
 
-        { 'key': 'xpos',
-          'type': 'WORD',
+        { 'key': 'geometry',
+          'type': 'RECT',
           'off': 0x0004,
-          'label': 'X position' },
-
-        { 'key': 'ypos',
-          'type': 'WORD',
-          'off': 0x0006,
-          'label': 'Y position' },
-
-        { 'key': 'width',
-          'type': 'WORD',
-          'off': 0x0008,
-          'label': 'Width' },
-
-        { 'key': 'height',
-          'type': 'WORD',
-          'off': 0x000A,
-          'label': 'Height' },
+          'label': 'Window geometry (x,y,w,h)' },
 
         { 'key': 'bg_flag',
           'type': 'WORD',
@@ -124,29 +109,20 @@ class CHUI_Format (Format):
           'off': 0x0000,
           'label': 'Control ID' },
 
-        { 'key': 'xpos',
-          'type': 'WORD',
+        { 'key': 'geometry',
+          'type': 'RECT',
           'off': 0x0004,
-          'label': 'X position in window' },
-
-        { 'key': 'ypos',
-          'type': 'WORD',
-          'off': 0x0006,
-          'label': 'Y position in window' },
-
-        { 'key': 'width',
-          'type': 'WORD',
-          'off': 0x0008,
-          'label': 'Width' },
-
-        { 'key': 'height',
-          'type': 'WORD',
-          'off': 0x000A,
-          'label': 'Height' },
+          'label': 'Geometry within window (x,y,w,h)' },
 
         { 'key': 'type',
-          'type': 'CTLTYPE',
+          'type': 'BYTE',
           'off': 0x000C,
+          'enum': {0: 'button/pixmap',
+                   2: 'slider',
+                   3: 'textedit',
+                   5: 'textarea',
+                   6: 'label?',
+                   7: 'scrollbar'},
           'label': 'Control type' },
 
         { 'key': 'unknown',
@@ -221,15 +197,10 @@ class CHUI_Format (Format):
           'off': 0x0022,
           'label': 'BAM frame: slider grabbed' },
 
-        { 'key': 'knob_x',
-          'type': 'WORD',
+        { 'key': 'knob_position',
+          'type': 'POINT',
           'off': 0x0024,
-          'label': 'Knob X offset' },
-
-        { 'key': 'knob_y',
-          'type': 'WORD',
-          'off': 0x0026,
-          'label': 'Knob Y offset' },
+          'label': 'Knob position' },
 
         { 'key': 'knob_jump_width',
           'type': 'WORD',

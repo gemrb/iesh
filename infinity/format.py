@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004-2010 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004-2011 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -48,6 +48,9 @@ class Format (object):
         self.bitmask_cache = {}
         self.options = {}
 
+        self.indents = []
+        self.indent = ''
+
 
     def read_header (self, stream, desc = None):
         if desc is None:
@@ -55,10 +58,12 @@ class Format (object):
             desc = self.header_desc
         self.read_struc (stream, 0x0000, desc, self.header)
 
+
     def write_header (self, stream, desc = None):
         if desc is None:
             desc = self.header_desc
         self.write_struc (stream, 0x0000, desc, self.header)
+
 
     def print_header (self, desc = None):
         if desc is None:
@@ -82,6 +87,7 @@ class Format (object):
             self.read_struc (stream, off, desc, obj)
             list.append (obj)
             off += size
+
 
     def write_list (self, stream, offset, name,  header = None, desc = None, list = None):
         if desc is None:
@@ -118,6 +124,7 @@ class Format (object):
     def get_masked_bits (self, value, mask, bl):
         return (value & mask) >> bl
 
+
     # FIXME: cache it globally ...
     def bits_to_mask (self, bits):
         try:
@@ -140,142 +147,194 @@ class Format (object):
 
     # { 'key': '', 'type': '', 'off': 0x00, 'label': '' },
 
-    def get_struc_field (self,  desc,  key,  value):
-        return None
 
     def reset_struc (self, desc, obj):
         for d in desc:
-            key = d['key']
-            type = d['type']
-            try:
-                value = d['default']
-            except:
-                if type in ('BYTE', 'WORD', 'DWORD', 'CTLTYPE', 'CTLID', 'RGBA', 'STRREF', 'RESTYPE'):
-                    value = 0
-                elif type in ('STR2', 'STR4', 'STR8', 'STR32', 'RESREF', 'STRSIZED'):
-                    value = ''
-                elif type == 'POINT':
-                    value = (0, 0)
-                elif type == 'RECT':
-                    value = (0, 0, 0, 0)
-                else:
-                    raise Error ("Unknown type")
-
-            # FIXME: bit masks
-            obj[key] = value
+            self.reset_datum(d, obj)
             
         return obj
+
             
     def read_struc (self, stream, offset, desc, obj):
         obj['_offset'] = offset
         for d in desc:
-            key = d['key']
-            type = d['type']
-            local_offset = d['off']
-            try: count = d['count']
-            except: count = 1
-            d['count'] = 1
-            size = self.get_struc_size ([ d ]) - local_offset
-            d['count'] = count
-
-            if self.get_option ('format.debug_read'):
-                print d
-
-            for index in range (count):
-                #print d, local_offset, key, type, count, index, size
-                if type == 'BYTE':
-                    value = ord (stream.get_char (offset + local_offset))
-                elif type == 'CTLTYPE':
-                    value = ord (stream.get_char (offset + local_offset))
-                elif type == 'WORD':
-                    value = stream.read_word (offset + local_offset)
-                elif type == 'DWORD':
-                    value = stream.read_dword (offset + local_offset)
-                elif type == 'POINT':
-                    value0 = stream.read_word (offset + local_offset)
-                    value1 = stream.read_word (offset + local_offset + 2)
-                    value = (value0, value1)
-                elif type == 'RECT':
-                    value0 = stream.read_word (offset + local_offset)
-                    value1 = stream.read_word (offset + local_offset + 2)
-                    value2 = stream.read_word (offset + local_offset + 4)
-                    value3 = stream.read_word (offset + local_offset + 6)
-                    value = (value0, value1, value2, value3)
-                elif type == 'CTLID':
-                    value = stream.read_dword (offset + local_offset)
-                elif type == 'RGBA':
-                    value = stream.read_dword (offset + local_offset)
-                elif type == 'STR2':
-                    value = stream.read_sized_string (offset + local_offset, 2)
-                elif type == 'STR4':
-                    value = stream.read_sized_string (offset + local_offset, 4)
-                elif type == 'STR8':
-                    value = stream.read_sized_string (offset + local_offset, 8)
-                elif type == 'STR32':
-                    value = stream.read_sized_string (offset + local_offset, 32)
-                elif type == 'RESREF':
-                    value = stream.read_resref (offset + local_offset)
-                    value = string.translate (value, core.slash_trans, '\x00')
-                elif type == 'STRREF':
-                    value = stream.read_dword (offset + local_offset)
-                elif type == 'RESTYPE':
-                    value = stream.read_word (offset + local_offset)
-                elif type == 'STROFF':
-                    str_offset = stream.read_dword (offset + local_offset)
-                    str_value = stream.read_asciiz_string (str_offset)
-                    str_value = string.translate (str_value, core.slash_trans, '\x00')
-                    obj[key + ':offset'] = str_offset
-                    # FIXME: ugly
-                    #value = (str_offset, str_value)
-                    value = str_value
-                elif type == 'STRSIZED':
-                    length = stream.read_dword (offset + local_offset)
-                    # FIXME: asciiz or sized???
-                    value = stream.read_asciiz_string (offset + local_offset + 4)
-                elif type == 'BYTES':
-                    value = stream.read_blob (offset + local_offset, d['size'])
-                elif type == '_STRING':
-                    value = ''
-                elif type == '_BYTE':
-                    value = '?'
-                else:
-                    raise ValueError ("Unknown data type: " + type)
-                    #value = ''
-    
-                if d.has_key ('bits'):
-                    mask, bl = self.bits_to_mask (d['bits'])
-                    value = self.get_masked_bits (value, mask, bl)
-    
-                if count > 1:
-                    try: obj[key].append (value)
-                    except KeyError: obj[key] = [ value ]
-                    local_offset += size
-                else:
-                    obj[key] = value
-
-            if self.get_option ('format.debug_read'):
-                self.print_date_by_desc (obj, d)
+            self.read_datum(stream, offset, d, obj)
 
                 
     def print_struc (self, obj, desc):
         for d in desc:
-            self.print_date_by_desc (obj, d)
+            self.print_datum (obj, d)
         print
+
 
     def write_struc (self, stream, offset, desc, obj):
         for d in desc:
-            key = d['key']
-            type = d['type']
-            local_offset = d['off']
+            self.write_datum(stream, offset, d, obj)
 
-            value = obj[key]
+
+    def get_struc_size (self, desc, obj = None):
+        total_size = 0
+        
+        for d in desc:
+            size = self.get_datum_size(d, obj)
+            try:
+                local_offset = d['off']
+            except KeyError:
+                local_offset = total_size
+
+            # FIXME: d[count] is ignored!
+            total_size = max (total_size, local_offset + size)
+
+        return total_size
+
+
+    def reset_datum (self, d, obj):
+        type = d['type']
+        
+        if type == '_LABEL' or type == '_INDENT' or type == '_DEDENT':
+            return
+        
+        key = d['key']
+        try: count = d['count']
+        except KeyError: count = 1
+
+        try:
+            # NOTE: default value has to be already an array if count>1
+            value = d['default']
+        except:
+            if type in ('BYTE', 'WORD', 'DWORD', 'CTLID', 'RGBA', 'STRREF', 'RESTYPE'):
+                value = 0
+            elif type in ('STR2', 'STR4', 'STR8', 'STR32', 'RESREF', 'STRSIZED'):
+                value = ''
+            elif type == 'POINT':
+                value = (0, 0)
+            elif type == 'RECT':
+                value = (0, 0, 0, 0)
+            else:
+                raise Error ("Unknown type")
+
+            if count > 1:
+                value = [ value for i in range(count) ]
+                
+        # FIXME: bit masks
+        obj[key] = value
+
+
+    def read_datum (self, stream, offset, d, obj):
+        type = d['type']
+        
+        if type == '_LABEL' or type == '_INDENT' or type == '_DEDENT':
+            return
+
+        key = d['key']
+        local_offset = d['off']
+        try: count = d['count']
+        except: count = 1
+        
+        size = self.get_datum_size (d)
+
+        if self.get_option ('format.debug_read'):
+            print d
+
+        for index in range (count):
+            #print d, local_offset, key, type, count, index, size
+            if type == 'BYTE':
+                value = ord (stream.get_char (offset + local_offset))
+            elif type == 'WORD':
+                value = stream.read_word (offset + local_offset)
+            elif type == 'DWORD':
+                value = stream.read_dword (offset + local_offset)
+            elif type == 'POINT':
+                value0 = stream.read_word (offset + local_offset)
+                value1 = stream.read_word (offset + local_offset + 2)
+                value = (value0, value1)
+            elif type == 'RECT':
+                value0 = stream.read_word (offset + local_offset)
+                value1 = stream.read_word (offset + local_offset + 2)
+                value2 = stream.read_word (offset + local_offset + 4)
+                value3 = stream.read_word (offset + local_offset + 6)
+                value = (value0, value1, value2, value3)
+            elif type == 'CTLID':
+                value = stream.read_dword (offset + local_offset)
+            elif type == 'RGBA':
+                value = stream.read_dword (offset + local_offset)
+            elif type == 'STR2':
+                value = stream.read_sized_string (offset + local_offset, 2)
+            elif type == 'STR4':
+                value = stream.read_sized_string (offset + local_offset, 4)
+            elif type == 'STR8':
+                value = stream.read_sized_string (offset + local_offset, 8)
+            elif type == 'STR32':
+                value = stream.read_sized_string (offset + local_offset, 32)
+            elif type == 'RESREF':
+                value = stream.read_resref (offset + local_offset)
+                value = string.translate (value, core.slash_trans, '\x00')
+            elif type == 'STRREF':
+                value = stream.read_dword (offset + local_offset)
+            elif type == 'RESTYPE':
+                value = stream.read_word (offset + local_offset)
+            elif type == 'STROFF':
+                str_offset = stream.read_dword (offset + local_offset)
+                str_value = stream.read_asciiz_string (str_offset)
+                str_value = string.translate (str_value, core.slash_trans, '\x00')
+                obj[key + ':offset'] = str_offset
+                # FIXME: ugly
+                #value = (str_offset, str_value)
+                value = str_value
+            elif type == 'STRSIZED':
+                length = stream.read_dword (offset + local_offset)
+                # FIXME: asciiz or sized???
+                value = stream.read_asciiz_string (offset + local_offset + 4)
+            elif type == 'BYTES':
+                value = stream.read_blob (offset + local_offset, d['size'])
+            elif type == '_STRING':
+                value = ''
+            elif type == '_BYTE':
+                value = '?'
+            elif type.startswith('_'):
+                continue
+            else:
+                raise ValueError ("Unknown data type: " + type)
+                #value = ''
+
+            if d.has_key ('bits'):
+                mask, bl = self.bits_to_mask (d['bits'])
+                value = self.get_masked_bits (value, mask, bl)
+
+            if count > 1:
+                try: obj[key].append (value)
+                except KeyError: obj[key] = [ value ]
+                local_offset += size
+            else:
+                obj[key] = value
+
+        if self.get_option ('format.debug_read'):
+            self.print_datum (obj, d)
+
+
+    def write_datum (self, stream, offset, d, obj):
+        type = d['type']
+        
+        if type.startswith ('_'):
+            return
+
+        key = d['key']
+        local_offset = d['off']
+        try: count = d['count']
+        except: count = 1
+        
+        size = self.get_datum_size (d)
+
+        if self.get_option ('format.debug_write'):
+            print '%05d' %(offset + local_offset), d, obj[key]
             
-            if self.get_option ('format.debug_write'):
-                print '%05d' %(offset + local_offset), d, value
+        for index in range (count):
+            if count > 1: 
+                value = obj[key][index]
+            else:
+                value = obj[key]
 
             if type == 'BYTE':
-                stream.put_char (chr (value), offset + local_offset)
-            elif type == 'CTLTYPE':
                 stream.put_char (chr (value), offset + local_offset)
             elif type == 'WORD':
                 stream.write_word (value, offset + local_offset)
@@ -320,86 +379,93 @@ class Format (object):
                 stream.write_sized_string (value + '\0', offset + local_offset + 4, len (value) + 1)
             elif type == 'BYTES':
                 value = stream.write_blob (value, offset + local_offset)
-            elif type.startswith ('_'):
-                pass
             else:
                 raise ValueError ("Unknown data type: " + type)
-
-
-    def get_struc_size (self, desc, obj = None):
-        total_size = 0
-        
-        for d in desc:
-            key = d['key']
-            type = d['type']
-            local_offset = d['off']
-
             
-            if type == 'BYTE':
-                size = 1
-            elif type == 'CTLTYPE':
-                size = 1
-            elif type == 'WORD':
-                size = 2
-            elif type == 'DWORD':
-                size = 4
-            elif type == 'POINT':
-                size = 4
-            elif type == 'RECT':
-                size = 8
-            elif type == 'CTLID':
-                size = 2
-            elif type == 'RGBA':
-                size = 4
-            elif type == 'STR2':
-                size = 2
-            elif type == 'STR4':
-                size = 4
-            elif type == 'STR8':
-                size = 8
-            elif type == 'STR32':
-                size = 32
-            elif type == 'RESREF':
-                size = 8
-            elif type == 'STRREF':
-                size = 4
-            elif type == 'RESTYPE':
-                size = 2
-            elif type == 'STROFF':
-                #raise RuntimeError (type + " not implemented")
-                # NOTE: that is only a size of the pointer, not the string itself
-                size = 4
-            elif type == 'STRSIZED':
-                # FIXME: encoding
-                if obj is not None:
-                    value = obj[key]
-                    size = 4 + len (value)
-                else:
-                    size = 4 # FIXME: eek!
-            elif type == 'BYTES':
-                size = d['size']
-                #value = obj[key]
-                #size = len (value)
-            elif type.startswith ('_'):
-                # Ignore the fields starting with '_'
-                size = 0
+            local_offset += size
+
+
+    def get_datum_size (self, d, obj=None):
+        # NOTE: d['count'] is ignored!
+        key = d['key']
+        type = d['type']
+        
+        if type == 'BYTE':
+            size = 1
+        elif type == 'WORD':
+            size = 2
+        elif type == 'DWORD':
+            size = 4
+        elif type == 'POINT':
+            size = 4
+        elif type == 'RECT':
+            size = 8
+        elif type == 'CTLID':
+            size = 4
+        elif type == 'RGBA':
+            size = 4
+        elif type == 'STR2':
+            size = 2
+        elif type == 'STR4':
+            size = 4
+        elif type == 'STR8':
+            size = 8
+        elif type == 'STR32':
+            size = 32
+        elif type == 'RESREF':
+            size = 8
+        elif type == 'STRREF':
+            size = 4
+        elif type == 'RESTYPE':
+            size = 2
+        elif type == 'STROFF':
+            #raise RuntimeError (type + " not implemented")
+            # NOTE: that is only a size of the pointer, not the string itself
+            size = 4
+        elif type == 'STRSIZED':
+            # FIXME: encoding
+            if obj is not None:
+                value = obj[key]
+                size = 4 + len (value)
             else:
-                raise ValueError ("Unknown data type: " + type)
+                size = 4 # FIXME: eek!
+        elif type == 'BYTES':
+            size = d['size']
+            #value = obj[key]
+            #size = len (value)
+        elif type.startswith ('_'):
+            # Ignore the fields starting with '_'
+            size = 0
+        else:
+            raise ValueError ("Unknown data type: " + type)
 
-            total_size = max (total_size, local_offset + size)
+        return size
 
-        return total_size
-    
 
-    def print_date_by_desc (self, obj, d):
+    def print_datum (self, obj, d):
         p_offset = self.get_option ('format.print_offset')
         p_type = self.get_option ('format.print_type')
         p_size = self.get_option ('format.print_size')
         
-        key = d['key']
         rec_type = d['type']
-        off = d['off']
         label = d['label']
+        
+        if rec_type == '_LABEL':
+            print self.indent + label
+            return
+        
+        if rec_type == '_INDENT':
+            self.indents.append (label)
+            self.indent = ''.join (self.indents) 
+            return
+
+        if rec_type == '_DEDENT':
+            self.indents.pop()
+            self.indent = ''.join (self.indents) 
+            return
+        
+        key = d['key']
+        off = d['off']
         
         try: base_offset = obj['_offset']
         except: base_offset = 0
@@ -416,6 +482,7 @@ class Format (object):
         try: count = d['count']
         except: count = 1
 
+
         for index in range (count):
             if count > 1:
                 value = obj[key][index]
@@ -426,9 +493,6 @@ class Format (object):
     
             if rec_type == 'RESTYPE':
                 try: value2 = '(' + core.restype_hash[value] + ')'
-                except: pass
-            elif rec_type == 'CTLTYPE':
-                try: value2 = '(' + ctltype_hash[value] + ')'
                 except: pass
             elif rec_type == 'CTLID':
                 try: value2 = '(' + '0x%08x' %value + ')'
@@ -469,9 +533,9 @@ class Format (object):
                 print "%3d" %size,
                 
             if count > 1:
-                print label + '[%d]:' %index, value, value2
+                print self.indent + label + '[%d]:' %index, value, value2
             else:
-                print label + ':', value, value2
+                print self.indent + label + ':', value, value2
 
             off += size
 
@@ -485,18 +549,6 @@ class Format (object):
 
     def set_option (self, key, value):
         self.options[key] = value
-
-
-
-# FIXME: should be in chui.py
-ctltype_hash = {
-    0 : 'button/pixmap',
-    2 : 'slider',
-    3 : 'textedit',
-    5 : 'textarea',
-    6 : 'label?',
-    7 : 'scrollbar',
-    }
 
 
 
