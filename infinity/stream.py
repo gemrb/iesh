@@ -200,7 +200,7 @@ class Stream (object):
     def write_resref (self, value, off):
         self.write_sized_string (value, off, 8)
 
-    def read_blob (self, offset, size = None):
+    def read_blob (self, offset, size = -1):
         # offset == None means "current offset" here
         # size == None means "till the end of stream"
         if offset is not None:
@@ -246,6 +246,9 @@ class Stream (object):
             version = ""
         elif s.startswith ("IF\n") or s.startswith ("IF\r\n"):
             signature = "BAF"
+            version = ""
+        elif s.startswith ("BM"):
+            signature = "BM"
             version = ""
         else:
             signature = s[0:4].strip ()
@@ -337,11 +340,14 @@ class FileStream (Stream):
 
     def open (self, filename, mode = 'r'):
         # FIXME: reset offset?
+        if type(filename) != type (''):
+            self.filename = '<file>'
+            self.fh = filename
+        else:
+            self.filename = filename
+            self.fh = open (filename, mode)
+            
         Stream.open (self, filename,  mode)
-        self.is_open = False
-        self.filename = filename
-        self.fh = open (self.filename, mode)
-        self.is_open = True
         
         if self.get_option ('stream.debug_coverage'):
             size = os.stat (filename)[6]
@@ -438,7 +444,7 @@ class ResourceStream (MemoryStream):
             oo = filter (lambda o: o['type'] == self.type, oo)
 
         if len (oo) > 1 and self.type is None:
-            raise RuntimeError, "More than one result"
+            raise RuntimeError, "More than one result, types " + ' '.join([ str(o['type']) for o in oo ])
 
         o = oo[index]
 
