@@ -456,7 +456,6 @@ class SPL_V20_Format (SPL_Format):
               'label': 'Unknown 0x73' },
     ])
 
-    ###Format.get_struc_field (None,  SPL_Format.extended_header_desc, 'off',  0x24)['enum'] = { 0: 'None' }
 
     def __init__ (self):
         SPL_Format.__init__ (self)

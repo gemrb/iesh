@@ -36,13 +36,17 @@ class VVC_Format (Format):
             { 'key': 'animation',
               'type': 'RESREF',
               'off': 0x0008,
-              'label': 'Animation' },
+              'label': 'Animation BAM' },
 
             { 'key': 'unknown_10',
-              'type': 'RESREF',
+              'type': 'DWORD',
               'off': 0x0010,
               'label': 'Unknown 10' },
 
+            { 'key': 'unknown_14',
+              'type': 'DWORD',
+              'off': 0x0014,
+              'label': 'Unknown 14' },
 
             { 'key': 'misc_flags',
               'type': 'WORD',
@@ -143,7 +147,7 @@ class VVC_Format (Format):
               'off': 0x0034,
               'label': 'Frame rate'},
 
-            { 'key': 'face_target',
+            { 'key': 'face_target', # FIXME: ielister has unknown here
               'type': 'DWORD',
               'off': 0x0038,
               'label': 'Face target'},
@@ -229,12 +233,12 @@ class VVC_Format (Format):
               'off': 0x008C,
               'label': 'Unknown 8C'},
 
-            { 'key': 'ending_bam_cycle',
+            { 'key': 'ending_bam_cycle', # FIXME: ielister has unknown here
               'type': 'DWORD',
               'off': 0x0090,
               'label': 'Ending BAM cycle'},
 
-            { 'key': 'ending_wavc',
+            { 'key': 'ending_wavc', # FIXME: ielister has unknown here
               'type': 'RESREF',
               'off': 0x0094,
               'label': 'Ending WAVC?'},
@@ -253,6 +257,9 @@ class VVC_Format (Format):
 
     def read (self, stream):
         self.read_header (stream)
+
+    def write (self, stream):
+        self.write_header (stream)
 
     def printme (self):
         self.print_header ()
