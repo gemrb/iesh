@@ -24,6 +24,7 @@ options = {
     'core.dialog_file': ['dialog.tlk', ""],  
     'pager': ['more', "Program to use for paging command output"],  
     'use_cache': [True, "Cache open BIF files"],
+    'encoding': ['utf8', "Encoding used for printing strings, e.g. 'utf8'"],
  
     'stream.debug_coverage': [False, "On stream close print info on offsets not read or read more than once"], 
     'format.debug_read': [False, "Print each read op to stdout"], 
@@ -54,6 +55,11 @@ options = {
     'format.tlk.tick_size': [ 100, "# of STRREFs read to print a dot" ], 
     'format.tlk.tack_size': [ 5000, "# of STRREFs read to print a number" ], 
     'format.tlk.decode_strrefs': [True,  "Read TLK strrefs, not only header"], 
+    'format.tlk.encoding': [None, "Encoding of strings in game data, e.g. cp1250 (Czech), cp932 (Japanese), cp949 (Korean), cp950 (Chinese)"],
+    #src_enc = 'cp1250' # Czech
+    #src_enc = 'cp949' # Korean, but some strings are in French
+    #src_enc = 'cp932' # Japanese
+    #src_enc = 'cp950' # Chinese
 
 }
 

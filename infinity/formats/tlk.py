@@ -17,12 +17,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
+import codecs
 import re
 import string
 import sys
 
 from infinity import core
 from infinity.format import Format, register_format
+
 
 class TLK_Format (Format):
     
@@ -114,6 +116,7 @@ class TLK_Format (Format):
         for i in range (self.header['num_of_strrefs']):
             
             obj = {}
+            obj['_strref'] = i
             self.read_strref_record (stream, off, obj)
             self.strref_list.append (obj)
             off = off + 26
@@ -125,7 +128,11 @@ class TLK_Format (Format):
                 sys.stdout.flush ()
         print
 
+
     def write (self, stream):
+        tick_size = core.get_option ('format.tlk.tick_size')
+        tack_size = core.get_option ('format.tlk.tack_size')
+
         self.header['num_strings'] = len (self.strref_list)
         self.header['string_offset'] = self.get_struc_size (self.header_desc, self.header) + len (self.strref_list) * self.get_struc_size (self.strref_record_desc, None)
         self.write_struc (stream, 0x0000, self.header_desc, self.header)
@@ -133,17 +140,27 @@ class TLK_Format (Format):
         strref_offset = self.get_struc_size (self.header_desc, self.header)
         string_offset = 0
         strref_size = self.get_struc_size (self.strref_record_desc, None)
-        for strref in self.strref_list:
+        for i, strref in enumerate (self.strref_list):
             # FIXME: possibly test strref type instead
-            if len (strref['string']) != 0:
+            self.encode(strref)
+
+            if len (strref['string_raw']) != 0:
                 strref['string_offset'] = string_offset
-                stream.write_sized_string (strref['string'], self.header['string_offset'] + string_offset, len (strref['string']))
+                stream.write_sized_string (strref['string_raw'], self.header['string_offset'] + string_offset, len (strref['string_raw']))
             else:
                 strref['string_offset'] = 0
+            strref['string_len'] = len (strref['string_raw'])
             self.write_struc (stream, strref_offset, self.strref_record_desc, strref)
             # FIXME: or raw_string ?
             strref_offset += strref_size
-            string_offset += len (strref['string'])
+            string_offset += len (strref['string_raw'])
+
+            if not (i % tick_size):
+                sys.stdout.write('.')
+                if not (i % tack_size):
+                    sys.stdout.write('%d' %i)
+                sys.stdout.flush ()
+        print
         
 
     def printme (self):
@@ -158,14 +175,86 @@ class TLK_Format (Format):
 
     def read_strref_record (self, stream, offset, obj):
         self.read_struc (stream, offset, self.strref_record_desc, obj)
-        obj['string'] = stream.read_sized_string (self.header['string_offset'] + obj['string_offset'], obj['string_len'])
-        obj['string_raw'] = obj['string']
-        if core.lang_trans:
-            obj['string'] = string.translate (obj['string'], core.lang_trans)
+        obj['string_raw'] = stream.read_sized_string (self.header['string_offset'] + obj['string_offset'], obj['string_len'])
+        self.decode(obj)
+
         
     def print_strref_record (self, obj):
         self.print_struc (obj, self.strref_record_desc)
 
+
+    def decode (self, obj, tlk_enc = None, io_enc = None):
+        res = True
+
+        if not tlk_enc:
+            tlk_enc = self.get_option ('format.tlk.encoding')
+        if not io_enc:
+            io_enc = self.get_option ('encoding')
+
+        obj['string'] = obj['string_raw']
+
+        # FIXME: polish BG1 encoding
+
+        if tlk_enc:
+            try:
+                #obj['string'] = string.translate (obj['string'], core.lang_trans)
+                #print codecs.encode (codecs.decode (obj['string'], 'cp1250'), 'utf-8')
+                obj['string'] = codecs.decode (obj['string_raw'], tlk_enc)
+            except UnicodeError, e:
+                res = False
+                try:
+                    obj['string'] = codecs.decode (obj['string_raw'], 'cp1252')
+                    print >>sys.stderr, 'STRREF', obj['_strref'], e
+                except UnicodeError:
+                    # e is from outer exception
+                    print >>sys.stderr, 'STRREF', obj['_strref'], e
+                    print >>sys.stderr, ' '.join ([ hex(ord(c)) for c in obj['string'] ])
+
+        if io_enc:
+            try:
+                obj['string'] = codecs.encode (obj['string'], io_enc)
+            except UnicodeError, e:
+                res = False
+                print >>sys.stderr, 'STRREF', obj['_strref'], e
+
+        return res
+
+
+    def encode (self, obj, tlk_enc = None, io_enc = None):
+        res = True
+
+        obj['string_raw'] = obj['string']
+
+        if not tlk_enc:
+            tlk_enc = self.get_option ('format.tlk.encoding')
+        if not io_enc:
+            io_enc = self.get_option ('encoding')
+
+        # FIXME: polish BG1 encoding
+
+        if io_enc:
+            try:
+                obj['string_raw'] = codecs.decode (obj['string'], io_enc)
+            except UnicodeError, e:
+                res = False
+                print >>sys.stderr, 'STRREF', obj['_strref'], e
+
+        if tlk_enc:
+            try:
+                #obj['string'] = string.translate (obj['string'], core.lang_trans)
+                #print codecs.encode (codecs.decode (obj['string'], 'cp1250'), 'utf-8')
+                obj['string_raw'] = codecs.encode (obj['string_raw'], tlk_enc)
+            except UnicodeError, e:
+                res = False
+                try:
+                    obj['string_raw'] = codecs.encode (obj['string'], 'cp1252')
+                    print >>sys.stderr, 'STRREF', obj['_strref'], e
+                except UnicodeError:
+                    # e is from outer exception
+                    print >>sys.stderr, 'STRREF', obj['_strref'], e
+                    print >>sys.stderr, ' '.join ([ hex(ord(c)) for c in obj['string'] ])
+
+        return res
 
 
     def get_strref_by_str_re (self, text):
