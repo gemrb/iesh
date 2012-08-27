@@ -1,5 +1,5 @@
-iesh - Simple Python shell for exploring Infinity Engine-based data files
-=========================================================================
+iesh - Python shell and package for exploring Infinity Engine-based data files
+==============================================================================
 
 
 Installation:
@@ -8,13 +8,10 @@ If you are installing from the source package, type
 
 # python ./setup.py install
 
-If you are installing from the binary package, untar the tarball
-to a usual directory, e.g. /usr/local
-
 Package contents:
-  iesh - the shell
-  infinity - python module package dealing with the reading of IE files
-  infinity/formats/* - various modules for reading the specific IE file formats
+  iesh - simple Python interactive shell with history, tab completion, pager 
+  infinity/ - python module package
+  infinity/formats/*.py - modules for reading and writing specific IE file formats
 
   infinity/stream.py
   infinity/format.py
@@ -25,10 +22,128 @@ Package contents:
   examples/ - some example code snippets
 
 
+
+Running:
+--------
+iesh is a simple shell for execution of Python statements.
+In fact, it's not that much different from ipython or even python's
+built-in shell itself, it's just slightly tweaked to ease 
+working with infinity package and you could easily use
+the python package without it.
+
+Key differences include:
+ * readline to complete names in Python namespace
+ * infinity.streams.*, infinity.formats.*, core and builtins.*
+   modules or objects are imported
+ * output is filtered through pager
+ * commands prefixed with '!' are passed to shell
+ * files prefixed with '@' are executed by iesh.
+ * statements prefixed with '~' are run through python debugger
+ * ?
+
+
+To start iesh, just run ./iesh or python ./iesh and you
+get to Cmd: prompt where you can type python statements.
+
+Up and down arrows are used to browse command history, Ctrl-R
+searches history for a command and TAB completes names of 
+Python objects. See documentation for python readline module
+for more information.
+
+For some functionality it's needed to load game's RESREFs and STRREFs
+- i.e. list of resources and strings in CHITIN.KEY and DIALOG.TLK
+files. To load them, run load_game () function like this:
+
+    Cmd: load_game ("/home/user/dos/bg2")
+
+dots marking progress as the program loads CHITIN.KEY and DIALOG.TLK.
+
+!!! This might take *extremely* long time on a slow computer and
+a significant portion of memory. If it's too slow or too big, then
+this proggie just is not for you :( !!! 
+
+Once the files are loaded, you get Cmd: prompt, 
+Now you can load files, inspect their contents, search them and export
+objects out of them.
+
+To considerably speed up the loading in the future, save a parsed representation
+of the data objects:
+
+    save("bg2")
+
+And next time instead of load_game() just use:
+
+    restore("bg2")
+
+
+Common tasks:
+-------------
+To load and parse a file or object, use the load_object() function:
+
+    o = load_object("data/STONEBIG.BAM")
+
+or even:
+
+    o = load_object("STONEBIG")
+ 
+If the named file is not found at the given path, it's searched for in game's data, 
+but that requires that game data were already loaded.
+ 
+To print the content of the object you just loaded:
+
+     o.printme()
+
+Image file types can be viewed:
+
+    o.view()
+
+To write object back to disk:
+
+    f = FileStream().open("data/tmp.tmp", "wb")
+    o.write(f)
+    f.close()
+
+(But not all objects support that already)
+
+To directly export an object to a file:
+
+    export_object("STONEBIG", "data/tmp.tmp")  
+
+
+Encoding support:
+-----------------
+To print strings from a foreign-language version of DIALOG.TLK, you have to set
+encoding used by the game data and by your terminal.
+
+For example, to print a string from the Korean version:
+
+    core.set_option("format.tlk.encoding", "cp949")
+    core.set_option("encoding", "utf8")
+    o = load_object("data/dialog.tlk")
+    print o.strref_list[1]['string']
+
+
+Getting help:
+-------------
+?, help
+help (object)
+help (infinity)
+help (infinity.builtins)
+?object
+...
+
+Debugging
+---------
+~
+format.debug_read
+format.debug_write
+stream.debug_coverage
+
+
 Configuration:
 --------------
 
-Edit ie_shell.py:
+  $HOME/.iesh_profile
 
 game_dir 
     - directory where the game you are interested in is installed
@@ -38,35 +153,7 @@ dialog_file
     - names of RESREF and STRREF index files, located in game_dir.
       Edit the names if the case does not match
 
-Other files:
-  $HOME/.iesh_profile
-  $HOME/.iesh_history
-  $HOME/.iesh_save
-  $HOME/.iesh_save-*
 
-
-Running:
---------
-Just type ./iesh or python ./iesh and you should see 
-dots marking progress as the program loads CHITIN.KEY and DIALOG.TLK.
-
-!!! This might take *extremely* long time on a slow computer and
-a significant portion of memory. If it's too slow or too big, then
-this proggie just is not for you :( !!! 
-
-Once the files are loaded, you get Cmd: prompt, where you can type
-python statements.
-
-Now you can load files, inspect their contents, search them and export
-objects out of them.
-
-Getting help:
--------------
-?, help
-help (object)
-help (infinity)
-help (infinity.builtins)
-...
 
 The following resource formats are recognized in this version:
   2DA
@@ -101,21 +188,36 @@ to exit the program.
 
 Struc format:
 -------------
+Many of the *_Format classes used for processing IE files use
+description of their respective file format specified as one or 
+several *_desc lists. Each item in a list defines one data field, 
+presumably a member of a struct originally used by IE to create
+the file.
+
+Each field is a dictionary whose items specify field's key,
+offset, size, type and label, possibly more.
+
 key - field name, used as a key in the resulting object
-type - data type used for read/write and presentation
+type - data type used to read, write and display the field
 off - field offset, relative to struc's offset 0x0000
+label - label printed for this field
 enum - map of field values to their descriptions or IDS filename
 mask - map of bit masks[FIXME: or bit nums?] to their descriptions
 size - num of bytes for BYTES data type
 count - count of fields of the same type and description
-label - label printed for this field
 
+
+Other files:
+  $HOME/.iesh_profile
+  $HOME/.iesh_history
+  $HOME/.iesh_save
+  $HOME/.iesh_save-*
 
 
 License, disclaimer and similar stuff:
 --------------------------------------
 
-Copyright (C) 2004-2010 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

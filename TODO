@@ -1,6 +1,6 @@
 1. use search path for files, possibly caching the paths
 2. Format.read_struc(): allow for offset based on size of other field (STRSIZED, as in BIFC_Format)
-3. make the MemoryStream data buffer autostrech (shrink/grow)
+3. make the MemoryStream data buffer autostretch (shrink/grow)
 4. canonize field names and labels
     - e.g.: 
         door_cnt or doors_cnt ?
@@ -14,7 +14,7 @@
 11. decode strings from a specified encoding to Unicode on load,
     encode to (possibly another) system encoding on write
 12. let formats register not only for sig+version, but for type, extension, game_type, some regexp as well. 
-    And combinations of the above, with more specific registations taking precedence. Unimplemented formats could
+    And combinations of the above, with more specific registrations taking precedence. Unimplemented formats could
     be handled by "Unimplemented_Format"
 
 Data types:
@@ -29,6 +29,13 @@ Data types:
 8. change prints in printme() to fh.write() to allow for better output redirection
 9. generalize prints to allow printing to HTML tables, for example.
 10. filter out non-printable chars in BYTES or STRn output to prevent garbage hosing the terminal
+11. organize reads and writes to be in the same order as in the file, to avoid seeks. Add debug option
+    to report each seek. Add option to ignore seeks or to check tell() before each read/write
+    and compare to expected one.
 
 Streams:
 1. Base streams on Python's native file interface, so normal files can be used for reading structures and also the streams can be used with normal python functions. This would require moving the read_(resref|word|...) functions elsewhere, though
+
+Dialogs:
+in DLG_Format.print_flow() indicate or print journal text, e.g. see dmorte2, transition 21
+

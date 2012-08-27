@@ -123,11 +123,17 @@ def help_on_shell ():
       help (__name__)
       help (infinity)
       help (infinity.builtins)
-            help on various topics
+           help on various topics
 
       !shell_cmd
           Runs command shell_cmd in your native shell. Useful to list
           files on disk, for example.
+
+      @filename
+          Execute python commands from the named file one by one
+
+     ?name
+          Print help on name
 
       quit
           Exit the shell.
@@ -266,8 +272,16 @@ while 1:
         help_on_shell ()
         continue
     
+    if current_command.startswith ('?'):
+        eval ('help(%s)' %current_command[1:])
+        continue
+
     if current_command.startswith ('!'):
         os.system (current_command[1:])
+        continue
+
+    if current_command.startswith ('@'):
+        read_command_file (current_command[1:])
         continue
 
     # If `pager' option is set, run the `pager' and pipe command output to it
