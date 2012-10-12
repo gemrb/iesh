@@ -156,7 +156,7 @@ def find_str (regexp):
     Find all strings in loaded DIALOG.TLK file matching regular
     expression 'regexp' and prints the STRREFs and strings to stdout."""
     
-    for o in core.strrefs.get_strref_by_str_re(text):
+    for o in core.strrefs.get_strref_by_str_re(regexp):
         print core.strrefs.strref_list.index(o), o['string']
 
 
