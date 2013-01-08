@@ -23,6 +23,7 @@ module contents are automatically imported directly into iesh's
 namespace on startup."""
 
 import os.path
+import sys
 import traceback
 
 from infinity import core
@@ -104,51 +105,88 @@ def export_object (name, filename, type = None, index = 0):
     fh.close ()
     stream.close ()
     
+
 ###################################################
-def iterate_objects (fn, filter_fn = None, sort_fn = None, error_fn = None):
-    """Execute function for each object of specified type."""
+class ObjectIterator:
+    """Iterate over specified resrefs, load them as objects and generate pairs (resref, object).
+
+    Parameters:
     
+    type=[num|name] - select resrefs specified by type id or type name
+    filter - ref to function taking resref as a parameter and returning True for
+             resrefs which should be selected
+    sort - fiels name to sort on or ref to function which compares two resrefs
+    error=[ignore|msg|traceback|throw|<fn>] - how to handle errors during a loading of a resref
+    names=all - print resref names as they are loaded."""
+
     # FIXME: this function opens and decodes a bif file EACH time some
-    #   object from it is accessed, so it's slow as hell. It should use
-    #   some caching
+    #   object from it is accessed, unless you set 'use_cache' option
 
-    #def resref_to_obj (res):
-    #    print res['resref_name']
-    #    return ResourceStream (res['resref_name'], type).load_object ()
+    # FIXME: add names=ok|error, eventually ok2, error2 to specidy when to
+    #   print the label
 
-    resrefs = []
-    resrefs.extend (core.keys.resref_list)
-    if callable (filter_fn):
-        resrefs = filter (filter_fn, resrefs)
+    def __init__ (self, **kw):
+        self.resrefs = core.keys.resref_list[:]
     
-    if callable (sort_fn):
-        resrefs.sort (sort_fn)
+        if 'type' in kw and type (kw['type']) == type (1):
+            self.resrefs = filter (lambda r, t=kw['type']: r['type'] == t, self.resrefs)
+        elif 'type' in kw:
+            tid = core.find_res_type (name=kw['type'])[0][0]
+            self.resrefs = filter (lambda r, t=tid: r['type'] == t, self.resrefs)
 
-    for res in resrefs:
-        print res['resref_name']
+        if 'filter' in kw and callable (kw['filter']):
+            self.resrefs = filter (kw['filter'], self.resrefs)
+        
+        if 'sort' in kw and callable (kw['sort']):
+            self.resrefs.sort (kw['sort'])
+    
+        if 'error' in kw:
+            self.error_fn = kw['error']
+        else:
+            self.error_fn = None
+    
+        if 'names' in kw:
+            self.print_names = kw['names']
+        else:
+            self.print_names = 'all'
+
+    
+    def __iter__ (self):
+        return self
+
+
+    def next (self):
+        if not self.resrefs:
+            raise StopIteration
+        
+        res = self.resrefs.pop (0)
+
+        if self.print_names == 'all':
+            print res['resref_name']
+
         obj = None
 
-        if error_fn in ['msg', 'traceback'] or callable (error_fn):
-            try:
-                obj = ResourceStream ().open (res['resref_name'], res['type']).load_object ()
-                fn (res, obj)
-            except Exception, e:
-                if callable (error_fn):
-                    error_fn (res, obj, e)
-                elif error_fn == 'msg':
-                    print e
-                elif error_fn == 'traceback':
-                    traceback.print_exc ()
-        else:
+        #if error_fn in ['msg', 'traceback', 'ignore'] or callable (error_fn):
+        try:
             obj = ResourceStream ().open (res['resref_name'], res['type']).load_object ()
-            fn (res, obj)
+            #fn (res, obj)
+        except Exception, e:
+            if callable (self.error_fn):
+                self.error_fn (res, obj, e)
+            elif self.error_fn == 'msg':
+                for msg in traceback.format_exception_only (sys.exc_type, sys.exc_value):
+                    print msg
+            elif self.error_fn == 'traceback':
+                traceback.print_exc ()
+            elif self.error_fn == 'ignore':
+                pass
+            else:
+                #traceback.print_exc ()
+               raise
+        
+        return res, obj
 
 
-###################################################
-def iterate_objects_by_type (type, fn, filter_fn = None, sort_fn = None, error_fn = None):
-    """Execute function for each object of specified type."""
-    return iterate_objects (fn, filter_fn = lambda r: r['type'] == type, sort_fn = sort_fn, error_fn = error_fn)
-    
 ###################################################
 def find_str (regexp):
     """Find all strings in core.strrefs matching regular expression.
