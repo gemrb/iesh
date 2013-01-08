@@ -20,11 +20,13 @@
 import struct
 import sys
 
+
 from infinity.format import Format, register_format
 from infinity.stream import CompressedStream
+from infinity.image import Image
 
 
-class MOS_Format (Format):
+class MOS_Format (Format, Image):
     header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
@@ -105,6 +107,7 @@ class MOS_Format (Format):
 
     def __init__ (self):
         Format.__init__ (self)
+        Image.__init__ (self)
         self.expect_signature = 'MOS'
 
         self.tile_list = []
@@ -137,6 +140,7 @@ class MOS_Format (Format):
                 off += 4
                 i += 1
 
+        self.data_to_image()
         return self
 
 
@@ -201,13 +205,30 @@ class MOS_Format (Format):
             print
         print
     
-    # FIXME: use stream instead of fh?
-    def write_ppm (self, fh):
-        fh.write ("P6\n")
-        fh.write ("# ie_shell\n");
-        fh.write ("%d %d\n" %(self.header['width'], self.header['height']));
-        fh.write ("255\n");
+#    # FIXME: use stream instead of fh?
+#    def write_ppm (self, fh):
+#        fh.write ("P6\n")
+#        fh.write ("# ie_shell\n");
+#        fh.write ("%d %d\n" %(self.header['width'], self.header['height']));
+#        fh.write ("255\n");
+#
+#        for line in range (self.header['height']):
+#            row = line / self.header['block_size']
+#            scanline = line % self.header['block_size']
+#            
+#            for i in range (self.header['columns']):
+#                tile = self.tile_list[(row * self.header['columns']) + i]
+#                pal = tile['palette']
+#            
+#                o = scanline * tile['width']
+#                for x in range (tile['width']):
+#                    pix = tile['tile_data'][o + x]
+#                    col = pal[pix]
+#                    fh.write ('%c%c%c' %(col['r'], col['g'], col['b']))
 
+
+    def data_to_image (self):
+        data = []
         for line in range (self.header['height']):
             row = line / self.header['block_size']
             scanline = line % self.header['block_size']
@@ -220,7 +241,9 @@ class MOS_Format (Format):
                 for x in range (tile['width']):
                     pix = tile['tile_data'][o + x]
                     col = pal[pix]
-                    fh.write ('%c%c%c' %(col['r'], col['g'], col['b']))
+                    data.append('%c%c%c\xff' %(col['r'], col['g'], col['b']))
+
+        self.pixels = ''.join(data)
 
 
 class MOSC_Format (MOS_Format):

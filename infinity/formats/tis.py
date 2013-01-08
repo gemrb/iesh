@@ -1,6 +1,6 @@
 # -*-python-*-
 # ie_shell.py - Simple shell for Infinity Engine-based game files
-# Copyright (C) 2004-2008 by Jaroslav Benkovsky, <edheldil@users.sf.net>
+# Copyright (C) 2004 by Jaroslav Benkovsky, <edheldil@users.sf.net>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,11 +18,13 @@
 
 import struct
 import sys
+import PIL
 
 from infinity import core
 from infinity.format import Format, register_format
+from infinity.imagesequence import ImageSequence
 
-class TIS_Format (Format):
+class TIS_Format (Format, ImageSequence):
 
     header_desc = (
             { 'key': 'signature',
@@ -83,6 +85,7 @@ class TIS_Format (Format):
 
     def __init__ (self):
         Format.__init__ (self)
+        ImageSequence.__init__ (self)
         self.expect_signature = 'TIS'
 
         self.tile_list = []
@@ -96,14 +99,15 @@ class TIS_Format (Format):
         
         off = self.header['tile_off']
         for i in range (self.header['tile_cnt']):
-            obj = []
-            self.read_palette (stream,  off,  obj)
+            pal = []
+            self.read_palette (stream,  off,  pal)
             off += palette_size
             bin_data = stream.read_blob (off, tile_size)
-            tile_data = struct.unpack ('%dB' %tile_size, bin_data)
+            #tile_data = struct.unpack ('%dB' %tile_size, bin_data)
             off += tile_size
+            obj = {'palette': pal,  'tile_data': bin_data}
             
-            self.tile_list.append ({'palette': obj,  'tile_data': tile_data})
+            self.tile_list.append (obj)
 
         return self
 
@@ -121,8 +125,8 @@ class TIS_Format (Format):
         for tile in self.tile_list:
             self.write_palette (stream, off, tile['palette'])
             off += palette_size
-            bin_data = struct.pack ('%dB' %tile_size, *tile['tile_data'])
-            stream.write_blob (bin_data, off)
+            #bin_data = struct.pack ('%dB' %tile_size, *tile['tile_data'])
+            stream.write_blob (tile['tile_data'], off)
             
             off += tile_size
 
@@ -173,27 +177,45 @@ class TIS_Format (Format):
 #        bin_data = stream.read_blob (obj['offset'], size)
 #        obj['tile_data'] = struct.unpack ('%dB' %size, bin_data)
 #
+# 
+    def frame_to_image (self, obj):
+        pal = obj['palette']
+        data = [ '%c%c%c\xff' %(pal[ord(p)]['r'], pal[ord(p)]['g'], pal[ord(p)]['b'])  for p in obj['tile_data']]
+        pixels = ''.join(data)
+        # FIXME: not needed 
+        obj['x'] = 0
+        obj['y'] = 0
+        sz = self.header['size']
+        obj['width'] = sz
+        obj['height'] = sz
+
+        img = PIL.Image.fromstring ('RGBA', (sz, sz), pixels, "raw", 'RGBA', 0, 1)
+        img.x = 0
+        img.y = 0
+
+        obj['image'] = img
+        return img
+
+#    def print_tile (self, obj):
+#        gray = ' #*+:.'
+#        grsz = len (gray) - 1
+#        ndx = 0
 #
-    def print_tile (self, obj):
-        gray = ' #*+:.'
-        grsz = len (gray) - 1
-        ndx = 0
+#        for i in range (self.header['size']):
+#            for j in range (self.header['size']):
+#                pix = obj['tile_data'][ndx]
+#
+#                p = obj['palette'][pix]
+#                gr = 1 + (p['r'] + p['g'] + p['b']) / (3 * (255 / grsz))
+#                if gr >= grsz:
+#                    gr = grsz - 1
+#                sys.stdout.write (gray[gr])
+#                #sys.stdout.write (gray[gr])
+#                #print gray[gr],
+#                ndx = ndx + 1
+#            print
+#        print
 
-        for i in range (self.header['size']):
-            for j in range (self.header['size']):
-                pix = obj['tile_data'][ndx]
-
-                p = obj['palette'][pix]
-                gr = 1 + (p['r'] + p['g'] + p['b']) / (3 * (255 / grsz))
-                if gr >= grsz:
-                    gr = grsz - 1
-                sys.stdout.write (gray[gr])
-                #sys.stdout.write (gray[gr])
-                #print gray[gr],
-                ndx = ndx + 1
-            print
-        print
-    
 #    # FIXME: use stream instead of fh?
 #    def write_ppm (self, fh):
 #        fh.write ("P6\n")
@@ -215,6 +237,9 @@ class TIS_Format (Format):
 #                    col = pal[pix]
 #                    fh.write ('%c%c%c' %(col['r'], col['g'], col['b']))
 
+
+    def get_frame_lol (self):
+        return [ self.tile_list ]
 
     def from_mos (self, mos):
         self.tile_list = []
@@ -247,7 +272,7 @@ class TIS_Format (Format):
             
             #print 'Pad:', pad
             data.extend (pad)
-
+            data = struct.pack ("%dB" %(size*size), *data)
             self.tile_list.append ({ 'palette': obj['palette'], 'tile_data': data })
 
         self.header['tile_cnt'] = len (self.tile_list)

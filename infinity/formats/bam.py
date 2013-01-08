@@ -19,12 +19,14 @@
 
 import struct
 import sys
+import PIL
 
 from infinity.format import Format, register_format
 from infinity.stream import CompressedStream
+from infinity.imagesequence import ImageSequence
 
 
-class BAM_Format (Format):
+class BAM_Format (Format, ImageSequence):
     header_desc = (
             { 'key': 'signature',
               'type': 'STR4',
@@ -84,21 +86,21 @@ class BAM_Format (Format):
               'off': 0x0002,
               'label': 'Frame height'},
 
-            { 'key': 'xcenter',
+            { 'key': 'x',
               'type': 'WORD',
               'off': 0x0004,
-              'label': 'Frame center X'},
+              'label': 'Frame anchor X'},
 
-            { 'key': 'ycenter',
+            { 'key': 'y',
               'type': 'WORD',
               'off': 0x0006,
-              'label': 'Frame center Y'},
+              'label': 'Frame anchor Y'},
 
-            { 'key': 'rle_encoded',
+            { 'key': 'uncompressed',
               'type': 'DWORD',
               'off': 0x0008,
               'bits': '31-31',
-              'label': 'RLE encoded'},
+              'label': 'Uncompressed (0=RLE)'},
 
             { 'key': 'frame_data_off',
               'type': 'DWORD',
@@ -125,7 +127,7 @@ class BAM_Format (Format):
             )
 
     palette_entry_desc = (
-            { 'key': 'r',
+            { 'key': 'b',
               'type': 'BYTE',
               'off': 0x0000,
               'label': 'R'},
@@ -135,7 +137,7 @@ class BAM_Format (Format):
               'off': 0x0001,
               'label': 'G'},
 
-            { 'key': 'b',
+            { 'key': 'r',
               'type': 'BYTE',
               'off': 0x0002,
               'label': 'B'},
@@ -156,13 +158,13 @@ class BAM_Format (Format):
 
     def __init__ (self):
         Format.__init__ (self)
+        ImageSequence.__init__ (self)
         self.expect_signature = 'BAM'
 
         self.frame_list = []
         self.cycle_list = []
         self.palette_entry_list = []
         self.frame_lut = None
-
 
     def read (self, stream):
         self.read_header (stream)
@@ -182,11 +184,17 @@ class BAM_Format (Format):
 
         self.read_palette (stream, self.header['palette_off'])
 
+        #if self.get_option ('format.bam.decode_frame_data'):
+        #    for obj in self.frame_list:
+        #        self.frame_to_rgba (obj)
+
 
     def write (self,  stream):
         # FIXME: incomplete
         frame_size = self.get_struc_size (self.frame_desc)
         cycle_size = self.get_struc_size (self.cycle_desc)
+
+        # FIXME: conver pixels
         
         self.header['frame_cnt'] = len (self.frame_list)
         self.header['cycle_cnt'] = len (self.cycle_list)
@@ -256,16 +264,18 @@ class BAM_Format (Format):
         self.read_struc (stream, offset, self.frame_desc, obj)
 
         if self.get_option ('format.bam.decode_frame_data'):
-            if self.get_option ('format.bam.force_rle') or obj['rle_encoded']:
-                self.read_rle_frame_data (stream, obj)
-            else:
+            if obj['uncompressed']:
                 self.read_frame_data (stream, obj)
+            else:
+                self.read_rle_frame_data (stream, obj)
+
     
     def print_frame (self, obj):
         self.print_struc (obj, self.frame_desc)
 
         if self.get_option ('format.bam.print_frame_bitmap'):
-            self.print_frame_bitmap (obj)
+            self.print_bitmap (obj)
+            print
 
     def read_cycle (self, stream, offset, obj):
         self.read_struc (stream, offset, self.cycle_desc, obj)
@@ -313,6 +323,7 @@ class BAM_Format (Format):
         bin_data = stream.read_blob (obj['frame_data_off'], size)
         obj['frame_data'] = struct.unpack ('%dB' %size, bin_data)
 
+        
     def read_rle_frame_data (self, stream, obj):
         off = obj['frame_data_off']
         size = obj['width'] * obj['height']
@@ -334,6 +345,28 @@ class BAM_Format (Format):
             off = off + 1
             
         obj['frame_data'] = data
+
+
+    def get_frame_lol (self):
+        return [ self.frame_list[:] ]
+
+    def frame_to_image (self, obj):
+        transparent = self.header['transp_color_ndx']
+        ndx = 0
+        data = []
+        for i in range (obj['height']):
+            for j in range (obj['width']):
+                color = obj['frame_data'][ndx]
+                p = self.palette_entry_list[color]
+                pix = '%c%c%c%c' %(p['r'], p['g'], p['b'], (255, 0)[color == transparent])
+                data.append(pix)
+                ndx = ndx + 1
+
+        img = PIL.Image.fromstring ('RGBA', (obj['width'], obj['height']), ''.join(data), "raw", 'RGBA', 0, 1)
+        img.x = 0
+        img.y = 0
+
+        obj['image'] = img
 
 
     def write_frame_data (self, stream, off, obj):
@@ -406,75 +439,6 @@ class BAM_Format (Format):
             print
         print
 
-    def print_frame_bitmap (self, obj):
-        gray = ' #*+:.'
-        grsz = len (gray) - 1
-        transparent_color = self.header['transp_color_ndx']
-        ndx = 0
-        for i in range (obj['height']):
-            for j in range (obj['width']):
-                pix = obj['frame_data'][ndx]
-                if pix == transparent_color:
-                    gr = 0
-                else:
-                    p = self.palette_entry_list[pix]
-                    gr = 1 + (p['r'] + p['g'] + p['b']) / (3 * (255 / grsz))
-                    if gr >= grsz:
-                        gr = grsz - 1
-                sys.stdout.write (gray[gr])
-                #sys.stdout.write (gray[gr])
-                #print gray[gr],
-                ndx = ndx + 1
-            print
-        print
-
-
-    # FIXME: use stream instead of fh?
-    def write_frame_ppm (self, fh,  obj):
-        fh.write ("P6\n")
-        fh.write ("# ie_shell BAM frame %d %d\n" %(obj['xcenter'], obj['ycenter']));
-        #fh.write ("# ie_shell BAM2 frame %d %d\n" %(obj['xcenter'], obj['ycenter']));
-        
-        fh.write ("%d %d\n" %(obj['width'], obj['height']));
-        fh.write ("255\n");
-
-        ndx = 0
-        for i in range (obj['height']):
-            for j in range (obj['width']):
-                pix = obj['frame_data'][ndx]
-                #if pix == transparent_color:
-                #   .....
-                
-                col= self.palette_entry_list[pix]
-                fh.write ('%c%c%c' %(col['r'], col['g'], col['b']))
-                ndx = ndx + 1
-
-    def read_frame_ppm (self,  fh):
-        line = fh.readline ()
-        if line != 'P6\n':
-            print "Not PNM P6 header"
-            return None
-            
-        line = fh.readline ()
-        while line.startswith ('#'):
-            line = fh.readline ()
-        
-        try:
-            width,  height = map (int, line.split(" "))
-        except e:
-            print "Not PNM"
-            return None
-            
-        buf = fh.read ()
-        print len(buf)
-        ndx = 0
-        for i in range (height):
-            for j in range (width):
-                print buf[ndx],  buf[ndx+1],  buf[ndx+2]
-                r,  g,  b = map (int, (buf[ndx],  buf[ndx+1],  buf[ndx+2]))
-                print r,  g,  b
-                
-                ndx += 3
 
 class BAMC_Format (BAM_Format):
     envelope_desc = (
@@ -509,6 +473,14 @@ class BAMC_Format (BAM_Format):
 
         return BAM_Format.read (self, stream)
 
+    def write (self, stream):
+        tmpstream = CompressedStream ().open (data, 'wb')
+        self.write (tmpstream)
+        data = tmpstream.data
+        # self.envelope['uncompressed_size'] = ...
+        self.write_envelope (stream)
+        stream.write_blob (data)
+
     def printme (self):
         self.print_envelope ()
         BAM_Format.printme (self)
@@ -516,6 +488,9 @@ class BAMC_Format (BAM_Format):
     def read_envelope (self, stream):
         self.envelope = {}
         self.read_struc (stream, 0x0000, self.envelope_desc, self.envelope)
+        
+    def write_envelope (self, stream):
+        self.write_struc (stream, 0x0000, self.envelope_desc, self.envelope)
         
     def print_envelope (self):
         self.print_struc (self.envelope, self.envelope_desc)
