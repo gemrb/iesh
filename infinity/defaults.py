@@ -33,12 +33,15 @@ options = {
     'format.print_size': [False, "Print field's size (in bytes)"],
     'format.print_type': [False, "Print field's type"],
 
-    'format.bam.force_rle': [True,  "Assume that frame data is always RLE encoded"], 
+    #'format.bam.force_rle': [True,  "Assume that frame data is always RLE encoded"], 
     'format.bam.decode_frame_data': [True, "Decode BAM frame data"], 
     'format.bam.print_frame_bitmap': [True, "Print BAM frame data"], 
     'format.bam.print_palette': [True, "Print BAM frame palette" ], 
 
     'format.biff.read_data': [False,  "When reading BIFF file read its data too"], 
+
+    'format.bmp.print_bitmap': [True, "Print BMP bitmap"], 
+    'format.bmp.print_palette': [True, "Print BMP palette" ],
 
     'format.key.tick_size': [ 100, "# of RESREFs read to print a dot" ], 
     'format.key.tack_size': [ 5000, "# of RESREFs read to print a number" ], 
@@ -46,6 +49,8 @@ options = {
 
     'format.mos.print_tiles': [True,  "Print MOS tiles"], 
     'format.mos.print_palettes': [False,  "Print MOS palettes"], 
+
+    'format.plt.print_bitmap': [True, "Print PLT bitmap"], 
 
     'format.sav.read_data': [False,  "When reading SAV file read its data too"], 
     
