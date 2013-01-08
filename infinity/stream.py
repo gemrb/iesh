@@ -422,8 +422,16 @@ class MemoryStream (Stream):
         self.offset = self.offset + len (data)
         return data
 
+    def write (self, bytes, size = None):
+        end = len (buffer) - (self.offset + len (bytes))
+        if end  < 0:
+            self.buffer.extend ([0] * -end)
+
+        # ...
+
     def __repr__ (self):
         return "<MemoryStream: %s at 0x%08x>" %(self.name, id (self))
+
 
 class ResourceStream (MemoryStream):
     """Stream for reading RESREFs (files in the IE data `filesystem').
@@ -432,7 +440,7 @@ class ResourceStream (MemoryStream):
     def __init__ (self):
         MemoryStream.__init__ (self)
 
-    def open (self, name, type = None,  index = 0):
+    def open (self, name, type = None, index = 0):
         self.resref = name
         self.type = type
 
@@ -450,9 +458,8 @@ class ResourceStream (MemoryStream):
 
         # First look for the object in cache and override directories.
         # We have to attach filename extension to the name based on its type when searching
-        exts = core.type_to_ext (o['type'])
-        for ext in exts:
-            obj_file = core.find_file (name + ext)
+        for ext in core.type_to_ext (o['type']):
+            obj_file = core.find_file (name + '.' + ext)
             if obj_file is not None:
                 return FileStream ().open (obj_file)
 
@@ -460,7 +467,7 @@ class ResourceStream (MemoryStream):
         # Lookup the BIF archive file containing the object
         src_file = core.keys.bif_list[o['locator_src_ndx']]
         use_cache = core.get_option ('use_cache')
-        if use_cache and src_file['file_name'] in core.bif_files:
+        if src_file['file_name'] in core.bif_files:
             # FIXME: convert to uppercase?
             b, bif_stream = core.bif_files[src_file['file_name']]
         else:
@@ -481,15 +488,18 @@ class ResourceStream (MemoryStream):
             if use_cache:
                 core.bif_files[src_file['file_name']] = (b, bif_stream)
 
-        obj = b.file_list[o['locator_ntset_ndx']]
+        if o['type'] != 0x3eb: # TIS            
+            obj = b.file_list[o['locator_ntset_ndx']]
+        else:
+            obj = b.file_list[o['locator_tset_ndx']]
+
         b.get_file_data (bif_stream, obj)
 
         buffer = obj['data']
         return MemoryStream.open (self, buffer,  name = name)
-        
+
     def load_object (self):
         return Stream.load_object (self, self.type)
-
 
     def __repr__ (self):
         return "<ResourceStream: %s at 0x%08x>" %(self.resref, id (self))
@@ -499,10 +509,14 @@ class CompressedStream (MemoryStream):
     """Stream for reading compressed files in memory."""
     
     def open (self, membuffer,  name = '?'):
-        return MemoryStream.open (self, gzip.zlib.decompress (membuffer),  name)
+        if membuffer:
+            return MemoryStream.open (self, gzip.zlib.decompress (membuffer),  name)
+    
+        else:
+            ms = MemoryStream.open (self, None,  name)
+        gzip.zlib.compress (ms.membuffer)
 
     def __repr__ (self):
         return "<CompressedStream: %s at 0x%08x>" %(self.name, id (self))
         
 # End of file stream.py
-
