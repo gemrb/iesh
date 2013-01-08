@@ -84,55 +84,55 @@ def translate_to_ord (s):
 #   unimplemented formats.
 #
 restype_list = [
-    # type,    sig,     ext,  gametype, desc
-    [ None,  'KEY ', '.key' ], 
-    [ None,  'BIFF', '.bif' ], 
-    [ None,  'BIF ', '.cbf' ], 
-    [ None,  'TLK ', '.tlk' ], 
-    [ None,  None,   '.acm' ], 
-    [ None,  None,   '.mus' ], 
-    [ 0x001, None,   '.bmp' ],
-    [ 0x002, None,   '.mve' ],
-    [ 0x004, None,   '.wav' ],
-    [ 0x004, 'WAVC', '.wav' ],
-    [ 0x004, 'WAVC', '.wac' ],
-    [ 0x005, 'WFX ', None ],
-    [ 0x006, 'PLT ', '.plt' ],
-    [ 0x3e8, 'BAM ', '.bam' ],
-    [ 0x3e8, 'BAMC', '.bam' ],
-    [ 0x3e9, 'WED ', '.wed' ],
-    [ 0x3ea, 'CHUI', '.chu' ],
-    [ 0x3eb, None,   '.tis' ],
-    [ 0x3ec, 'MOS ', '.mos' ],
-    [ 0x3ec, 'MOSC', '.mos' ],
-    [ 0x3ed, 'ITM ', '.itm' ],
-    [ 0x3ee, 'SPL ', '.spl' ],
-    [ 0x3ef, None,   '.bcs' ],
-    [ 0x3f0, None,   '.ids' ],
-    [ 0x3f1, 'CRE ', '.cre' ],
-    [ 0x3f2, 'AREA', '.are' ],
-    [ 0x3f3, 'DLG ', '.dlg' ],
-    [ 0x3f4, '2DA',  '.2da' ],
-    [ 0x3f5, 'GAME', '.gam' ],
-    [ None,  'SAV ', '.sav' ],
-    [ 0x3f6, 'STOR', '.sto' ],
-    [ 0x3f7, 'WMAP', '.wmp' ],
-    [ 0x3f8, 'CHR ', '.chr' ],
-    [ 0x3f8, 'EFF ', '.eff' ],
-    [ 0x3f9, None,   '.bs' ],
-    [ 0x3fa, 'CHR ', '.chr' ],
-    [ 0x3fb, 'VVC ', '.vvc' ],
-    [ 0x3fc, '????', '.vef' ],
-    [ 0x3fd, 'PRO ', '.pro' ],
-    [ None,  None,   '.res' ],
-    [ 0x3fe, None,   '.bio' ],
-    [ 0x44c, None,   '.ba' ],
-    [ None,  None,   '.baf' ],
-    [ 0x802, None,   '.ini' ],
-    [ 0x803, None,   '.src' ],
-    [ None,  'TLK ', '.toh' ],
-    [ None,  None,   '.tot' ],
-    [ None,  None,   '.var' ],
+    # type,    sig,     ext,  games, desc
+    [ None,  'KEY ', 'KEY' ],
+    [ None,  'BIFF', 'BIF' ],
+    [ None,  'BIF ', 'CBF' ],
+    [ None,  'TLK ', 'TLK' ],
+    [ None,  None,   'ACM' ],
+    [ None,  None,   'MUS' ],
+    [ 0x001, 'BM',   'BMP' ],
+    [ 0x002, None,   'MVE' ],
+    [ 0x004, None,   'WAV' ],
+    [ 0x004, 'WAVC', 'WAV' ],
+    [ 0x004, 'WAVC', 'WAC' ],
+    [ 0x005, 'WFX ', 'WFX' ], # no extension used, actually
+    [ 0x006, 'PLT ', 'PLT' ],
+    [ 0x3e8, 'BAM ', 'BAM' ],
+    [ 0x3e8, 'BAMC', 'BAM' ],
+    [ 0x3e9, 'WED ', 'WED' ],
+    [ 0x3ea, 'CHUI', 'CHU' ],
+    [ 0x3eb, None,   'TIS' ],
+    [ 0x3ec, 'MOS ', 'MOS' ],
+    [ 0x3ec, 'MOSC', 'MOS' ],
+    [ 0x3ed, 'ITM ', 'ITM' ],
+    [ 0x3ee, 'SPL ', 'SPL' ],
+    [ 0x3ef, None,   'BCS' ],
+    [ 0x3f0, None,   'IDS' ],
+    [ 0x3f1, 'CRE ', 'CRE' ],
+    [ 0x3f2, 'AREA', 'ARE' ],
+    [ 0x3f3, 'DLG ', 'DLG' ],
+    [ 0x3f4, '2DA',  '2DA' ],
+    [ 0x3f5, 'GAME', 'GAM' ],
+    [ None,  'SAV ', 'SAV' ],
+    [ 0x3f6, 'STOR', 'STO' ],
+    [ 0x3f7, 'WMAP', 'WMP' ],
+    [ 0x3f8, 'CHR ', 'CHR' ],
+    [ 0x3f8, 'EFF ', 'EFF' ],
+    [ 0x3f9, None,   'BS' ],
+    [ 0x3fa, 'CHR ', 'CHR' ],
+    [ 0x3fb, 'VVC ', 'VVC' ],
+    [ 0x3fc, '????', 'VEF' ],
+    [ 0x3fd, 'PRO ', 'PRO' ],
+    [ None,  None,   'RES' ],
+    [ 0x3fe, None,   'BIO' ],
+    [ 0x44c, None,   'BA' ],
+    [ None,  None,   'BAF' ],
+    [ 0x802, None,   'INI' ],
+    [ 0x803, None,   'SRC' ],
+    [ None,  'TLK ', 'TOH' ],
+    [ None,  None,   'TOT' ],
+    [ None,  None,   'VAR' ],
     ]
 
 restype_hash = {}
@@ -146,11 +146,22 @@ def build_restype_tables (gametype = None):
     restype_rev_hash = {}
 
     for restype in reversed (restype_list):
-        type, sig, ext = restype
+        # Add fields not set explicitly in restype_list
+        if len (restype) < 5:
+            restype.extend ([None] * (5 - len (restype)))
+
+        if not restype[3]:
+            restype[3] = set()
+
+        if not restype[4]:
+            restype[4] = set()
+
+        type, sig, ext, games, desc = restype
 
         if type is not None and sig is not None:
             restype_hash[type] = sig.strip ()
             restype_rev_hash[sig.strip ()] = type
+
 
 
 
@@ -228,7 +239,7 @@ def build_restype_tables (gametype = None):
 
 def find_res_type (**kw):
     """Return list of resource types matching the given parameters.
-    
+
     Parameter can be type, sig, sig4, or ext. If more than one parameter is given, the
     result must satisfy each of them.
         type - numerical RESREF type
@@ -250,10 +261,10 @@ def find_res_type (**kw):
             rtl = [ r for r in rtl if r[1] == value ]
         elif key == 'sig4':
             rtl = [ r for r in rtl if r[1] == value ]
-        elif key == 'ext':
-            value = value.lower ()
-            if not value.startswith ('.'):
-                value = '.' + value
+        elif key == 'ext' or key == 'name':
+            value = value.upper ()
+            if value.startswith ('.'):
+                value = value[1:]
             rtl = [ r for r in rtl if r[2] == value ]
     
     return rtl
@@ -337,13 +348,15 @@ def symbol_to_id (idsfile, sym):
         except Exception, e:
             traceback.print_exc()
             print e
-            return id
+            #return id
+            return None
 
     try:
         return ids[idsfile].ids_re[sym]
     except KeyError, e:
         sys.stderr.write ("Warning: No such symbol %s in %s\n" %(sym, idsfile))
-        return sym
+        #return sym
+        return None
         
 
 def find_file (filename, type = None):
