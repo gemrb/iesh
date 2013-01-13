@@ -280,4 +280,40 @@ class TIS_Format (Format, ImageSequence):
         self.header['length'] = 4 * 256 + self.header['size'] ** 2
 
 
+class UTIS_Format (TIS_Format):
+    def __init__ (self):
+        TIS_Format.__init__ (self)
+        
+        self.header = {}
+        self.reset_struc (self.header_desc, self.header)
+        self.header['size'] = 64
+
+
+    def read (self, stream):
+        #self.read_header (stream)
+
+        palette_size = 4 * 256
+        tile_size = self.header['size'] ** 2
+        
+        off = 0
+        while True:
+            pal = []
+            try:
+                self.read_palette (stream,  off,  pal)
+            except: # FIXME: ugly hack
+                break
+            
+            off += palette_size
+            bin_data = stream.read_blob (off, tile_size)
+            if len (bin_data) != tile_size:
+                break
+            off += tile_size
+            obj = {'palette': pal,  'tile_data': bin_data}
+            
+            self.tile_list.append (obj)
+
+        self.header['tile_cnt'] = len (self.tile_list)
+        return self
+
+
 register_format ('TIS', 'V1', TIS_Format)
