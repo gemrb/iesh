@@ -17,6 +17,8 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
+# Conforms to IESDP 2012-04-22
+
 import codecs
 import re
 import string
@@ -39,10 +41,10 @@ class TLK_Format (Format):
           'off':0x0004,
           'label': 'Version'},
             
-        { 'key': 'unknown',
+        { 'key': 'language_id',
           'type': 'WORD',
           'off': 0x0008,
-          'label': '???' },
+          'label': 'Language ID?' },
 
         { 'key': 'num_of_strrefs',
           'type': 'DWORD',
@@ -60,6 +62,7 @@ class TLK_Format (Format):
         { 'key': 'content_type',
           'type': 'WORD',
           'off': 0x0000,
+          'enum': { 0: 'No message data', 1: 'Has text', 2: 'Has sound', 3: 'Standard message', 7: 'Has tags in bg2' },
           'label': 'Content of this entry' },
        
         { 'key': 'sound_resref',
