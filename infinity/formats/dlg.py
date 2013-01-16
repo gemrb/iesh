@@ -251,19 +251,19 @@ class DLG_Format (Format):
 
         i = 0
         for obj in self.state_trigger_list:
-            print 'State trigger#%d' %i
+            print('State trigger#%d' %i)
             self.print_script (obj)
             i = i + 1
 
         i = 0
         for obj in self.transition_trigger_list:
-            print 'Transition trigger #%d' %i
+            print('Transition trigger #%d' %i)
             self.print_script (obj)
             i = i + 1
 
         i = 0
         for obj in self.action_list:
-            print 'Action #%d' %i
+            print('Action #%d' %i)
             self.print_script (obj)
             i = i + 1
 
@@ -304,41 +304,41 @@ class DLG_Format (Format):
     def print_flow (self):
         i = 0
         for state in self.state_list:
-            print 'State %d:' %i
+            print('State %d:' %i)
             #self.print_state (state)
             if (state['trigger_index'] != 0xffffffff):
-                print '  Trigger:', self.state_trigger_list[state['trigger_index']]['code']
+                print('  Trigger:', self.state_trigger_list[state['trigger_index']]['code'])
             if core.strrefs:
-                print '  Text:', core.strrefs.strref_list[state['npc_text']]['string']
+                print('  Text:', core.strrefs.strref_list[state['npc_text']]['string'])
             else:
-                print '  Text:', state['npc_text']
+                print('  Text:', state['npc_text'])
 
             j = 0
             for transition in self.transition_list[state['first_transition_index']:state['first_transition_index']+state['transition_cnt']]:
-                print '\n  Trans %d:' %j
+                print('\n  Trans %d:' %j)
                 self.print_transition (transition)
-                print "\n"
+                print("\n")
                 j = j + 1
                 
             i = i + 1
 
     def print_transition (self, transition):
         if (transition['flags'] & 0x02) and transition['trigger_index'] != 0xffffffff:
-            print '    Trigger:', self.transition_trigger_list[transition['trigger_index']]['code']
+            print('    Trigger:', self.transition_trigger_list[transition['trigger_index']]['code'])
 
         if (transition['flags'] & 0x01) and transition['pc_text'] != 0xffffffff:
             if core.strrefs:
-                print '    Text:', core.strrefs.strref_list[transition['pc_text']]['string']
+                print('    Text:', core.strrefs.strref_list[transition['pc_text']]['string'])
             else:
-                print '    Text:', transition['pc_text']
+                print('    Text:', transition['pc_text'])
 
         if (transition['flags'] & 0x04) and transition['action_index'] != 0xffffffff:
-            print '    Action:', self.action_list[transition['action_index']]['code']
+            print('    Action:', self.action_list[transition['action_index']]['code'])
 
         if not (transition['flags'] & 0x08):
-            print '    ->', transition['next_dialog'], ":", transition['next_state']
+            print('    ->', transition['next_dialog'], ":", transition['next_state'])
         else:
-            print '    -> FIN'
+            print('    -> FIN')
 
 
 

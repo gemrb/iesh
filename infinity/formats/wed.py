@@ -320,13 +320,13 @@ class WED_Format (Format):
 
         i = 0
         for obj in self.overlay_list:
-            print 'Overlay #%d' %i
+            print('Overlay #%d' %i)
             self.print_overlay (obj)
             i = i + 1
 
         i = 0
         for obj in self.door_list:
-            print 'Door #%d' %i
+            print('Door #%d' %i)
             self.print_door (obj)
             i = i + 1
 
@@ -378,12 +378,12 @@ class WED_Format (Format):
 
         i = 0
         for obj2 in obj['tilemap_list']:
-            print 'Tilemap #%d' %i
+            print('Tilemap #%d' %i)
             self.print_tilemap (obj2)
             i = i + 1
 
-        print "Tile indices:",  obj['tile_index_list']
-        print
+        print("Tile indices:",  obj['tile_index_list'])
+        print()
 
 
     def read_door (self, stream, offset, obj):
@@ -411,13 +411,13 @@ class WED_Format (Format):
 
         i = 0
         for obj2 in obj['open_door_poly_list']:
-            print 'Open Poly #%d' %i
+            print('Open Poly #%d' %i)
             self.print_polygon (obj2)
             i = i + 1
 
         i = 0
         for obj2 in obj['closed_door_poly_list']:
-            print 'Closed Poly #%d' %i
+            print('Closed Poly #%d' %i)
             self.print_polygon (obj2)
             i = i + 1
 

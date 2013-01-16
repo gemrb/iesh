@@ -525,7 +525,7 @@ class CHUI_Format (Format):
 
         i = 0
         for obj in self.window_list:
-            print '#%d' %i
+            print('#%d' %i)
             self.print_window_record (obj)
             i = i + 1
 
@@ -535,7 +535,7 @@ class CHUI_Format (Format):
 
         j = 0
         for ctl in obj['control_list']:
-            print 'C #%d' %j
+            print('C #%d' %j)
             self.print_control_record (ctl)
             j = j + 1
 

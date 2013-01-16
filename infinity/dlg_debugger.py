@@ -360,7 +360,7 @@ def merge_all ():
             merge_conditions (d)
         except:
             #print "!!! Merge exception in %s !!!" %d.name
-            print "!!! Merge exception !!!"
+            print("!!! Merge exception !!!")
     
     infinity.builtins.iterate_objects_by_type (0x3f3,  merge_one)
 
@@ -374,7 +374,7 @@ def print_conditions (cond = None):
         keys = []
         
     for key in keys:
-        print key,  '=',  repr (values[key])
+        print(key,  '=',  repr (values[key]))
 
 
 def set_condition_value (cond,  value = None):
@@ -382,7 +382,7 @@ def set_condition_value (cond,  value = None):
         oldvalue = values[cond]
     except KeyError:
         # FIXME: maybe try to parse the condition first and test the parsed var?
-        print "Condition does not exist:",  cond
+        print("Condition does not exist:",  cond)
         return
     
     if value == None:
@@ -394,9 +394,9 @@ def set_condition_value (cond,  value = None):
 
 def print_state (d,  state):
     if core.strrefs:
-        print '  Text:', core.strrefs.strref_list[state['npc_text']]['string']
+        print('  Text:', core.strrefs.strref_list[state['npc_text']]['string'])
     else:
-        print '  Text:', state['npc_text']
+        print('  Text:', state['npc_text'])
 
     j = 0
     for transition in d.transition_list[state['first_transition_index']:state['first_transition_index']+state['transition_cnt']]:
@@ -404,7 +404,7 @@ def print_state (d,  state):
             j += 1
             continue
 
-        print '[%d]' %j, 
+        print('[%d]' %j, end=' ') 
         print_transition (transition)
         j += 1
 
@@ -415,9 +415,9 @@ def print_transition (transition):
 
     if (transition['flags'] & 0x01) and transition['pc_text'] != 0xffffffff:
         if core.strrefs:
-            print '    ', core.strrefs.strref_list[transition['pc_text']]['string']
+            print('    ', core.strrefs.strref_list[transition['pc_text']]['string'])
         else:
-            print '    ', transition['pc_text']
+            print('    ', transition['pc_text'])
 
 #            if (transition['flags'] & 0x04) and transition['action_index'] != 0xffffffff:
 #                print '    Action:', self.action_list[transition['action_index']]['code']
@@ -448,18 +448,18 @@ def do_transition (d, state,  transition_ndx):
     
     if (transition['flags'] & 0x01) and transition['pc_text'] != 0xffffffff:
         if core.strrefs:
-            print 'SELF:', core.strrefs.strref_list[transition['pc_text']]['string']
+            print('SELF:', core.strrefs.strref_list[transition['pc_text']]['string'])
         else:
-            print 'SELF:', transition['pc_text']
+            print('SELF:', transition['pc_text'])
 
         if (transition['flags'] & 0x04) and transition['action_index'] != 0xffffffff:
-            print '    Exec:', d.action_list[transition['action_index']]['code']
+            print('    Exec:', d.action_list[transition['action_index']]['code'])
 
         if not (transition['flags'] & 0x08):
-            print '    ->', transition['next_dialog'], ":", transition['next_state']
+            print('    ->', transition['next_dialog'], ":", transition['next_state'])
             return transition['next_dialog'], transition['next_state']
         else:
-            print '    -> FIN'
+            print('    -> FIN')
             return None,  0
 
 
@@ -476,8 +476,8 @@ def run_dialog (name,  state = 0):
     d = get_dialog (name)
     next_dlg = d
 
-    print "\nIE DLG debugger\n"
-    print "Type '?' or 'h' to print help on debugger commands\n"
+    print("\nIE DLG debugger\n")
+    print("Type '?' or 'h' to print help on debugger commands\n")
 
     self.commands = [
         ('env', '', 'print values of known triggers'),
@@ -506,7 +506,7 @@ def run_dialog (name,  state = 0):
                 cmd = raw_input ('Dbg: ')
             except KeyboardInterrupt:
                 cmd = 'q'
-                print
+                print()
 
             cmd = cmd.strip ()
             try:
@@ -524,11 +524,11 @@ def run_dialog (name,  state = 0):
             
             # FIXME: allow bare numbers for transitions!!!
             if len (fcmds) == 0:
-                print 'Unknown command:', cmd
+                print('Unknown command:', cmd)
                 continue
             
             elif len (fcmds) > 1:
-                print "Command '%s' may be:", ', '.join (fcmds)
+                print("Command '%s' may be:", ', '.join (fcmds))
                 continue
     
             else:
@@ -542,9 +542,9 @@ def run_dialog (name,  state = 0):
             elif cmd == '?' or cmd == 'help':
                 if args is None:
                     for c in self.commands:
-                        print "%-10s\t%-5s\t%s" %(c[0], c[1], c[2])
+                        print("%-10s\t%-5s\t%s" %(c[0], c[1], c[2]))
                 else:
-                    print "help on " + args
+                    print("help on " + args)
             elif cmd in ('e',  'en',  'env'):
                 if args is None:
                     print_conditions ()
@@ -573,31 +573,31 @@ def run_dialog (name,  state = 0):
                 else:
                     s = int (args[0])
 
-                print "State #%d:" %s
+                print("State #%d:" %s)
                 state_obj = d.state_list[s]
                 d.print_struc (state_obj, d.state_desc)
                 
                 if state_obj['trigger_index'] != 0xffffffff:
-                    print "State trigger:"
+                    print("State trigger:")
                     script_obj = d.state_trigger_list[state_obj['trigger_index']]
                     d.print_script (script_obj)
                     
                     try:
-                        print 'Evals to:', eval_function (script_obj['code'])
+                        print('Evals to:', eval_function (script_obj['code']))
                     except KeyError:
-                        print "Unknown trigger"
+                        print("Unknown trigger")
 
                 j = 0
                 for transition in d.transition_list[state_obj['first_transition_index']:state_obj['first_transition_index']+state_obj['transition_cnt']]:
-                    print '\n  Trans %d:' %j
+                    print('\n  Trans %d:' %j)
                     d.print_transition (transition)
-                    print "\n"
+                    print("\n")
                     j = j + 1
                 
             elif cmd == 'r':
                 # FIXME: optional arguments!
                 # FIXME: return to the last run dlg instead of the first one?
-                print "dlg reset"
+                print("dlg reset")
                 step = False
                 values = {}
                 dialogs = {}
@@ -607,9 +607,9 @@ def run_dialog (name,  state = 0):
                 
             elif cmd in ('trigger'):
                 try:
-                    print eval_function (args)
+                    print(eval_function (args))
                 except KeyError:
-                    print "Unknown trigger:",  args
+                    print("Unknown trigger:",  args)
                     
             elif cmd == 'c':
                 step = False
@@ -618,12 +618,12 @@ def run_dialog (name,  state = 0):
                 step = True
                 break
             elif cmd in ('w',  'wh',  'whe',  'wher',  'where'):
-                print 'DLG:',  d.name,  'state:',  state,  '@',  address
+                print('DLG:',  d.name,  'state:',  state,  '@',  address)
             elif re.match ('\\d+',  cmd) and address == A_GET_REPLY:
                 address = A_TRANSITION
                 break
             else:
-                print 'Unknown command:',  cmd
+                print('Unknown command:',  cmd)
 
             # TODO: execution history with 'undo' possibility
 

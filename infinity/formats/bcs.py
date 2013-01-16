@@ -437,25 +437,25 @@ class BCS_Format (Format):
         for cr in self.script[1:]:
             co = cr[1]
             rs = cr[2]
-            print 'IF'
+            print('IF')
             for tr in co[1:]:
                 fn_spec = core.id_to_symbol ('TRIGGER', tr[1])
                 neg = ('!', '')[not tr[3]] # FIXME: hack, use odef[]
                 
                 #print fn_spec
                 fn_name, res_args = resolve_args (fn_spec, 'tr', tr)
-                print '    ' + neg + fn_name + '(' + ','.join (res_args) + ')'
+                print('    ' + neg + fn_name + '(' + ','.join (res_args) + ')')
                 #print '    TR', tr_name + '#0x%04x' %tr[1]
-            print 'THEN'
+            print('THEN')
             for re in rs[1:]:
-                print '    RESPONSE #%d' %re[1]
+                print('    RESPONSE #%d' %re[1])
                 for ac in re[2:]:
                     #print 'AC', ac[1]
                     fn_spec = core.id_to_symbol ('ACTION', ac[1])
                     fn_name, res_args = resolve_args (fn_spec, 'ac', ac)
                     #print 'res_args:', res_args
-                    print '        ' + fn_name + '(' + ','.join ([ str (a) for a in res_args]) + ')'
-            print 'END\n'
+                    print('        ' + fn_name + '(' + ','.join ([ str (a) for a in res_args]) + ')')
+            print('END\n')
 
 
     def add_ids_code (self, ids, id):

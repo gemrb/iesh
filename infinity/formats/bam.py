@@ -246,13 +246,13 @@ class BAM_Format (Format, ImageSequence):
 
         i = 0
         for obj in self.frame_list:
-            print 'Frame #%d' %i
+            print('Frame #%d' %i)
             self.print_frame (obj)
             i = i + 1
 
         i = 0
         for obj in self.cycle_list:
-            print 'Cycle #%d' %i
+            print('Cycle #%d' %i)
             self.print_cycle (obj)
             i = i + 1
 
@@ -275,7 +275,7 @@ class BAM_Format (Format, ImageSequence):
 
         if self.get_option ('format.bam.print_frame_bitmap'):
             self.print_bitmap (obj)
-            print
+            print()
 
     def read_cycle (self, stream, offset, obj):
         self.read_struc (stream, offset, self.cycle_desc, obj)
@@ -314,7 +314,7 @@ class BAM_Format (Format, ImageSequence):
     def print_palette (self):
         i = 0
         for obj in self.palette_entry_list:
-            print "%3d: %3d %3d %3d %3d (#%02x%02x%02x%02x)" %(i, obj['r'], obj['g'], obj['b'], obj['a'], obj['r'], obj['g'], obj['b'], obj['a'])
+            print("%3d: %3d %3d %3d %3d (#%02x%02x%02x%02x)" %(i, obj['r'], obj['g'], obj['b'], obj['a'], obj['r'], obj['g'], obj['b'], obj['a']))
             i = i + 1
 
 
@@ -434,10 +434,10 @@ class BAM_Format (Format, ImageSequence):
         ndx = 0
         for i in range (obj['height']):
             for j in range (obj['width']):
-                print '%3d' %obj['frame_data'][ndx],
+                print('%3d' %obj['frame_data'][ndx], end=' ')
                 ndx = ndx + 1
-            print
-        print
+            print()
+        print()
 
 
 class BAMC_Format (BAM_Format):

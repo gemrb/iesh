@@ -111,7 +111,7 @@ class BAF_Format (Format):
             self.token = None
             p='x'
 
-        print '>>' + p+':'+repr(tok) + '<<'
+        print('>>' + p+':'+repr(tok) + '<<')
         return tok
 
     def next_token (self, stream):
@@ -487,28 +487,28 @@ class BAF_Format (Format):
         for cr in self.script:
             co = cr[0]
             rs = cr[1]
-            print 'IF'
+            print('IF')
             for tr in co:
-                print '    ', resolve_action (tr)
+                print('    ', resolve_action (tr))
                 continue
                 fn_spec = core.id_to_symbol ('TRIGGER', tr[1])
                 neg = ('!', '')[not tr[3]] # FIXME: hack, use odef[]
                 
                 #print tr_decl
                 fn_name, res_args = resolve_args (fn_spec, 'tr', tr)
-                print '    ' + neg + fn_name + '(' + ','.join (res_args) + ')'
+                print('    ' + neg + fn_name + '(' + ','.join (res_args) + ')')
                 #print '    TR', tr_name + '#0x%04x' %tr[1]
-            print 'THEN'
+            print('THEN')
             for re in rs:
-                print '    RESPONSE #%d' %re[0]
+                print('    RESPONSE #%d' %re[0])
                 for ac in re[1:]:
                     #print 'AC', ac[1]
-                    print '        ' + resolve_action (ac)
+                    print('        ' + resolve_action (ac))
                     continue
                     fn_spec = core.id_to_symbol ('ACTION', ac[1])
                     fn_name, res_args = resolve_args (fn_spec, 'ac', ac)
-                    print '        ' + fn_name + '(' + ','.join (res_args) + ')'
-            print 'END\n'
+                    print('        ' + fn_name + '(' + ','.join (res_args) + ')')
+            print('END\n')
 
 
     def add_ids_code (self, ids, id):
@@ -539,7 +539,7 @@ class BAF_Format (Format):
             for TR in CO:
                 obj.append ('TR\n')
                 obj.extend (TR)
-                print core.symbol_to_id ('TRIGGER', TR[0])
+                print(core.symbol_to_id ('TRIGGER', TR[0]))
                 obj.append ('TR\n')
             obj.append ('CO\n')
             obj.append ('RS\n')

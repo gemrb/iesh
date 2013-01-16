@@ -106,7 +106,7 @@ class IDS_Format (Format):
     def printme (self):
         for key, value in self.ids_list:
 
-            print "%s\t%s" %(key, value)
+            print("%s\t%s" %(key, value))
             
     def find (self, key, index=-1):
 	if type (key) == type (0):

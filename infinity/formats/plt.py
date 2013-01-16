@@ -120,7 +120,7 @@ class PLT_Format (Format, Image):
         
         if self.get_option ('format.plt.print_bitmap'):
             self.print_bitmap ()
-            print
+            print()
 
 
 register_format ('PLT', 'V1', PLT_Format)

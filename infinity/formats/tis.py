@@ -137,14 +137,14 @@ class TIS_Format (Format, ImageSequence):
         if self.get_option ('format.tis.print_palettes'):
             i = 0
             for obj in self.tile_list:
-                print 'Palette #%d' %i
+                print('Palette #%d' %i)
                 self.print_palette (obj['palette'])
                 i = i + 1
 
         if self.get_option ('format.tis.print_tiles'):
             i = 0
             for obj in self.tile_list:
-                print 'Tile #%d' %i
+                print('Tile #%d' %i)
                 #print obj['offset']
                 self.print_tile (obj)
                 i = i + 1
@@ -168,7 +168,7 @@ class TIS_Format (Format, ImageSequence):
     def print_palette (self, palette):
         i = 0
         for obj in palette:
-            print "%3d: %3d %3d %3d %3d (#%02x%02x%02x%02x)" %(i, obj['r'], obj['g'], obj['b'], obj['a'], obj['r'], obj['g'], obj['b'], obj['a'])
+            print("%3d: %3d %3d %3d %3d (#%02x%02x%02x%02x)" %(i, obj['r'], obj['g'], obj['b'], obj['a'], obj['r'], obj['g'], obj['b'], obj['a']))
             i = i + 1
 
 

@@ -143,13 +143,13 @@ class BIFF_Format (Format):
 
         i = 0
         for obj in self.file_list:
-            print 'File #%d' %i
+            print('File #%d' %i)
             self.print_file_record (obj)
             i = i + 1
             
         i = 0
         for obj in self.tileset_list:
-            print 'Tileset #%d' %i
+            print('Tileset #%d' %i)
             self.print_tileset_record (obj)
             i = i + 1
 
@@ -259,7 +259,7 @@ class BIFC_V1_Format (BIFF_Format):
 
     def printme (self):
         self.print_envelope ()
-        print
+        print()
         BIFF_Format.printme (self)
 
     def read_envelope (self, stream):

@@ -169,7 +169,7 @@ class KEY_Format (Format):
                 if not (i % tack_size):
                     sys.stdout.write('%d' %i)
                 sys.stdout.flush ()
-        print
+        print()
 
     def write (self, stream):
         # FIXME: STROFF is missing
@@ -200,13 +200,13 @@ class KEY_Format (Format):
 
         i = 0
         for obj in self.bif_list:
-            print '#%d' %i
+            print('#%d' %i)
             self.print_bif_record (obj)
             i = i + 1
             
         i = 0
         for obj in self.resref_list:
-            print '#%d' %i
+            print('#%d' %i)
             self.print_resref_record (obj)
             i = i + 1
 

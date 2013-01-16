@@ -319,7 +319,7 @@ def id_to_symbol (idsfile, id):
             ids[idsfile] = idsobj
         except Exception, e:
             traceback.print_exc()
-            print e
+            print(e)
             return id
 
     try:

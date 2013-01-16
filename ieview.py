@@ -40,8 +40,8 @@ if len (sys.argv) > 1 and sys.argv[1] == '-o':
 if len (sys.argv) > 1:
     ffile = sys.argv[1]
 else:
-    print """Usage:
-    %s  [-v] [-o option[=value] ] <file>""" %sys.argv[0]
+    print("""Usage:
+    %s  [-v] [-o option[=value] ] <file>""" %sys.argv[0])
     sys.exit (1)
 
 

@@ -9,6 +9,6 @@ from plugins import core
 #   without conversion
 
 def print_raw_str (strref):
-    print core.strrefs.strref_list[strref]['string_raw']
-    print map (lambda c: c + " (%02x)" %ord (c), core.strrefs.strref_list[strref]['string_raw'])
+    print(core.strrefs.strref_list[strref]['string_raw'])
+    print([c + " (%02x)" %ord (c) for c in core.strrefs.strref_list[strref]['string_raw']])
 

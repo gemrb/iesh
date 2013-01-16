@@ -129,7 +129,7 @@ class TLK_Format (Format):
                 if not (i % tack_size):
                     sys.stdout.write('%d' %i)
                 sys.stdout.flush ()
-        print
+        print()
 
 
     def write (self, stream):
@@ -163,7 +163,7 @@ class TLK_Format (Format):
                 if not (i % tack_size):
                     sys.stdout.write('%d' %i)
                 sys.stdout.flush ()
-        print
+        print()
         
 
     def printme (self):
@@ -171,7 +171,7 @@ class TLK_Format (Format):
 
         i = 0
         for obj in self.strref_list:
-            print '#%d' %i
+            print('#%d' %i)
             self.print_strref_record (obj)
             i = i + 1
 
@@ -207,18 +207,18 @@ class TLK_Format (Format):
                 res = False
                 try:
                     obj['string'] = codecs.decode (obj['string_raw'], 'cp1252')
-                    print >>sys.stderr, 'STRREF', obj['_strref'], e
+                    print('STRREF', obj['_strref'], e, file=sys.stderr)
                 except UnicodeError:
                     # e is from outer exception
-                    print >>sys.stderr, 'STRREF', obj['_strref'], e
-                    print >>sys.stderr, ' '.join ([ hex(ord(c)) for c in obj['string'] ])
+                    print('STRREF', obj['_strref'], e, file=sys.stderr)
+                    print(' '.join ([ hex(ord(c)) for c in obj['string'] ]), file=sys.stderr)
 
         if io_enc:
             try:
                 obj['string'] = codecs.encode (obj['string'], io_enc)
             except UnicodeError, e:
                 res = False
-                print >>sys.stderr, 'STRREF', obj['_strref'], e
+                print('STRREF', obj['_strref'], e, file=sys.stderr)
 
         return res
 
@@ -240,7 +240,7 @@ class TLK_Format (Format):
                 obj['string_raw'] = codecs.decode (obj['string'], io_enc)
             except UnicodeError, e:
                 res = False
-                print >>sys.stderr, 'STRREF', obj['_strref'], e
+                print('STRREF', obj['_strref'], e, file=sys.stderr)
 
         if tlk_enc:
             try:
@@ -251,11 +251,11 @@ class TLK_Format (Format):
                 res = False
                 try:
                     obj['string_raw'] = codecs.encode (obj['string'], 'cp1252')
-                    print >>sys.stderr, 'STRREF', obj['_strref'], e
+                    print('STRREF', obj['_strref'], e, file=sys.stderr)
                 except UnicodeError:
                     # e is from outer exception
-                    print >>sys.stderr, 'STRREF', obj['_strref'], e
-                    print >>sys.stderr, ' '.join ([ hex(ord(c)) for c in obj['string'] ])
+                    print('STRREF', obj['_strref'], e, file=sys.stderr)
+                    print(' '.join ([ hex(ord(c)) for c in obj['string'] ]), file=sys.stderr)
 
         return res
 

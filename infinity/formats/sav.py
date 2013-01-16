@@ -117,7 +117,7 @@ class SAV_Format (Format):
 
         i = 0
         for obj in self.file_list:
-            print 'File #%d' %i
+            print('File #%d' %i)
             self.print_struc (obj, self.file_desc)
             self.print_struc (obj, self.file2_desc)
             i = i + 1

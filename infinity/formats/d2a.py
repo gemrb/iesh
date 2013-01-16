@@ -185,12 +185,12 @@ class D2A_Format (Format):
             values = self.get_row (row, True)
             for val, size, rjust in zip (values, sizes, rjusts):
                 if rjust:
-                    print val.rjust (size),
+                    print(val.rjust (size), end=' ')
                 else:
-                    print val.ljust (size),
+                    print(val.ljust (size), end=' ')
                 #print "%*s" %(size, val),
         
-            print
+            print()
 
 
 register_format ('2DA', '', D2A_Format)

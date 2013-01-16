@@ -17,4 +17,4 @@ def print_button_frames (filename):
             else:
                 mark = ""
             
-            print "%2d/%2d: %d %d %d %d" %(w['id'], b['id'], b['frame_unpressed'], b['frame_pressed'], b['frame_selected'], b['frame_disabled']), mark
+            print("%2d/%2d: %d %d %d %d" %(w['id'], b['id'], b['frame_unpressed'], b['frame_pressed'], b['frame_selected'], b['frame_disabled']), mark)

@@ -116,7 +116,7 @@ class Format (object):
 
         i = 0
         for obj in list:
-            print name.capitalize () + " #%d:" %i
+            print(name.capitalize () + " #%d:" %i)
             self.print_struc (obj, desc)
             i += 1
 
@@ -132,7 +132,7 @@ class Format (object):
         except:
             bh, bl = map (int, string.split (bits, '-'))
             if bl > bh:
-                print "warning: bh < bl:", bits
+                print("warning: bh < bl:", bits)
                 bh, bl = bl, bh
 
             mask = 0L
@@ -164,7 +164,7 @@ class Format (object):
     def print_struc (self, obj, desc):
         for d in desc:
             self.print_datum (obj, d)
-        print
+        print()
 
 
     def write_struc (self, stream, offset, desc, obj):
@@ -234,7 +234,7 @@ class Format (object):
         size = self.get_datum_size (d)
 
         if self.get_option ('format.debug_read'):
-            print d
+            print(d)
 
         for index in range (count):
             #print d, local_offset, key, type, count, index, size
@@ -326,7 +326,7 @@ class Format (object):
         size = self.get_datum_size (d)
 
         if self.get_option ('format.debug_write'):
-            print '%05d' %(offset + local_offset), d, obj[key]
+            print('%05d' %(offset + local_offset), d, obj[key])
             
         for index in range (count):
             if count > 1: 
@@ -451,7 +451,7 @@ class Format (object):
         label = d['label']
         
         if rec_type == '_LABEL':
-            print self.indent + label
+            print(self.indent + label)
             return
         
         if rec_type == '_INDENT':
@@ -526,16 +526,16 @@ class Format (object):
                 value2 = '(' + string.join (map (lambda m, mask=mask: mask[m], filter (lambda m, v=value: (m & v) == m, mask.keys ())), '|') + ')'
 
             if p_offset:
-                print "0x%04X" %(base_offset + off),
+                print("0x%04X" %(base_offset + off), end=' ')
             if p_type:
-                print "%-6s" %rec_type,
+                print("%-6s" %rec_type, end=' ')
             if p_size:
-                print "%3d" %size,
+                print("%3d" %size, end=' ')
                 
             if count > 1:
-                print self.indent + label + '[%d]:' %index, value, value2
+                print(self.indent + label + '[%d]:' %index, value, value2)
             else:
-                print self.indent + label + ':', value, value2
+                print(self.indent + label + ':', value, value2)
 
             off += size
 

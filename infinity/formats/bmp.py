@@ -244,7 +244,7 @@ class BMP_Format (Format, Image):
 
         if self.get_option ('format.bmp.print_bitmap'):
             self.print_bitmap ()
-            print
+            print()
 
 
     def read_palette (self, stream, offset):
@@ -265,7 +265,7 @@ class BMP_Format (Format, Image):
 
     def print_palette (self):
         for i, obj in enumerate (self.palette_entry_list):
-            print "%3d: %3d %3d %3d %3d (#%02x%02x%02x%02x)" %(i, obj['r'], obj['g'], obj['b'], obj['a'], obj['r'], obj['g'], obj['b'], obj['a'])
+            print("%3d: %3d %3d %3d %3d (#%02x%02x%02x%02x)" %(i, obj['r'], obj['g'], obj['b'], obj['a'], obj['r'], obj['g'], obj['b'], obj['a']))
         
 
 

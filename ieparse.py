@@ -44,8 +44,7 @@ while len (sys.argv) > 1:
 if len (sys.argv) > 1:
     ffile = sys.argv[1]
 else:
-    print """Usage:
-    %s  [-v] [-o option[=value] ] <file>""" %sys.argv[0]
+    print("Usage:\n    %s  [-v] [-o option[=value] ] <file>" %sys.argv[0])
     sys.exit (1)
 
 

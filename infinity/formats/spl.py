@@ -398,13 +398,13 @@ class SPL_Format (Format):
 
         i = 0
         for obj in self.casting_feature_list:
-            print 'Casting feature #%d' %i
+            print('Casting feature #%d' %i)
             self.print_feature (obj)
             i = i + 1
 
         i = 0
         for obj in self.extended_header_list:
-            print 'Extended header #%d' %i
+            print('Extended header #%d' %i)
             self.print_extended_header (obj)
             i = i + 1
 
@@ -425,7 +425,7 @@ class SPL_Format (Format):
 
         j = 0
         for feature in obj['feature_list']:
-            print 'Feature #%d' %j
+            print('Feature #%d' %j)
             self.print_feature (feature)
             j = j + 1
 

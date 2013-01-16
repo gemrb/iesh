@@ -169,4 +169,4 @@ class Image (object):
         if img:
             img.show ()
         else:
-            print >>sys.stderr, "Image could not be created"
+            print("Image could not be created", file=sys.stderr)

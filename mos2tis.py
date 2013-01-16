@@ -30,7 +30,7 @@ from infinity.formats import mos, tis
 from infinity import stream
 
 if len (sys.argv) != 3:
-    print __doc__
+    print(__doc__)
     sys.exit (1)
 
 ifile = stream.FileStream ().open (sys.argv[1])

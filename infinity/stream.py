@@ -288,15 +288,15 @@ class Stream (object):
 
     def print_coverage (self):
         def print_single (offset,  value):
-            print "  0x%04x: %d" %(offset,  value)
+            print("  0x%04x: %d" %(offset,  value))
 
         def print_range (offset1,  offset2,  value):
             if offset2 == offset1:
                 print_single (offset1,  value)
             else:
-                print "  0x%04x - 0x%04x: %d" %(offset1,  offset2,  value)
+                print("  0x%04x - 0x%04x: %d" %(offset1,  offset2,  value))
 
-        print "Coverage (%s):" %self.name
+        print("Coverage (%s):" %self.name)
         from_offset = None
         
         for i in range (len (self.coverage)):
@@ -408,7 +408,7 @@ class MemoryStream (Stream):
 
     def decrypt (self):
         for i in range (len (self.buffer)):
-            print chr (ord (self.buffer[i]) ^ ord (core.xor_key[i]))
+            print(chr (ord (self.buffer[i]) ^ ord (core.xor_key[i])))
 
     def seek (self, offset):
         self.offset = offset

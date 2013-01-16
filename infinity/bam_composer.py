@@ -171,7 +171,7 @@ class BAMComposer (object):
 
 		if len(buf) != (3 * 256): # FIXME: 255 or 256?
 			# FIXME:allow smaller palettes
-			print >>sys.stderr, "Palette size should be  255"
+			print("Palette size should be  255", file=sys.stderr)
 		
 		im = pi.new ('P', (1, 1))
 		im.putpalette (struct.unpack ('768B', buf))
@@ -321,7 +321,7 @@ class BAMComposer (object):
 
 
 def help ():
-	print >>sys.stderr, "Usage: %s <project file> <output file>" %os.path.basename (sys.argv[0])
+	print("Usage: %s <project file> <output file>" %os.path.basename (sys.argv[0]), file=sys.stderr)
 
 if __name__ == '__main__':
 	if len (sys.argv) != 3:

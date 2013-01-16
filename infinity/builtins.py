@@ -54,7 +54,7 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
     stream = FileStream ().open (chitin_file)
     core.keys = core.get_format ('KEY') ()
     core.keys.read_header (stream)
-    print "Loading %d file refs and %d RESREFs. This may take ages" %(core.keys.header['num_of_bifs'], core.keys.header['num_of_resrefs'])
+    print("Loading %d file refs and %d RESREFs. This may take ages" %(core.keys.header['num_of_bifs'], core.keys.header['num_of_resrefs']))
     core.keys.read (stream)
     stream.close ()
 
@@ -63,7 +63,7 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
     stream = FileStream ().open (dialog_file)
     core.strrefs = core.get_format ('TLK') ()
     core.strrefs.read_header (stream)
-    print "Loading %d STRREFs. This may take eternity" %(core.strrefs.header['num_of_strrefs'])
+    print("Loading %d STRREFs. This may take eternity" %(core.strrefs.header['num_of_strrefs']))
     core.strrefs.read (stream)
     stream.close ()
 
@@ -162,7 +162,7 @@ class ObjectIterator:
         res = self.resrefs.pop (0)
 
         if self.print_names == 'all':
-            print res['resref_name']
+            print(res['resref_name'])
 
         obj = None
 
@@ -195,7 +195,7 @@ def find_str (regexp):
     expression 'regexp' and prints the STRREFs and strings to stdout."""
     
     for o in core.strrefs.get_strref_by_str_re(regexp):
-        print core.strrefs.strref_list.index(o), o['string']
+        print(core.strrefs.strref_list.index(o), o['string'])
 
 
 ###################################################
@@ -203,7 +203,7 @@ def sprintf (format_str, *params):
     return  format_str %(params)
 
 def printf (format_str, *params):
-    print sprintf (format_str, *params)
+    print(sprintf (format_str, *params))
 
 
 ###################################################
@@ -212,7 +212,7 @@ def load_ids ():
 
     def p (obj):
         obj.read ()
-        print obj.stream.resref
+        print(obj.stream.resref)
         #obj.print_file ()
         
     iterate_objects_by_type (0x03f0, p)
@@ -235,7 +235,7 @@ def print_restype_stats ():
             type = core.restype_hash[s]
         else:
             type = '??'
-        print "0x%04x (%s):\t%5d" %(s, type, stats[s])
+        print("0x%04x (%s):\t%5d" %(s, type, stats[s]))
 
     return stats
 
@@ -246,8 +246,8 @@ def print_formats ():
     flist = filter (lambda a: a[0][1] is not None,  core.formats.items ())
     flist.sort (lambda a,  b: 2 * cmp (a[0][0],  b[0][0]) + cmp (a[0][1],  b[0][1]))
 
-    print "sign vers  class                 desc & status"
-    print "-----------------------------------------------"
+    print("sign vers  class                 desc & status")
+    print("-----------------------------------------------")
     for key,  value in flist:
         version = ''
         desc = ''
@@ -258,7 +258,7 @@ def print_formats ():
         klass_name = str (value[0])
         klass_name = klass_name.replace ('infinity.formats.',  '')
             
-        print "%-4s %-4s  %-20s  %s" %(key[0],  version,  klass_name,  desc)
+        print("%-4s %-4s  %-20s  %s" %(key[0],  version,  klass_name,  desc))
 
 
 ###################################################
@@ -269,9 +269,9 @@ def print_options (desc = True):
     options.sort ()
     for key,  opt in options:
         if desc:
-            print "%-30s - %s [%s]" %(key,  opt[1],  repr (opt[0]))
+            print("%-30s - %s [%s]" %(key,  opt[1],  repr (opt[0])))
         else:
-            print "%-30s - %s" %(key,  repr (opt[0]))
+            print("%-30s - %s" %(key,  repr (opt[0])))
 
 ###################################################
 # End of file builtins.py
