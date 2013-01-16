@@ -6,6 +6,7 @@ import baf
 import bam
 import bcs
 import biff
+import bmp
 import chr_v10
 import chr_v12
 import chr_v20
@@ -18,12 +19,14 @@ import cre_v90
 import d2a
 import dlg
 import eff_v20
+import gam
 import ids
 import itm_v1
 import itm_v11
 import itm_v20
 import key
 import mos
+import plt
 import pro
 import sav
 import spl
