@@ -16,6 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
+from __future__ import print_function
 
 import re
 import sys
@@ -176,8 +177,8 @@ class D2A_Format (Format):
 
     # FIXME: options for same column width, minimal width, using tabs, left alignment, ...
     def printme (self):
-        print 'Signature:', self.signature
-        print 'Default value:', self.default_value
+        print ('Signature:', self.signature)
+        print ('Default value:', self.default_value)
         sizes = map (self.get_col_width, range (-1, len (self.cols)))
         rjusts = map (self.get_col_justification, range (-1, len (self.cols)))
         #print self.cols

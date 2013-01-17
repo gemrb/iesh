@@ -25,6 +25,7 @@ representing IE file types. This class is futher subclassed
 in infinity.formats package to the various IE file formats
 like 2DA, BAM, TLK etc."""
 
+from __future__ import print_function
 import os.path
 import re
 import string

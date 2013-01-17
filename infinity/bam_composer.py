@@ -31,7 +31,7 @@ frame f1 0 5 5 images/cursor2.bmp
 cycle c0 f0 f1
 
 """
-
+from __future__ import print_function
 import os.path
 import re
 import sys

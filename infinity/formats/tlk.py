@@ -18,7 +18,7 @@
 
 
 # Conforms to IESDP 2012-04-22
-
+from __future__ import print_function
 import codecs
 import re
 import string
