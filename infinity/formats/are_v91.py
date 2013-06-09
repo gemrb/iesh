@@ -325,9 +325,19 @@ class ARE_V91_Format (Format):
                 'label': 'Flags' },
         
             { 'key': 'spawned_flag',
-                'type': 'DWORD',
+                'type': 'BYTE',
                 'off': 0x002C,
                 'label': 'Spawned flag' },
+
+            { 'key': 'letter',
+                'type': 'WORD',
+                'off': 0x002D,
+                'label': 'Resref fragment (1 letter)' },
+
+            { 'key': 'difficulty_margin',
+                'type': 'BYTE',
+                'off': 0x002F,
+                'label': 'Difficulty margin' },
         
             { 'key': 'animation',
                 'type': 'DWORD',
