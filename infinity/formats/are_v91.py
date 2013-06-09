@@ -325,13 +325,13 @@ class ARE_V91_Format (Format):
                 'label': 'Flags' },
         
             { 'key': 'spawned_flag',
-                'type': 'BYTE',
+                'type': 'WORD',
                 'off': 0x002C,
                 'label': 'Spawned flag' },
 
             { 'key': 'letter',
-                'type': 'WORD',
-                'off': 0x002D,
+                'type': 'BYTE',
+                'off': 0x002E,
                 'label': 'Resref fragment (1 letter)' },
 
             { 'key': 'difficulty_margin',
