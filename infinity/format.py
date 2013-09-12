@@ -552,9 +552,8 @@ class Format (object):
         self.options[key] = value
 
 
-
-def register_format (signature, version, klass,  desc = None):
-    core.register_format (signature, version, klass,  desc)
+# Alias for an easier access
+register_format = core.register_format
 
 
 # End of file format.py

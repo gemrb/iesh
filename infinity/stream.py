@@ -227,6 +227,7 @@ class Stream (object):
         #    self.open ()
 
         s = self.read_sized_string (0x0000, 8)
+        return s
 
         #if not was_open:
         #    self.close ()
@@ -234,39 +235,32 @@ class Stream (object):
         #    self.seek (0)
 
 
-        if s == '902     ':
-            signature = "VAR"
-            version = ""
-        elif re.match (" ?2DA[\r\n\t ]", s):
-            signature = "2DA"
-            version = ""
-        elif re.match ("[0-9]{1,4}[\r\n ]", s) or re.match ("0[xX][0-9A-Fa-f]{1,4} ", s) or re.match ("-1[\r\n]", s):
-            signature = "IDS"
-            version = ""
-        elif s == "SC\nCR\nCO" or s == "SC\r\nCR\r\n":
-            signature = "BCS"
-            version = ""
-        elif s.startswith ("IF\n") or s.startswith ("IF\r\n"):
-            signature = "BAF"
-            version = ""
-        elif s.startswith ("BM"):
-            signature = "BM"
-            version = ""
-        else:
-            signature = s[0:4].strip ()
-            version = s[4:8].strip ()
-
-        return (signature, version)
+#        if s == '902     ':
+#            signature = "VAR"
+#        elif re.match (" ?2DA[\r\n\t ]", s):
+#            signature = "2DA"
+#        elif re.match ("[0-9]{1,4}[\r\n ]", s) or re.match ("0[xX][0-9A-Fa-f]{1,4} ", s) or re.match ("-1[\r\n]", s):
+#            signature = "IDS"
+#        elif s == "SC\nCR\nCO" or s == "SC\r\nCR\r\n":
+#            signature = "BCS"
+#        elif s.startswith ("IF\n") or s.startswith ("IF\r\n"):
+#            signature = "BAF"
+#        elif s.startswith ("BM"):
+#            signature = "BM"
+#        else:
+#            signature = s
+#
+#        return signature
 
     def get_format (self, type = 0):
-        signature, version = self.get_signature ()
-        fmt = core.get_format (signature, version)
+        signature = self.get_signature ()
+        fmt = core.get_format (signature=signature, name=self.name, type=type)
         
-        if fmt is None and type != 0:
-            fmt = core.get_format_by_type (type)
+#        if fmt is None and type != 0:
+#            fmt = core.get_format_by_type (type)
 
         if fmt is None:
-            raise RuntimeError, "Unknown format: %s %s"%(signature, version)
+            raise FormatUndetectedError ("Unknown format: %s"%(repr(signature)))
 
         return fmt
 

@@ -22,13 +22,31 @@ Core and global definitions for the `infinity' package
 """
 
 import os
+import re
 import string
 import sys
 
 import defaults
 
-global formats
-formats = {}
+#global formats
+#formats = {}
+global fmt_signatures
+fmt_signatures = {}
+fmt_signatures_list = []
+
+global fmt_regexps
+fmt_regexps = {}
+fmt_regexps_list = []
+
+global fmt_extensions
+fmt_extensions = {}
+
+global fmt_types
+fmt_types = {}
+
+global fmt_names
+fmt_names = {}
+
 
 global strrefs
 strrefs = None
@@ -277,24 +295,98 @@ def type_to_ext (type):
 #def sig_to_type (signature,  game_type = None):
 #    pass
 
-def register_format (signature, version, klass,  desc = None):
-    """Register class `klass' for reading, parsing and (possibly) writing
-    IE file format with given `signature' and `version'.  `desc' allows
-    to specify text displayed in format list and should be used to 
-    describe status/progress of implementation."""
 
-    #core.formats[(signature, version)] = klass
-    #formats[signature] = klass
-    formats[(signature,  version)] = (klass,  desc)
-    # FIXME: this is ugly temporary hack
-    formats[(signature,  None)] = (klass,  desc)
+def register_format (klass, **kw):
+    """Register/Bind class `klass' as a factory for a specified IE file format.
+    Format can be specified by signature, extension, name or type id.
+    signature - string that has to be found at the beginning of the file
+    regexp - regexp that has to match at the beginning of the file
+    extension - filename extension
+    type - numeric type as used in CHITIN.KEY
+    name - name used for the format.
+    
+    Values are specified directly, or as a list of values. Either
+        extension='BAM'
+    or
+        extension=('BIF', 'CBF')
+    
+    Options:
+    
+    game - limit the binding to the specified game type (bg1, bg2, iwd, iwd2, pst)"""
+
+    def seq (val):
+        if type(val) == list or type(val) == tuple:
+            return val
+        else:
+            return (val, )
+
+    def bind (m, k, v):
+        if k in m:
+            m[k].append (v)
+            return False
+        else:
+            m[k] = [ v ]
+            return True
+
+    if 'game' in kw:
+        game = kw['game']
+    else:
+        game = None
 
 
-def get_format (signature, version = None):
-    try:
-        return formats[(signature,  version)][0]
-    except:
+    if 'signature' in kw:
+        for sig in seq (kw['signature']):
+            if bind (fmt_signatures, sig, klass) and len (sig) != 8:
+                fmt_signatures_list.append (sig)
+    if 'regexp' in kw:
+        for rexp in seq (kw['regexp']):
+            if bind (fmt_regexps, rexp, klass):
+                fmt_regexps_list.append ((re.compile(rexp), rexp))
+    if 'extension' in kw:
+        for ext in seq (kw['extension']):
+            bind (fmt_extensions, ext.upper(), klass)
+    if 'type' in kw: 
+        for typ in seq (kw['type']):
+            bind (fmt_types, typ, klass)
+    if 'name' in kw:
+        for name in seq (kw['name']):
+            bind (fmt_names, name.upper(), klass)
+
+    # FIXME: create lists for sigs and regexps
+
+
+#def register_format (signature, version, klass,  desc = None):
+#    """Register class `klass' for reading, parsing and (possibly) writing
+#    IE file format with given `signature' and `version'.  `desc' allows
+#    to specify text displayed in format list and should be used to 
+#    describe status/progress of implementation."""
+#
+#    #core.formats[(signature, version)] = klass
+#    #formats[signature] = klass
+#    formats[(signature,  version)] = (klass,  desc)
+#    # FIXME: this is ugly temporary hack
+#    formats[(signature,  None)] = (klass,  desc)
+
+
+def get_format (**kw):
+    if 'signature' in kw:
+        signature = kw['signature']
+        try:
+            return fmt_signatures[signature][0]
+        except KeyError:
+            pass
+        
+        for sig in fmt_signatures_list:
+            if signature.startswith (sig):
+                return fmt_signatures[sig][0]
+
+        for rexpc, rexp in fmt_regexps_list:
+            #print rexp
+            if rexpc.match (signature):
+                return fmt_regexps[rexp][0]
+        
         return None
+        
 
 
 # FIXME: replace with find_res_type()
