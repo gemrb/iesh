@@ -576,4 +576,4 @@ class CHUI_Format (Format):
         return self.get_struc_size (desc, obj)
 
         
-register_format ('CHUI', 'V1', CHUI_Format)
+register_format (CHUI_Format, signature='CHUIV1  ')

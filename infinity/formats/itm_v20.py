@@ -593,4 +593,4 @@ class ITM_V20_Format (Format):
         self.print_struc (obj, self.feature_desc)
 
         
-register_format ('ITM', 'V2.0', ITM_V20_Format)
+register_format (ITM_V20_Format, signature='ITM V2.0')

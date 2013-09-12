@@ -194,4 +194,4 @@ class D2A_Format (Format):
             print()
 
 
-register_format ('2DA', '', D2A_Format)
+register_format (D2A_Format, regexp=" ?2DA[\r\n\t ]", extension='2DA', name='2DA', type=0x3f4)

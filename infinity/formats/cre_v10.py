@@ -777,4 +777,4 @@ class CRE_V10_Format (Format):
 
 
 
-register_format ('CRE', 'V1.0', CRE_V10_Format)
+register_format (CRE_V10_Format, signature='CRE V1.0')

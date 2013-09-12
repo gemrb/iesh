@@ -313,4 +313,4 @@ class STOR_V90_Format (Format):
 
 
         
-register_format ('STOR', 'V9.0', STOR_V90_Format)
+register_format (STOR_V90_Format, signature='STORV9.0')

@@ -486,4 +486,4 @@ class PRO_Format (Format):
         
 
         
-register_format ('PRO', 'V1.0', PRO_Format)
+register_format (PRO_Format, signature='PRO V1.0', extension='PRO', name=('PRO', 'PROJECTILE'), type=0x3fd)

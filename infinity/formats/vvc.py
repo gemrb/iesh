@@ -266,4 +266,4 @@ class VVC_Format (Format):
 
 
         
-register_format ('VVC', 'V1.0', VVC_Format)
+register_format (VVC_Format, signature='VVC V1.0', extension='VVC', name='VVC', type=0x3fb)

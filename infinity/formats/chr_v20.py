@@ -102,5 +102,5 @@ class CHR_V20_Format (Format):
         self.cre.printme ()
 
         
-register_format ('CHR', 'V2.0', CHR_V20_Format)
-register_format ('CHR', 'V2.1', CHR_V20_Format)
+register_format (CHR_V20_Format, signature='CHR V2.0')
+register_format (CHR_V20_Format, signature='CHR V2.1')

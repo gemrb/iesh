@@ -69,4 +69,4 @@ class VAR_Format (Format):
 
 
         
-register_format ('VAR', '', VAR_Format)
+register_format (VAR_Format, signature='902     ', extension='VAR', name='VAR')

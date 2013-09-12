@@ -897,5 +897,5 @@ class CRE_V11_Format (CRE_V12_Format):
                 'label': 'Selected Weapon Ability' },
     )
 
-register_format ('CRE', 'V1.2', CRE_V12_Format)
-register_format ('CRE', 'V1.1', CRE_V11_Format)
+register_format (CRE_V12_Format, signature='CRE V1.2')
+register_format (CRE_V11_Format, signature='CRE V1.1')

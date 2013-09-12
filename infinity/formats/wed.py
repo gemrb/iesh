@@ -451,4 +451,4 @@ class WED_Format (Format):
         
         
 
-register_format ('WED', 'V1.3', WED_Format)
+register_format (WED_Format, signature='WED V1.3', extension='WED', name='WED', type=0x3e9)

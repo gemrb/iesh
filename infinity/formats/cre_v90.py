@@ -872,4 +872,4 @@ class CRE_V90_Format (Format):
 
 
 
-register_format ('CRE', 'V9.0', CRE_V90_Format)
+register_format (CRE_V90_Format, signature='CRE V9.0')

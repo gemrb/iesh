@@ -123,4 +123,4 @@ class PLT_Format (Format, Image):
             print()
 
 
-register_format ('PLT', 'V1', PLT_Format)
+register_format (PLT_Format, signature='PLT V1  ', extension='PLT', name='PLT', type=0x0006)

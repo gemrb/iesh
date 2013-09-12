@@ -587,4 +587,4 @@ class ITM_V11_Format (Format):
         self.print_struc (obj, self.feature_desc)
 
         
-register_format ('ITM', 'V1.1', ITM_V11_Format)
+register_format (ITM_V11_Format, signature='ITM V1.1')

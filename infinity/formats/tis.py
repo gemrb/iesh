@@ -316,4 +316,5 @@ class UTIS_Format (TIS_Format):
         return self
 
 
-register_format ('TIS', 'V1', TIS_Format)
+register_format (TIS_Format, signature='TIS V1  ')
+register_format (UTIS_Format, extension='TIS')

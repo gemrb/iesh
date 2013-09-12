@@ -277,4 +277,4 @@ class EFF_V20_Format (Format):
         self.print_header ()
 
         
-register_format ('EFF', 'V2.0', EFF_V20_Format)
+register_format (EFF_V20_Format, signature='EFF V2.0')

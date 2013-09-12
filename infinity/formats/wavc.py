@@ -93,4 +93,4 @@ class WAVC_Format (Format, Image):
 
 
 
-register_format ('WAVC', 'V1.0', WAVC_Format)
+register_format (WAVC_Format, signature='WAVCV1.0', extension='WAV', name='WAVC')

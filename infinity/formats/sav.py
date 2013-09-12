@@ -173,4 +173,4 @@ class SAV_Format (Format):
         
 
 
-register_format ('SAV', 'V1.0', SAV_Format)
+register_format (SAV_Format, signature='SAV V1.0', extension='SAV', name=('SAV', 'SAVE'))

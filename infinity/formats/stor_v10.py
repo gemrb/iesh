@@ -302,4 +302,4 @@ class STOR_V10_Format (Format):
 
 
         
-register_format ('STOR', 'V1.0', STOR_V10_Format)
+register_format (STOR_V10_Format, signature='STOR V1.0')

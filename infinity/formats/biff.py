@@ -271,5 +271,5 @@ class BIFC_V1_Format (BIFF_Format):
         
 
 
-register_format ('BIFF', 'V1', BIFF_Format)
-register_format ('BIF ', 'V1.0', BIFC_V1_Format)
+register_format (BIFF_Format, signature='BIFFV1  ', extension='BIF', name=('BIF', 'BIFF'))
+register_format (BIFC_V1_Format, signature='BIF V1.0', extension='CBF', name='CBF')

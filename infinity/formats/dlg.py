@@ -356,5 +356,5 @@ class DLG_V19_Format (DLG_Format):
     def __init__ (self):
         DLG_Format.__init__ (self)
         
-register_format ('DLG', 'V1.0', DLG_Format)
+register_format (DLG_Format, signature='DLG V1.0', extension='DLG', name=('DLG', 'DIALOG'), type=0x3f3)
 #register_format ('DLG', 'V1.09', DLG_V19_Format) # What's the signature????

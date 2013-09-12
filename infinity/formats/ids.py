@@ -120,4 +120,5 @@ class IDS_Format (Format):
             else:
                 return self.ids2_re[key][index]
 
-register_format ('IDS', '', IDS_Format)
+# FIXME: the signature is bogus
+register_format (IDS_Format, signature='IDS', regexp = ("([0-9]{1,4}|0[xX][0-9A-Fa-f]{1,4}|-1)[\r\n ].*"), extension='IDS', name='IDS', type=0x3f0)

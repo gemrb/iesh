@@ -186,4 +186,4 @@ class CHR_V22_Format (Format):
         self.cre.printme ()
 
         
-register_format ('CHR', 'V2.2', CHR_V22_Format)
+register_format (CHR_V22_Format, signature='CHR V2.2')

@@ -929,4 +929,4 @@ class GAM_V20_Format (Format):
         self.print_struc (self.familiar_info, self.familiar_info_desc)
 
         
-register_format ('GAME', 'V2.0', GAM_V20_Format)
+register_format (GAM_V20_Format, signature='GAMEV2.0', extension='GAM', name=('GAM', 'GAME'), type=0x3f5)

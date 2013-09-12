@@ -461,5 +461,5 @@ class SPL_V20_Format (SPL_Format):
         SPL_Format.__init__ (self)
 
 
-register_format ('SPL', 'V1', SPL_Format,  "Should be done except of enums")
-register_format ('SPL', 'V2.0', SPL_V20_Format,  "Should be done except of enums")
+register_format (SPL_Format, signature='SPL V1  ', extension='SPL', name=('SPL', 'SPELL'), type=0x3ee)
+register_format (SPL_V20_Format, signature='SPL V2.0', extension='SPL', name=('SPL', 'SPELL'), type=0x3ee)

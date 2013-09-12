@@ -557,4 +557,4 @@ class BAF_Format (Format):
         obj.append ('SC\n')
         return obj
 
-register_format ('BAF', '', BAF_Format)
+register_format (BAF_Format, signature=('BAF', "IF\n", "IF\r\n"), extension='BAF', name='BAF')

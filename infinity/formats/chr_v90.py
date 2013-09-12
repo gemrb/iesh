@@ -102,4 +102,4 @@ class CHR_V90_Format (Format):
         self.cre.printme ()
 
         
-register_format ('CHR', 'V9.0', CHR_V90_Format)
+register_format (CHR_V90_Format, signature='CHR V9.0')

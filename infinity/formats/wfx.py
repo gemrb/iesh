@@ -71,4 +71,4 @@ class WFX_Format (Format):
         
 
         
-register_format ('WFX', 'V1.0', WFX_Format)
+register_format (WFX_Format, signature='WFX V1.0', extension='WFX', name='WFX')

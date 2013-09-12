@@ -518,4 +518,4 @@ class BCS_Format (Format):
             return False
 
 
-register_format ('BCS', '', BCS_Format)
+register_format (BCS_Format, signature=('BCS', "SC\nCR\nCO", "SC\r\nCR\r\n"), extension='BCS', name='BCS', type=0x3ef)

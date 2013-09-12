@@ -269,4 +269,4 @@ class BMP_Format (Format, Image):
         
 
 
-register_format ('BM', '', BMP_Format)
+register_format (BMP_Format, signature='BM', extension='BMP', name='BMP', type=0x0001)

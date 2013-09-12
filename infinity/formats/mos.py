@@ -294,5 +294,5 @@ class MOSC_Format (MOS_Format):
 
 
 
-register_format ('MOS', 'V1', MOS_Format)
-register_format ('MOSC', 'V1', MOSC_Format)
+register_format (MOS_Format, signature='MOS V1  ')
+register_format (MOSC_Format, signature='MOSCV1  ')

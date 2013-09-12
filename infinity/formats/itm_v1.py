@@ -678,4 +678,4 @@ class ITM_V10_Format (Format):
         self.print_struc (obj, self.feature_desc)
 
         
-register_format ('ITM', 'V1', ITM_V10_Format)
+register_format (ITM_V10_Format, signature='ITM V1  ')

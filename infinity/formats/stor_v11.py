@@ -313,4 +313,4 @@ class STOR_V11_Format (Format):
 
 
         
-register_format ('STOR', 'V1.1', STOR_V11_Format)
+register_format (STOR_V11_Format, signature='STORV1.1')

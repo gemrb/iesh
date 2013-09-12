@@ -323,4 +323,4 @@ class WMAP_V10_Format (Format):
         self.print_list ('area_link')
 
 
-register_format ('WMAP', 'V1.0', WMAP_V10_Format)
+register_format (WMAP_V10_Format, signature='WMAPV1.0', extension='WMP', name=('WMP', 'WMAP', 'WORLDMAP'), type=0x3f7)

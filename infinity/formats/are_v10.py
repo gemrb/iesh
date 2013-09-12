@@ -1631,4 +1631,4 @@ class ARE_V10_Format (Format):
         self.print_struc (self.rest_interrupt, self.rest_interrupt_desc)
 
 
-register_format ('AREA', 'V1.0', ARE_V10_Format)
+register_format (ARE_V10_Format, signature='AREAV1.0')

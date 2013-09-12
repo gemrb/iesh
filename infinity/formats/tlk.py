@@ -266,4 +266,4 @@ class TLK_Format (Format):
 
 
         
-register_format ('TLK', 'V1', TLK_Format)
+register_format (TLK_Format, signature='TLK V1  ', extension='TLK', name='TLK')

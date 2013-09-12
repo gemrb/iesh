@@ -500,5 +500,5 @@ class BAMC_Format (BAM_Format):
 
 
 
-register_format ('BAM', 'V1', BAM_Format)
-register_format ('BAMC', 'V1', BAMC_Format)
+register_format (BAM_Format, signature='BAM V1  ')
+register_format (BAMC_Format, signature='BAMCV1  ')
