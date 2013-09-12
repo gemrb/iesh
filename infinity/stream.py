@@ -474,19 +474,16 @@ class ResourceStream (MemoryStream):
             b, bif_stream = core.bif_files[src_file['file_name']]
         else:
             bif_file = core.find_file (src_file['file_name'])
-            if bif_file is not None:
-                b = core.get_format ('BIFF') ()
-            else:
+            if bif_file is None:
                 bif_file = os.path.splitext (src_file['file_name'])[0] + '.cbf'
                 bif_file = core.find_file (bif_file)
-                if bif_file is not None:
-                    b = core.get_format ('BIF ') ()
-                else:
-                    raise RuntimeError ("File not found in path: %s" %src_file['file_name'])
-                    
+            if bif_file is None:
+                raise IOError ("Archive not found in path: %s" %src_file['file_name'])
 
             bif_stream = FileStream ().open (bif_file)
+            b = bif_stream.get_format()()
             b.read (bif_stream)
+
             if use_cache:
                 core.bif_files[src_file['file_name']] = (b, bif_stream)
 
