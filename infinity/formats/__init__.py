@@ -37,6 +37,7 @@ import tis
 import tlk
 import var
 import vvc
+import wav
 import wed
 import wfx
 import wmap
