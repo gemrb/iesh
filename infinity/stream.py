@@ -477,6 +477,7 @@ class ResourceStream (MemoryStream):
             if bif_file is None:
                 bif_file = os.path.splitext (src_file['file_name'])[0] + '.cbf'
                 bif_file = core.find_file (bif_file)
+
             if bif_file is None:
                 raise IOError ("Archive not found in path: %s" %src_file['file_name'])
 
@@ -517,5 +518,18 @@ class CompressedStream (MemoryStream):
 
     def __repr__ (self):
         return "<CompressedStream: %s at 0x%08x>" %(self.name, id (self))
-        
+
+class DecryptedStream (Stream):
+    def __init__ (self, stream):
+        Stream.__init__ (self)
+        self.stream = stream
+        if stream.read_word(0) == 0xffff:
+            data = stream.read()
+            decrypt()
+            self.new_stream
+
+class FormatUndetectedError (RuntimeError):
+    pass
+
+
 # End of file stream.py
