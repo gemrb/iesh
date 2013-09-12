@@ -31,6 +31,8 @@ class BCS_Format (Format):
         self.lineno = 1
         self.ids_codes = {}
 
+        self.type = 'bg2'
+
 
     def read_token (self, stream):
         def getc ():
@@ -191,7 +193,10 @@ class BCS_Format (Format):
         obj.append (self.get_token (stream))
         obj.append (self.get_token (stream))
         obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
+
+        if self.type == 'pst':
+            obj.append (self.get_token (stream))
+
         obj.append (self.read_object (stream))
         self.expect_token (stream, 'TR')
         
@@ -271,9 +276,11 @@ class BCS_Format (Format):
         #    self.get_token (stream)
         #    return obj
             
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
-        obj.append (self.get_token (stream))
+        if self.type == 'pst':
+            obj.append (self.get_token (stream))
+            obj.append (self.get_token (stream))
+            obj.append (self.get_token (stream))
+
         self.expect_token (stream, 'OB')
         
         #print core.id_to_symbol ('OBJECT', obj[10])
@@ -288,6 +295,13 @@ class BCS_Format (Format):
                            'P': (5,),
                            'S': (6,7),
                            'O': (8,),
+                           },
+                'bg2_tr': { # FIXME: not tested, bogus
+                           'id': (0,),
+                           'I': (1, 3),
+                           'not': (2,),
+                           'S': (5,6),
+                           'O': (7,),
                            },
                 'pst_ac': {
                            'id': (0,),
@@ -318,28 +332,42 @@ class BCS_Format (Format):
                                     'bitset', 
                                     'bitclear')
         
-        game_type = 'pst'
-
         def resolve_object (obj):
             res = []
-            if obj[1] != 0:
-                res.append (core.id_to_symbol ('EA', obj[1]))
-            if obj[2] != 0:
-                res.append (core.id_to_symbol ('FACTION', obj[2]))
-            if obj[3] != 0:
-                res.append (core.id_to_symbol ('TEAM', obj[3]))
-            if obj[4] != 0:
-                res.append (core.id_to_symbol ('GENERAL', obj[4]))
-            if obj[5] != 0:
-                res.append (core.id_to_symbol ('RACE', obj[5]))
-            if obj[6] != 0:
-                res.append (core.id_to_symbol ('CLASS', obj[6]))
-            if obj[7] != 0:
-                res.append (core.id_to_symbol ('SPECIFIC', obj[7]))
-            if obj[8] != 0:
-                res.append (core.id_to_symbol ('GENDER', obj[8]))
-            if obj[9] != 0:
-                res.append (core.id_to_symbol ('ALIGNMEN', obj[9]))
+            if self.type == 'pst':
+                if obj[1] != 0:
+                    res.append (core.id_to_symbol ('EA', obj[1]))
+                if obj[2] != 0:
+                    res.append (core.id_to_symbol ('FACTION', obj[2]))
+                if obj[3] != 0:
+                    res.append (core.id_to_symbol ('TEAM', obj[3]))
+                if obj[4] != 0:
+                    res.append (core.id_to_symbol ('GENERAL', obj[4]))
+                if obj[5] != 0:
+                    res.append (core.id_to_symbol ('RACE', obj[5]))
+                if obj[6] != 0:
+                    res.append (core.id_to_symbol ('CLASS', obj[6]))
+                if obj[7] != 0:
+                    res.append (core.id_to_symbol ('SPECIFIC', obj[7]))
+                if obj[8] != 0:
+                    res.append (core.id_to_symbol ('GENDER', obj[8]))
+                if obj[9] != 0:
+                    res.append (core.id_to_symbol ('ALIGNMEN', obj[9]))
+            else:
+                if obj[1] != 0:
+                    res.append (core.id_to_symbol ('EA', obj[1]))
+                if obj[2] != 0:
+                    res.append (core.id_to_symbol ('GENERAL', obj[2]))
+                if obj[3] != 0:
+                    res.append (core.id_to_symbol ('RACE', obj[3]))
+                if obj[4] != 0:
+                    res.append (core.id_to_symbol ('CLASS', obj[4]))
+                if obj[5] != 0:
+                    res.append (core.id_to_symbol ('SPECIFIC', obj[5]))
+                if obj[6] != 0:
+                    res.append (core.id_to_symbol ('GENDER', obj[6]))
+                if obj[7] != 0:
+                    res.append (core.id_to_symbol ('ALIGNMEN', obj[7]))
 
             if res:
                 res = '[' + '.'.join (res) + ']'
@@ -347,21 +375,37 @@ class BCS_Format (Format):
                 res = None
 
             res2 = None
-            if obj[10] != 0:
-                res2 = core.id_to_symbol ('OBJECT', obj[10])
-            if obj[11] != 0:
-                res2 = core.id_to_symbol ('OBJECT', obj[11]) + '(' + res2 +')'
-            if obj[12] != 0:
-                res2 = core.id_to_symbol ('OBJECT', obj[12]) + '(' + res2 +')'
-            if obj[13] != 0:
-                res2 = core.id_to_symbol ('OBJECT', obj[13]) + '(' + res2 +')'
-            if obj[14] != 0:
-                res2 = core.id_to_symbol ('OBJECT', obj[14]) + '(' + res2 +')'
+            if self.type == 'pst':
+                if obj[10] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[10])
+                if obj[11] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[11]) + '(' + res2 +')'
+                if obj[12] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[12]) + '(' + res2 +')'
+                if obj[13] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[13]) + '(' + res2 +')'
+                if obj[14] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[14]) + '(' + res2 +')'
+            else:
+                if obj[8] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[8])
+                if obj[9] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[9]) + '(' + res2 +')'
+                if obj[10] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[10]) + '(' + res2 +')'
+                if obj[11] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[11]) + '(' + res2 +')'
+                if obj[12] != 0:
+                    res2 = core.id_to_symbol ('OBJECT', obj[12]) + '(' + res2 +')'
                 
             # FIXME: what about area?? [-1.-1.-1.-1] (15)
             res3 = None
-            if obj[16] != '""':
-                res3 = obj[16]
+            if self.type == 'pst':
+                if obj[16] != '""':
+                    res3 = obj[16]
+            else:
+                if obj[13] != '""':
+                    res3 = obj[13]
 
             if (res and res2) or (res and res3) or (res2 and res3):
                 raise ValueError ("Error: More values for object: " + repr (res) + '//' + repr (res2) + '//' + repr (res3))
@@ -399,9 +443,9 @@ class BCS_Format (Format):
 
                 #print 'ot:', obj_type, 'type;', type, 'index:', index
                 if not split_string_arg or type != 'S' or index == 0:
-                    aindex = odef[game_type + '_' + obj_type][type][index] + 1
+                    aindex = odef[self.type + '_' + obj_type][type][index] + 1
                 else:
-                    aindex = odef[game_type + '_' + obj_type][type][index-1] + 1
+                    aindex = odef[self.type + '_' + obj_type][type][index-1] + 1
                     
                 
                 if type == 'I':
@@ -442,7 +486,7 @@ class BCS_Format (Format):
                 fn_spec = core.id_to_symbol ('TRIGGER', tr[1])
                 neg = ('!', '')[not tr[3]] # FIXME: hack, use odef[]
                 
-                #print fn_spec
+                print fn_spec, tr
                 fn_name, res_args = resolve_args (fn_spec, 'tr', tr)
                 print('    ' + neg + fn_name + '(' + ','.join (res_args) + ')')
                 #print '    TR', tr_name + '#0x%04x' %tr[1]
