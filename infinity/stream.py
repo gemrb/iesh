@@ -53,7 +53,9 @@ class Stream (object):
     
     def __init__ (self):
         self.is_open = False
+        self.name = None
         self.options = {}
+        self.coverage = None
 
 
     def __del__ (self):
