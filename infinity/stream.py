@@ -119,9 +119,9 @@ class Stream (object):
         #return self.readline ()
         return self.read_line_string ()
 
-    def put_line (self):
+    def put_line (self, value):
         #FIXME
-        pass
+        return self.write_line_string (value)
 
     def read_word (self, offset):
         # offset == None means "current offset" here
@@ -195,6 +195,12 @@ class Stream (object):
             
         return s
 
+    def write_line_string (self, value, offset=None):
+        if offset:
+            self.seek(offset)
+        self.write(value+'\r\n', len(value)+2)
+
+
     # FIXME: (read|write)_resref should not be here
     def read_resref (self, off):
         return self.read_sized_string (off, 8)
@@ -226,7 +232,7 @@ class Stream (object):
         #if not self.is_open:
         #    self.open ()
 
-        s = self.read_sized_string (0x0000, 8)
+        s = self.read_sized_string (0x0000, 16)
         return s
 
         #if not was_open:
