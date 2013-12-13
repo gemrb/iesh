@@ -22,6 +22,7 @@ Functions which are ``built-into'' the iesh shell, meaning that this
 module contents are automatically imported directly into iesh's 
 namespace on startup."""
 
+import cPickle
 import os.path
 import sys
 import traceback
@@ -66,6 +67,24 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
     print("Loading %d STRREFs. This may take eternity" %(core.strrefs.header['num_of_strrefs']))
     core.strrefs.read (stream)
     stream.close ()
+
+###################################################
+def save_state (filename):
+    """Saves some core variables (especially keys and strrefs), so that they
+    can be later loaded faster than from IE data files."""
+    data = [core.game_dir, core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs, core.game_data_path ]
+    fh = open (filename,  'w')
+    cPickle.dump (data,  fh)
+    fh.close ()
+
+###################################################
+def restore_state (filename):
+    """Loads some core variables (especially keys and strrefs) saved
+    by save_state() function, much faster than from IE data files."""
+    fh = open (filename)
+    data = cPickle.load (fh)
+    fh.close ()
+    core.game_dir,  core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs, core.game_data_path = data
 
 ###################################################
 def load_object (name, type = None,  index = 0):
