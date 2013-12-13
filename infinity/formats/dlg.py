@@ -167,6 +167,11 @@ class DLG_Format (Format):
               'label': 'Script code'},
             
             )
+    
+    state_trigger_desc = script_desc
+    transition_trigger_desc = script_desc
+    action_desc = script_desc
+
 
     def __init__ (self):
         Format.__init__ (self)
@@ -229,6 +234,40 @@ class DLG_Format (Format):
 #             self.decode_feature_block (off, obj)
 #             self.casting_feature_block_list.append (obj)
 #             off = off + 48
+
+
+
+    def write (self, stream):
+
+        script_offset = off = self.get_struc_size(self.header_desc) \
+                    + len(self.state_list) * self.get_struc_size(self.state_desc) \
+                    + len(self.transition_list) * self.get_struc_size(self.transition_desc) \
+                    + len(self.state_trigger_list) * self.get_struc_size(self.state_trigger_desc) \
+                    + len(self.transition_trigger_list) * self.get_struc_size(self.transition_trigger_desc) \
+                    + len(self.action_list) * self.get_struc_size(self.action_desc)
+        
+        scripts = []
+        
+        for obj in self.state_trigger_list + self.transition_trigger_list + self.action_list:
+            s = obj['code']
+            l = len (s)
+ 
+            scripts.append(s)
+            obj['script_off'] = off
+            obj['script_len'] = len (obj['code'])
+            off += l
+
+        off = self.get_struc_size(self.header_desc)
+        off = self.write_list (stream, off, 'state')        
+        off = self.write_list (stream, off, 'transition')
+        off = self.write_list (stream, off, 'state_trigger')
+        off = self.write_list (stream, off, 'transition_trigger')
+        off = self.write_list (stream, off, 'action')
+
+        text = ''.join (scripts)
+        stream.write_sized_string(text, script_offset, len(text))
+
+        self.write_header (stream)
 
 
     def printme (self):
