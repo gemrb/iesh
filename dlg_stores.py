@@ -5,6 +5,7 @@ for quick access to different shops when debugging stores in the original pst"""
 
 import os.path
 
+from infinity import core
 from infinity.stream import FileStream
 from infinity.formats import dlg
 from infinity.builtins import load_game, load_object, restore_state
@@ -36,7 +37,8 @@ def main ():
     d.state_trigger_list.append(trigger)
 
 
-    resrefs = ('ALEKSTR', 'BARSE', 'COAX', 'EMORIC', 'FELL', 'FHJULL', 'VRIS', )
+    #resrefs = ('ALEKSTR', 'BARSE', 'COAX', 'EMORIC', 'FELL', 'FHJULL', 'VRIS', )
+    resrefs = [ r['resref_name']  for r in core.keys.get_resref_by_type(0x3f6) ]
     
 
     for i, resref in enumerate(resrefs):
