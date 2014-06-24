@@ -269,6 +269,10 @@ while 1:
         eval ('help(%s)' %current_command[1:])
         continue
 
+    if current_command.endswith ('?'):
+        eval ('help(%s)' %current_command[:-1])
+        continue
+
     if current_command.startswith ('!'):
         os.system (current_command[1:])
         continue
@@ -295,6 +299,11 @@ while 1:
             exec (current_command)
         else:
             pdb.run (current_command[1:])
+
+    except IOError:
+        print "IOE"
+        traceback.print_exc()
+        print
 
     except:
         print "\n*** Exception in command ***\n"
