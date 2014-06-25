@@ -425,7 +425,7 @@ class MemoryStream (Stream):
         return data
 
     def write (self, bytes, size = None):
-        end = len (buffer) - (self.offset + len (bytes))
+        end = len (self.buffer) - (self.offset + len (bytes))
         if end  < 0:
             self.buffer.extend ([0] * -end)
 
@@ -514,7 +514,7 @@ class CompressedStream (MemoryStream):
     
         else:
             ms = MemoryStream.open (self, None,  name)
-        gzip.zlib.compress (ms.membuffer)
+            #gzip.zlib.compress (ms.buffer)
 
     def __repr__ (self):
         return "<CompressedStream: %s at 0x%08x>" %(self.name, id (self))
