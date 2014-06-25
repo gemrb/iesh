@@ -32,7 +32,6 @@ import defaults
 #formats = {}
 global fmt_signatures
 fmt_signatures = {}
-fmt_signatures_list = []
 
 global fmt_regexps
 fmt_regexps = {}
@@ -336,8 +335,7 @@ def register_format (klass, **kw):
 
     if 'signature' in kw:
         for sig in seq (kw['signature']):
-            if bind (fmt_signatures, sig, klass) and len (sig) != 8:
-                fmt_signatures_list.append (sig)
+            bind (fmt_signatures, sig, klass)
     if 'regexp' in kw:
         for rexp in seq (kw['regexp']):
             if bind (fmt_regexps, rexp, klass):
@@ -376,7 +374,7 @@ def get_format (**kw):
         except KeyError:
             pass
         
-        for sig in fmt_signatures_list:
+        for sig in fmt_signatures.keys():
             if signature.startswith (sig):
                 return fmt_signatures[sig][0]
 
