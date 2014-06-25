@@ -141,16 +141,13 @@ def help_on_shell ():
 
 
 ###################################################
-def read_command_file (filename, add_quit = False):
+def read_command_file (filename):
     """Read commands to be executed from a file."""
 
     try: fh = open (filename)
     except: return False
 
     commands.extend (map (lambda s: s.rstrip ("\n\r"), fh.readlines ()))
-
-    if add_quit:
-        commands.append ("quit")
 
     return True
 
@@ -162,7 +159,12 @@ def read_command (prompt):
     if len (commands) != 0:
         return commands.pop (0)
     else:
-        try: return raw_input (prompt)
+        try:
+            if sys.stdin.isatty():
+                return raw_input (prompt)
+            else:
+                s = sys.stdin.readline()
+                return s  if s  else 'quit'
         except KeyboardInterrupt:
             print
             return ''
@@ -221,11 +223,8 @@ def restore (name = ''):
 #
 
 if len (sys.argv) > 1:
-    res = read_command_file (sys.argv[1], True)
-    if not res:
-        print "Can't read input file: %s" %sys.argv[1]
-        sys.exit (1)
-else:
+    sys.stdin = open(sys.argv[1])
+elif sys.stdin.isatty():
     _readline_init ()
     read_command_file (os.path.expanduser (IESH_PROFILE_FILE))
     print "\n\nType `help' to print a short help, `quit' or ^D to exit the shell\n"
@@ -240,7 +239,6 @@ while 1:
     else:
         prompt = IESH_COMPOUND_PROMPT
 
-    #current_command = raw_input (prompt)
     current_command = read_command (prompt)
 
     indent = current_command[0:(len (current_command) - len (current_command.lstrip ()))]
@@ -289,7 +287,7 @@ while 1:
     save_stdout = sys.stdout
     save_stderr = sys.stdout
     
-    if core.get_option ('pager') and not current_command.startswith ('help') and not current_command.startswith ('load_game') and not current_command.startswith ('~'):
+    if sys.stdin.isatty() and core.get_option ('pager') and not current_command.startswith ('help') and not current_command.startswith ('load_game') and not current_command.startswith ('~'):
         pager = subprocess.Popen (core.get_option ('pager'),  shell = True,  stdin=subprocess.PIPE)
         sys.stdout = pager.stdin
         sys.stderr = pager.stdin
@@ -301,9 +299,9 @@ while 1:
             pdb.run (current_command[1:])
 
     except IOError:
-        print "IOE"
-        traceback.print_exc()
-        print
+        pass
+        #traceback.print_exc()
+        #print
 
     except:
         print "\n*** Exception in command ***\n"
