@@ -208,7 +208,7 @@ class Stream (object):
     def write_resref (self, value, off):
         self.write_sized_string (value, off, 8)
 
-    def read_blob (self, offset, size = -1):
+    def read_blob (self, offset, size = None):
         # offset == None means "current offset" here
         # size == None means "till the end of stream"
         if offset is not None:
