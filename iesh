@@ -60,6 +60,8 @@ compound_command = ""
 pager = None
 """Pager process (as a Popen object)"""
 
+quit = False
+
 ###################################################
 def help_on_shell ():
     print """
@@ -156,21 +158,30 @@ def read_command (prompt):
     """Return next command to be executed.
     The command is read either from a file or from the command line."""
 
+    global quit
+
+    if quit:
+        return 'quit'
+
+    s = ''
     if len (commands) != 0:
-        return commands.pop (0)
+        s = commands.pop (0)
     else:
         try:
             if sys.stdin.isatty():
-                return raw_input (prompt)
+                s = raw_input (prompt)
             else:
                 s = sys.stdin.readline()
-                return s  if s  else 'quit'
+                if s.endswith("\n"):
+                    s = s[:-1]
+                elif s == '':
+                    quit = True
         except KeyboardInterrupt:
-            print
-            return ''
+            pass
         except EOFError: 
-                print
-                return 'quit'
+            quit = True
+
+    return s
 
 ###################################################
 def _readline_init ():
@@ -233,7 +244,7 @@ elif sys.stdin.isatty():
 # Main command processing loop
 #
 
-while 1:
+while True:
     if compound_command == '':
         prompt = IESH_NORMAL_PROMPT
     else:
@@ -302,6 +313,9 @@ while 1:
         pass
         #traceback.print_exc()
         #print
+
+    except KeyboardInterrupt:
+        pass
 
     except:
         print "\n*** Exception in command ***\n"
