@@ -81,6 +81,14 @@ class KEY_Format (Format):
             { 'key': 'location',
               'type': 'WORD',
               'off': 0x000A,
+              'mask': { 0x01: 'data',
+                        0x02: 'cache',
+                        0x04: 'CD1',
+                        0x08: 'CD2',
+                        0x10: 'CD3',
+                        0x20: 'CD4',
+                        0x40: 'CD5',
+                        0x80: 'CD6' },
               'label': 'BIF location' },
             )
 
