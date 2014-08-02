@@ -259,7 +259,7 @@ class Stream (object):
 #        return signature
 
     def get_format (self, type = 0):
-        signature = self.get_signature ()
+        signature = self.get_signature ()[:8]
         fmt = core.get_format (signature=signature, name=self.name, type=type)
         
 #        if fmt is None and type != 0:
