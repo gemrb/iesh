@@ -26,7 +26,7 @@ function usage ()
 
 IEPARSE="$(dirname $0)/ieparse.py"
 
-for i in $@; do
+for i in "$@"; do
   if [[ -f $i ]]; then
     if [[ -z $FILE1 ]]; then
       FILE1="$i"
