@@ -454,7 +454,7 @@ class ResourceStream (MemoryStream):
             oo = filter (lambda o: o['type'] == self.type, oo)
 
         if len (oo) > 1 and self.type is None:
-            raise RuntimeError, "More than one result, types " + ' '.join([ str(o['type']) for o in oo ])
+            raise RuntimeError, name + ": more than one result, types " + ' '.join([ str(o['type']) for o in oo ])
 
         o = oo[index]
 
