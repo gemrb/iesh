@@ -24,7 +24,7 @@ function usage ()
   exit 1
 }
 
-IEPARSE="$(dirname $0)/ieparse.py"
+IEPARSE="${IEPARSE:-$(dirname $0)/ieparse.py}"
 
 for i in "$@"; do
   if [[ -f $i ]]; then
