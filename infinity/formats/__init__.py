@@ -15,6 +15,7 @@ import chr_v90
 import chui
 import cre_v10
 import cre_v12
+import cre_v22
 import cre_v90
 import d2a
 import dlg
