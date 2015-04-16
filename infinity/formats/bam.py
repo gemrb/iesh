@@ -188,6 +188,7 @@ class BAM_Format (Format, ImageSequence):
         #if self.get_option ('format.bam.decode_frame_data'):
         #    for obj in self.frame_list:
         #        self.frame_to_rgba (obj)
+        return self
 
 
     def write (self,  stream):
