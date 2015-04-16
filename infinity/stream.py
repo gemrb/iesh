@@ -87,8 +87,9 @@ class Stream (object):
         Override in subclasses."""
         pass
 
-    def read (self, count = None):
+    def read (self, count=-1):
         """Read `count' of bytes at the current offset and update the offset.
+        If count is zero, read till the end of the stream.
         Override in subclasses."""
         pass
 
@@ -208,22 +209,21 @@ class Stream (object):
     def write_resref (self, value, off):
         self.write_sized_string (value, off, 8)
 
-    def read_blob (self, offset, size = None):
+    def read_blob (self, offset, size=-1):
         # offset == None means "current offset" here
         # size == None means "till the end of stream"
         if offset is not None:
             self.seek (offset)
 
         return self.read (size)
-        
-    def write_blob (self, value, offset, size = None):
+
+    def write_blob (self, value, offset):
         # offset == None means "current offset" here
-        # size == None means "till the end of stream"
         if offset is not None:
             self.seek (offset)
 
         return self.write (value)
-        
+
 
     # Helper methods
 
@@ -367,7 +367,7 @@ class FileStream (Stream):
     def seek (self, offset):
         self.fh.seek (offset)
 
-    def read (self, size = None):
+    def read (self, size=-1):
         # FIXME: do some caching/buffering here?
 
         #if size == None:
@@ -382,8 +382,8 @@ class FileStream (Stream):
         #   value = self.fh.read ()
 
         if self.get_option ('stream.debug_coverage'):
-            #sz = len (value)
-            self.coverage_add (off,  size,  None)
+            self.coverage_add (off, len(value), None)
+
         return value
 
 
@@ -415,16 +415,16 @@ class MemoryStream (Stream):
     def seek (self, offset):
         self.offset = offset
 
-    def read (self, count = None):
-        if count is not None:
+    def read (self, count=-1):
+        if count >= 0:
             data = self.buffer[self.offset:self.offset+count]
         else:
             data = self.buffer[self.offset:]
-            
+
         self.offset = self.offset + len (data)
         return data
 
-    def write (self, bytes, size = None):
+    def write (self, bytes):
         end = len (self.buffer) - (self.offset + len (bytes))
         if end  < 0:
             self.buffer.extend ([0] * -end)
@@ -488,7 +488,7 @@ class ResourceStream (MemoryStream):
             if use_cache:
                 core.bif_files[src_file['file_name']] = (b, bif_stream)
 
-        if o['type'] != 0x3eb: # TIS            
+        if o['type'] != 0x3eb:  # TIS
             obj = b.file_list[o['locator_ntset_ndx']]
         else:
             obj = b.file_list[o['locator_tset_ndx']]
