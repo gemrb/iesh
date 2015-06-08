@@ -310,16 +310,21 @@ while True:
             pdb.run (current_command[1:])
 
     except IOError:
-        traceback.print_exc()
-        print
+        try:
+            traceback.print_exc()
+            print >> sys.stderr
+        except IOError:
+            # second IOError probably means that the pager exited,
+            #   so even the first exception is not interesting
+            if save_stderr:
+                print >> save_stderr
 
     except KeyboardInterrupt:
         pass
 
     except:
-        print "\n*** Exception in command ***\n"
         traceback.print_exc ()
-        print
+        print >> sys.stderr
 
     if pager is not None:
         pager.stdin.close ()
