@@ -384,16 +384,16 @@ class DLG_Format (Format):
 class DLG_V19_Format (DLG_Format):
     """Referenced in IESDP, but where is it used? And what's the signature???"""
     
-    # FIXME: struc descs are not inherited from parent class!!!
-#    DLG_V19_Format.header_desc.append (
-#            { 'key': 'flags',
-#              'type': 'DWORD',
-#              'off': 0x0030,
-#              'label': 'Flags'},
-#              )
+    DLG_Format.header_desc.append (
+            { 'key': 'flags',
+              'type': 'DWORD',
+              'mask': { 0x01:'Enemy()', 0x02:'EscapeArea()', 0x04:'nothing (like Enemy())' },
+              'off': 0x0030,
+              'label': 'Dialog flags'},
+            )
 
     def __init__ (self):
         DLG_Format.__init__ (self)
         
-register_format (DLG_Format, signature='DLG V1.0', extension='DLG', name=('DLG', 'DIALOG'), type=0x3f3)
-#register_format ('DLG', 'V1.09', DLG_V19_Format) # What's the signature????
+register_format (DLG_Format, signature='DLG V1.0', extension='DLG', name=('DLG', 'DIALOG'), type=0x3f3, game="bg1")
+register_format (DLG_V19_Format, signature='DLG V1.0', extension='DLG', name=('DLG', 'DIALOG'), type=0x3f3)
