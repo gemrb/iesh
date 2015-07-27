@@ -53,6 +53,22 @@ class Format (object):
         self.indent = ''
 
 
+    @classmethod
+    def load(cls, fh):
+        if type(fh) in (str, unicode):
+            fh = FileStream().open(fh)
+        elif not isinstance(fh, Stream):
+            fh = Stream(fh)  # FIXME: does not work
+
+        return cls().read(fh)
+
+
+    @classmethod
+    def load_from_string(cls, data):
+        fh = MemoryStream().open(data)
+        return cls.load(fh)
+
+
     def read_header (self, stream, desc = None):
         if desc is None:
             self.header = {}
@@ -149,7 +165,10 @@ class Format (object):
     # { 'key': '', 'type': '', 'off': 0x00, 'label': '' },
 
 
-    def reset_struc (self, desc, obj):
+    def reset_struc (self, desc, obj=None):
+        if obj is None:
+            obj = {}
+
         for d in desc:
             self.reset_datum(d, obj)
             
@@ -205,14 +224,14 @@ class Format (object):
         except:
             if type in ('BYTE', 'WORD', 'DWORD', 'CTLID', 'RGBA', 'STRREF', 'RESTYPE'):
                 value = 0
-            elif type in ('STR2', 'STR4', 'STR8', 'STR32', 'RESREF', 'STRSIZED'):
+            elif type in ('STR2', 'STR4', 'STR8', 'STR32', 'RESREF', 'STRSIZED', '_STRING'):
                 value = ''
             elif type == 'POINT':
                 value = (0, 0)
             elif type == 'RECT':
                 value = (0, 0, 0, 0)
             else:
-                raise Error ("Unknown type")
+                raise ValueError ("Unknown type: " + str(type))
 
             if count > 1:
                 value = [ value for i in range(count) ]

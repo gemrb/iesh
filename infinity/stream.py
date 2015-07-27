@@ -424,12 +424,14 @@ class MemoryStream (Stream):
         self.offset = self.offset + len (data)
         return data
 
-    def write (self, bytes):
+    def write (self, bytes, count=-1):
+        if count == -1:
+            count = len(bytes)
         end = len (self.buffer) - (self.offset + len (bytes))
         if end  < 0:
             self.buffer.extend ([0] * -end)
 
-        # ...
+        self.buffer[self.offset:self.offset + len(self.buffer)] = bytes[:count]
 
     def __repr__ (self):
         return "<MemoryStream: %s at 0x%08x>" %(self.name, id (self))
