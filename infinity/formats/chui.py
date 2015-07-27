@@ -21,6 +21,15 @@
 
 from infinity.format import Format, register_format
 
+CTL_BUTTON = 0
+CTL_PROGRESSBAR = 1
+CTL_SLIDER = 2
+CTL_TEXTEDIT = 3
+CTL_TEXTAREA = 5
+CTL_LABEL = 6
+CTL_SCROLLBAR = 7
+
+
 class CHUI_Format (Format):
     header_desc = (
         { 'key': 'signature',
@@ -197,7 +206,7 @@ class CHUI_Format (Format):
         { 'key': 'slider',
           'type': 'RESREF',
           'off': 0x0016,
-          'label': 'Cycle in BAM file' },
+          'label': 'Slider' },
 
         { 'key': 'bam',
           'type': 'RESREF',
@@ -266,7 +275,7 @@ class CHUI_Format (Format):
           'off': 0x002A,
           'label': 'Knob jump count' },
 
-        { 'key': 'unknown2C',
+        { 'key': 'unknown_2c',
           'type': 'WORD',
           'off': 0x002C,
           'count': 4,
@@ -314,7 +323,7 @@ class CHUI_Format (Format):
           'off': 0x0036,
           'label': 'Unknown 36' },
 
-        { 'key': 'font_file',
+        { 'key': 'font',
           'type': 'RESREF',
           'off': 0x003A,
           'label': 'Font BAM' },
@@ -378,7 +387,7 @@ class CHUI_Format (Format):
           'off': 0x000E,
           'label': 'Initial text' },
 
-        { 'key': 'font_file',
+        { 'key': 'font',
           'type': 'RESREF',
           'off': 0x0012,
           'label': 'Font BAM' },
@@ -485,6 +494,7 @@ class CHUI_Format (Format):
         for obj in self.window_list:
             obj['control_list'] = controls[obj['control_ndx']:obj['control_ndx']+obj['num_of_controls']]          
 
+        return self
 
 
     def write (self, stream):
@@ -543,13 +553,13 @@ class CHUI_Format (Format):
 
 
     def control_type_to_desc (self, type):
-        if type == 0: return self.control_button_record_desc
-        elif type == 1: return self.control_progressbar_record_desc
-        elif type == 2: return self.control_slider_record_desc
-        elif type == 3: return self.control_textedit_record_desc
-        elif type == 5: return self.control_textarea_record_desc
-        elif type == 6: return self.control_label_record_desc
-        elif type == 7: return self.control_scrollbar_record_desc
+        if type == CTL_BUTTON: return self.control_button_record_desc
+        elif type == CTL_PROGRESSBAR: return self.control_progressbar_record_desc
+        elif type == CTL_SLIDER: return self.control_slider_record_desc
+        elif type == CTL_TEXTEDIT: return self.control_textedit_record_desc
+        elif type == CTL_TEXTAREA: return self.control_textarea_record_desc
+        elif type == CTL_LABEL: return self.control_label_record_desc
+        elif type == CTL_SCROLLBAR: return self.control_scrollbar_record_desc
 
 
     def read_control_record (self, stream, offset, obj):
@@ -573,7 +583,7 @@ class CHUI_Format (Format):
 
     def get_control_record_size (self, obj):
         # NOTE: do not add length of control_common_record_desc, because
-        #   it's alread in the specific desc due to its nonzero offset 
+        #   it's already in the specific desc due to its nonzero offset
         desc = self.control_type_to_desc (obj['type'])
         return self.get_struc_size (desc, obj)
 
