@@ -26,11 +26,13 @@ class CHUI_Format (Format):
         { 'key': 'signature',
           'type': 'STR4',
           'off': 0x0000,
+          'default': 'CHUI',
           'label': 'Signature' },
 
         { 'key': 'version',
           'type': 'STR4',
           'off':0x0004,
+          'default': 'V1  ',
           'label': 'Version'},
 
         { 'key': 'num_of_windows',

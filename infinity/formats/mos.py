@@ -31,11 +31,13 @@ class MOS_Format (Format, Image):
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
+              'default': 'MOS ',
               'label': 'Signature' },
             
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
+              'default': 'V1  ',
               'label': 'Version'},
             
             { 'key': 'width',
@@ -251,11 +253,13 @@ class MOSC_Format (MOS_Format):
             { 'key': 'signature',
               'type': 'STR4',
               'off': 0x0000,
+              'default': 'MOSC',
               'label': 'Signature' },
             
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
+              'default': 'V1  ',
               'label': 'Version'},
             
             { 'key': 'uncompressed_size',
