@@ -9,12 +9,12 @@ for r, o in ObjectIterator(type=aretype, names="none"):
 	name = (r['resref_name']).lower()
 	try:
 		wi = load_object (t, initype)
-		wi = t + ".ids"
+		wi = t + ".ini"
 	except:
 		wi = "none"
 	try:
 		ai = load_object (name, initype)
-		ai = name + ".ids"
+		ai = name + ".ini"
 	except:
 		ai = "none"
 	if ai != wi:
