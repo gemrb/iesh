@@ -266,7 +266,7 @@ class Stream (object):
 #            fmt = core.get_format_by_type (type)
 
         if fmt is None:
-            raise FormatUndetectedError ("Unknown format: %s in %s"%(repr(signature), self.name))
+            raise FormatUndetectedError ("Unknown format: %s in %s (type %s)" %(repr(signature), self.name, type))
 
         return fmt
 
