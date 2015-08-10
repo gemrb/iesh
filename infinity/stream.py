@@ -233,6 +233,10 @@ class Stream (object):
         #    self.open ()
 
         s = self.read_sized_string (0x0000, 16)
+        # hacks/exceptions for inis and other types without signatures
+        if re.match ("^\s*\[", s):
+            s = "INI"
+
         return s
 
         #if not was_open:

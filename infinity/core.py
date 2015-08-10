@@ -145,7 +145,7 @@ restype_list = [
     [ 0x3fe, None,   'BIO' ],
     [ 0x44c, None,   'BA' ],
     [ None,  None,   'BAF' ],
-    [ 0x802, None,   'INI' ],
+    [ 0x802, 'INI',   'INI' ],
     [ 0x803, None,   'SRC' ],
     [ None,  'TLK ', 'TOH' ],
     [ None,  None,   'TOT' ],
