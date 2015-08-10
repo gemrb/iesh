@@ -273,7 +273,7 @@ class Stream (object):
 
     def load_object (self, type = 0):
         #print self
-        fmt = self.get_format ()
+        fmt = self.get_format (type)
         obj = fmt ()
         self.seek (0)
         obj.read (self)
