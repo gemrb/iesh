@@ -388,8 +388,8 @@ class SPL_Format (Format):
         off = self.header['feature_block_off'] + self.header['casting_feature_ndx'] * 48
         for i in range (self.header['casting_feature_cnt']):
             obj = {}
-            self.read_feature_block (stream, off, obj)
-            self.casting_feature_block_list.append (obj)
+            self.read_feature (stream, off, obj)
+            self.casting_feature_list.append (obj)
             off = off + 48
 
 
