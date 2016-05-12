@@ -517,7 +517,7 @@ class Format (object):
             elif rec_type == 'CTLID':
                 try: value2 = '(' + '0x%08x' %value + ')'
                 except: pass
-            elif rec_type == 'STRREF' and core.strrefs:
+            elif rec_type == 'STRREF' and core.strrefs and value >= 0:
                 try: value2 = '(' + core.strrefs.strref_list[value]['string'] + ')'
                 except: pass
             elif rec_type == 'RGBA':
