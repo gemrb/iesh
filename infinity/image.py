@@ -95,7 +95,7 @@ class Image (object):
 
         w = img.size[0]
         h = img.size[1]
-        pixels = img.tostring()
+        pixels = img.tobytes()
         
         for ndx in range (h*w):
             r = ord(pixels[4*ndx])
