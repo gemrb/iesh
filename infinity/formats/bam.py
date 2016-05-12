@@ -364,7 +364,7 @@ class BAM_Format (Format, ImageSequence):
                 data.append(pix)
                 ndx = ndx + 1
 
-        img = PIL.Image.fromstring ('RGBA', (obj['width'], obj['height']), ''.join(data), "raw", 'RGBA', 0, 1)
+        img = PIL.Image.frombytes ('RGBA', (obj['width'], obj['height']), ''.join(data), "raw", 'RGBA', 0, 1)
         img.x = 0
         img.y = 0
 
