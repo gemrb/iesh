@@ -290,6 +290,14 @@ def find_res_type (**kw):
 def type_to_ext (type):
     return [ r[2] for r in find_res_type (type=type) ]
     
+def ext_to_type (filetype):
+    if type(filetype) == type(''):
+        try:
+            filetype = find_res_type(ext=filetype.upper ())[0][0]
+        except:
+            pass
+
+    return filetype
 
 #def sig_to_type (signature,  game_type = None):
 #    pass
