@@ -411,9 +411,8 @@ def id_to_symbol (idsfile, id):
 
     if not ids.has_key (idsfile):
         try:
-            # FIXME: ugly & should use 'IDS' instead of 0x3F0
-            idsobj = ResourceStream ().open (idsfile, 0x03F0).load_object ()
-            #idsobj.read ()
+            # FIXME: ugly
+            idsobj = ResourceStream ().open (idsfile, 'IDS').load_object ()
             ids[idsfile] = idsobj
         except Exception, e:
             traceback.print_exc()
@@ -439,9 +438,8 @@ def symbol_to_id (idsfile, sym):
 
     if not ids.has_key (idsfile):
         try:
-            # FIXME: ugly & should use 'IDS' instead of 0x3F0
-            idsobj = ResourceStream ().open (idsfile, 0x03F0).load_object ()
-            #idsobj.read ()
+            # FIXME: ugly
+            idsobj = ResourceStream ().open (idsfile, 'IDS').load_object ()
             ids[idsfile] = idsobj
         except Exception, e:
             traceback.print_exc()

@@ -531,9 +531,8 @@ class Format (object):
                 elif type (enum) == types.StringType:
                     if not core.ids.has_key (enum):
                         try:
-                            # FIXME: ugly & should use 'IDS' instead of 0x3F0
-                            ids = ResourceStream ().open (enum, 0x03F0).load_object ()
-                            ids.read ()
+                            # FIXME: ugly
+                            ids = ResourceStream ().open (enum, 'IDS').load_object ()
                             core.ids[enum] = ids
                         except:
                             pass
