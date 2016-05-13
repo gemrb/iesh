@@ -448,9 +448,9 @@ class ResourceStream (MemoryStream):
     def __init__ (self):
         MemoryStream.__init__ (self)
 
-    def open (self, name, type = None, index = 0):
+    def open (self, name, filetype = None, index = 0):
         self.resref = name
-        self.type = type
+        self.type = core.ext_to_type(filetype)
 
         if core.keys is None:
             raise RuntimeError, "Core game files are not loaded. See load_game ()."
