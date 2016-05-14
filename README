@@ -159,32 +159,8 @@ dialog_file
 
 
 
-The following resource formats are recognized in this version:
-  2DA
-  AREA V1.0
-  BAM V1
-  BAMC V1
-  BIFF V1
-  BIF V1.0
-  CHUI V1
-  CRE V1.2
-  DLG V1.0
-  IDS
-  ITM V1.1
-  KEY V1
-  MOS V1
-  MOSC V1
-  PRO V1.0
-  SPL V1
-  STOR V1.1
-  TIS V1
-  TLK V1
-  VVC V1.0
-  WED V1.3
-  WFX  V1.0
-  WMAP V1.0
-
-Type list_formats() to print list of recognized file formats.
+Almost all resource formats from before the introduction of EE versions are recognized.
+Type print_formats() to print a list of recognized file signatures (formats).
   
 Type `?' or `help' to get some online help and `q', `quit' or ^D
 to exit the program.
