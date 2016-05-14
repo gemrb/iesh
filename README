@@ -57,6 +57,10 @@ files. To load them, run load_game () function like this:
     Cmd: load_game ("/home/user/dos/bg2")
 
 dots marking progress as the program loads CHITIN.KEY and DIALOG.TLK.
+For EE versions of the games, specify the paths to both these files
+as the second and third parameter to load_game:
+
+    Cmd: load_game("/Users/user/bg2ee", "chitin.key", "lang/en_US/dialog.tlk")
 
 !!! This might take *extremely* long time on a slow computer and
 a significant portion of memory. If it's too slow or too big, then
