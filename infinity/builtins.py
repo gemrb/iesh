@@ -262,22 +262,17 @@ def print_restype_stats ():
 def print_formats ():
     """List recognized/implemented IE file formats"""
     
-    flist = filter (lambda a: a[0][1] is not None,  core.formats.items ())
-    flist.sort (lambda a,  b: 2 * cmp (a[0][0],  b[0][0]) + cmp (a[0][1],  b[0][1]))
+    flist = filter (lambda a: a[1] is not None,  core.fmt_signatures.items ())
+    flist.sort (lambda a, b: cmp (a[0], b[0]))
 
-    print("sign vers  class                 desc & status")
-    print("-----------------------------------------------")
-    for key,  value in flist:
-        version = ''
-        desc = ''
-        if key[1] is not None:
-            version = key[1]
-        if value[1] is not None:
-            desc = '- ' + value[1]
-        klass_name = str (value[0])
-        klass_name = klass_name.replace ('infinity.formats.',  '')
-            
-        print("%-4s %-4s  %-20s  %s" %(key[0],  version,  klass_name,  desc))
+    print("signature    class")
+    print("----------|------------------------")
+    for sig, klass in flist:
+        klass_name = str (klass[0]).split("'")
+        klass_name = klass_name[1].replace ('infinity.formats.',  '')
+        sig = sig.replace('\n', ' ').replace('\r', ' ').rstrip()
+        if len(sig) > 1:
+            print("%-10s|  %s" %(sig, klass_name))
 
 
 ###################################################
