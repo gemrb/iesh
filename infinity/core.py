@@ -53,6 +53,9 @@ strrefs = None
 global keys
 keys = None
 
+global override
+override = None
+
 global options
 options = defaults.options
 
@@ -65,6 +68,7 @@ bif_files = {}
 
 # These variables are filled after call to load_game()
 game_dir = None
+override_dir = None
 chitin_file = None
 dialog_file = None
 game_data_path = None
@@ -508,6 +512,44 @@ def find_file (filename, type = None):
 
     return None
 
+def locate_override ():
+    for override in ["override", "Override"]:
+        dir = os.path.join (game_dir, override)
+
+        if (os.path.exists (dir)):
+            return dir
+
+    return None
+
+def load_override ():
+    entries = os.listdir (override_dir)
+    override = []
+
+    print("Processing %d items from override" %(len(entries)))
+
+    for entry in entries:
+        (fname, ext) = os.path.splitext (entry)
+        try:
+            file_type = find_res_type (ext=ext)[0][0]
+            file_path = os.path.join(override_dir, entry)
+        except:
+            print ("Warning: unrecognized file: %s" %(entry))
+            continue
+
+        rec = {'path': file_path, 'resref_name': fname, 'type': file_type}
+        override.append (rec)
+
+    print("%d items indexed" %(len(override)))
+
+    return override
+
+def search_override (name, type = None):
+    obj = filter (lambda s, name=name.upper (): s['resref_name'].upper () == name, override)
+
+    if type is not None:
+        obj = filter (lambda o: o['type'] == type, obj)
+
+    return obj
 
 def get_option (key):
     try:

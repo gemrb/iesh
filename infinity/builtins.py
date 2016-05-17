@@ -28,7 +28,7 @@ import sys
 import traceback
 
 from infinity import core
-from infinity.stream import ResourceStream, FileStream
+from infinity.stream import ResourceStream, FileStream, OverrideStream
 
 ###################################################
 def load_game (game_dir, chitin_file = None, dialog_file = None):
@@ -36,8 +36,8 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
 
     The `game_dir' parameter is mandatory, the others are optional.
     Many commands assume that these two files are
-    already loaded. The loaded objects are stored in core.keys and
-    core.strrefs."""
+    already loaded. The loaded objects are stored in core.keys, core.override
+    and core.strrefs."""
 
     if chitin_file is None:
         chitin_file = core.get_option ('core.chitin_file')
@@ -47,9 +47,14 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
 
     core.game_dir = game_dir
     core.game_data_path = game_dir
+    core.override_dir = core.locate_override ()
     core.chitin_file = chitin_file
     core.dialog_file = dialog_file
     
+    # Load data from the override
+    if core.override_dir is not None:
+        core.override = core.load_override ()
+
     # Load RESREF index file (CHITIN.KEY)
     chitin_file = core.find_file (chitin_file)
     stream = FileStream ().open (chitin_file)
@@ -72,7 +77,8 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
 def save_state (filename):
     """Saves some core variables (especially keys and strrefs), so that they
     can be later loaded faster than from IE data files."""
-    data = [core.game_dir, core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs, core.game_data_path ]
+    data = [core.game_dir, core.override, core.override_dir, core.chitin_file,
+            core.dialog_file, core.keys, core.strrefs, core.game_data_path ]
     fh = open (filename,  'w')
     cPickle.dump (data,  fh)
     fh.close ()
@@ -84,21 +90,39 @@ def restore_state (filename):
     fh = open (filename)
     data = cPickle.load (fh)
     fh.close ()
-    core.game_dir,  core.chitin_file,  core.dialog_file,  core.keys,  core.strrefs, core.game_data_path = data
+    core.game_dir, core.override, core.override_dir, core.chitin_file, core.dialog_file, core.keys, core.strrefs, core.game_data_path = data
 
 ###################################################
-def load_object (name, type = None,  index = 0):
+def load_object (name, type = None, index = 0, ignore_override = False):
     """Load named object from a file located in filesystem or in game's data.
 
-    Load file or resref `name'  and return Format object of appropriate type. 
-    If `name' is not unique, specify resource type with `type' and eventually 
-    `index' if there's still more than one."""
+    Load file or resref `name' and return Format object of appropriate type.
+    If `name' is not unique, specify resource type with `type' and eventually
+    `index' if there's still more than one.
 
-    try:
-        stream = FileStream().open (name)
-    except:
-        stream = ResourceStream().open (name, type,  index)
-    
+    If you want to avoid the override folder, specify the appropriate value for
+    `ignore_override' parameter."""
+
+    stream = None
+
+    if not ignore_override:
+        try:
+            stream = OverrideStream().open (name, type, index)
+        except RuntimeError as e:
+            print sys.exc_info()[1]
+
+        try:
+            stream = stream or FileStream().open (name)
+        except:
+            print "File not found on filesystem, checking BIF files"
+
+    if stream is None or ignore_override:
+        try:
+            stream = ResourceStream().open (name, type, index)
+        except:
+            print sys.exc_info()[1]
+            return None
+
     res = stream.load_object ()
     stream.close ()
     return res
@@ -111,15 +135,26 @@ def print_object (name, type = None,  index = 0):
     obj.printme ()
 
 ###################################################
-def export_object (name, filename, type = None, index = 0):
-    """Export resource `name' into file `filename'. 
+def export_object (name, filename, type = None, index = 0, ignore_override=False):
+    """Export resource `name' into file `filename'.
 
-    If the `name' is not
-    unique, specify resource type with `type' and eventually `index' if
-    there's still more than one"""
+    If the `name' is not unique, specify resource type with `type' and eventually
+    `index' if there's still more than one.
 
-    stream = ResourceStream ().open (name,  type,  index)
-    fh = open (filename,  "w")
+    Specify `ignore_override' if you want to export straight from the game's data."""
+
+    stream = None
+
+    if not ignore_override:
+        try:
+            stream = OverrideStream ().open (name, type, index)
+        except:
+            pass
+
+    if stream is None or ignore_override:
+        stream = ResourceStream ().open (name, type, index)
+
+    fh = open (filename, "w")
     fh.write (stream.buffer)
     fh.close ()
     stream.close ()

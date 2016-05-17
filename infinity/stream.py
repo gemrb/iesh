@@ -27,6 +27,7 @@ from normal files, memory buffers and from files in IE specific
 Classes:
   Stream - base class implementing reading of IE primitives
   FileStream - read from files contained in filesystem
+  OverrideStream - read from files located in the override folder
   MemoryStream - read from memory buffers (strings)
   ResourceStream - read IE object referenced by RESREF
   CompressedStream - read compressed buffer
@@ -510,6 +511,40 @@ class ResourceStream (MemoryStream):
     def __repr__ (self):
         return "<ResourceStream: %s at 0x%08x>" %(self.resref, id (self))
 
+class OverrideStream (MemoryStream):
+    """A subclass of MemoryStream for looking up data in the override directory."""
+
+    def __init__ (self):
+        MemoryStream.__init__ (self)
+
+    def open (self, name, filetype = None, index = 0):
+        self.resref = name
+        self.type = core.ext_to_type(filetype)
+
+        if not core.override:
+            raise RuntimeError, "Override is empty."
+
+        obj = core.search_override (self.resref, self.type)
+
+        if len (obj) > 1 and self.type is None:
+            raise RuntimeError, name + ": more than one result in override, types " + ' ' . join([ str(o['type']) for o in obj ])
+
+        if len (obj) == 0:
+            raise RuntimeError, name + ": not found in override!"
+
+        obj = obj[index]
+
+        # this is performed for compatibility with export_object
+        stream = FileStream ().open (obj['path'])
+        buffer = stream.read()
+
+        return MemoryStream.open (self, buffer, name = name)
+
+    def load_object (self):
+        return Stream.load_object (self, self.type)
+
+    def __repr__ (self):
+        return "<OverrideStream: %s at 0x%08x>" %(self.resref, id (self))
 
 class CompressedStream (MemoryStream):
     """Stream for reading compressed files in memory."""

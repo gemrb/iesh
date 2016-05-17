@@ -89,10 +89,10 @@ To load and parse a file or object, use the load_object() function:
 or even:
 
     o = load_object("STONEBIG")
- 
-If the named file is not found at the given path, it's searched for in game's data, 
-but that requires that game data were already loaded.
- 
+
+If the named file is not found in the override or at the given path, it's searched for
+in game's data, but that requires that game data were already loaded.
+
 To print the content of the object you just loaded:
 
      o.printme()
