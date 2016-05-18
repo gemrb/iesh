@@ -93,6 +93,37 @@ def restore_state (filename):
     core.game_dir, core.override, core.override_dir, core.chitin_file, core.dialog_file, core.keys, core.strrefs, core.game_data_path = data
 
 ###################################################
+def find_objects (name, filetype = None):
+    """Look up named objects in game's data or in the override directory."""
+
+    filetype = core.ext_to_type(filetype)
+    override_obj = core.search_override (name, filetype)
+    resref_obj = core.keys.get_resref_by_name (name)
+
+    if filetype is not None:
+        resref_obj = filter (lambda o: o['type'] == filetype, resref_obj)
+
+    if override_obj:
+        print ("Override:")
+        for o in override_obj:
+            print (
+                "  File: %s, Type: %s, location: %s"
+                %(o['resref_name'], core.type_to_ext(o['type'])[0], o['path'])
+            )
+    else:
+        print "Nothing found in override!"
+
+    if resref_obj:
+        print ("Game data:")
+        for o in resref_obj:
+            print (
+                "  File: %s, Type: %s, location: %s"
+                %(o['resref_name'], core.type_to_ext(o['type'])[0], o['file_name']['file_name'])
+            )
+    else:
+        print "Nothing found in game data!"
+
+###################################################
 def load_object (name, type = None, index = 0, ignore_override = False):
     """Load named object from a file located in filesystem or in game's data.
 

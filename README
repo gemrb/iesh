@@ -82,6 +82,16 @@ And next time instead of load_game() just use:
 
 Common tasks:
 -------------
+To search for objects in game data and override:
+
+    find_objects("demogor2")
+
+Optionally, you can provide a file type to filter the results by, using
+either the file extension or numerical RESREF type:
+
+    find_objects('demogor2', 'cre')
+    find_objects('demogor2', 1009)
+
 To load and parse a file or object, use the load_object() function:
 
     o = load_object("data/STONEBIG.BAM")
