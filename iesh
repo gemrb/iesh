@@ -82,6 +82,12 @@ def help_on_shell ():
           already loaded. The loaded objects are stored in core.keys and
           core.strrefs.
 
+      find_objects('demogor2')
+      find_objects('demogor2', 'cre')
+      find_objects('demogor2', 1009)
+          Tries to find all objects that match the name and, optionally, file type
+          inside the game's data and the override folder.
+
       load_object ("data/AGOODY.itm")
       load_object ("AGOODY")
           tries to find and load object from a file or resources.
