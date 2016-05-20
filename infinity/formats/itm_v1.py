@@ -536,14 +536,24 @@ class ITM_V10_Format (Format):
               'label': 'THAC0 bonus'},
 
             { 'key': 'dice_sides',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0016,
               'label': 'Dice sides'},
 
+            { 'key': 'primary_type',
+              'type': 'BYTE',
+              'off': 0x0017,
+              'label': 'Primary type'},
+
             { 'key': 'dice_thrown',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0018,
               'label': 'Dice thrown'},
+
+            { 'key': 'secondary_type',
+              'type': 'BYTE',
+              'off': 0x0019,
+              'label': 'Secondary type'},
 
             { 'key': 'damage_bonus',
               'type': 'WORD',
