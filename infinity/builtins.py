@@ -90,7 +90,14 @@ def restore_state (filename):
     fh = open (filename)
     data = cPickle.load (fh)
     fh.close ()
-    core.game_dir, core.override, core.override_dir, core.chitin_file, core.dialog_file, core.keys, core.strrefs, core.game_data_path = data
+    # old format from before override dir support
+    if len(data) == 6:
+        core.game_dir, core.chitin_file, core.dialog_file, core.keys, core.strrefs, core.game_data_path = data
+        core.override_dir = core.locate_override ()
+        if core.override_dir is not None:
+            core.override = core.load_override ()
+    else:
+        core.game_dir, core.override, core.override_dir, core.chitin_file, core.dialog_file, core.keys, core.strrefs, core.game_data_path = data
 
 ###################################################
 def find_objects (name, filetype = None):
