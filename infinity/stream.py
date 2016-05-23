@@ -139,12 +139,15 @@ class Stream (object):
         bytes = struct.pack ('<H', value)
         self.write (bytes)
 
-    def read_dword (self, offset):
+    def read_dword (self, offset, signed = False):
         # offset == None means "current offset" here
         if offset is not None:
             self.seek (offset)
+
         v = self.read (4)
-        return struct.unpack ('<I', v)[0]
+        fmt = '<i' if signed else '<I'
+
+        return struct.unpack (fmt, v)[0]
 
     def write_dword (self, value, offset = None):
         # offset == None means "current offset" here
