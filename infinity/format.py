@@ -290,7 +290,7 @@ class Format (object):
                 value = stream.read_resref (offset + local_offset)
                 value = string.translate (value, core.slash_trans, '\x00')
             elif type == 'STRREF':
-                value = stream.read_dword (offset + local_offset)
+                value = stream.read_dword (offset + local_offset, True)
             elif type == 'RESTYPE':
                 value = stream.read_word (offset + local_offset)
             elif type == 'STROFF':
