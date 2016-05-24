@@ -53,4 +53,4 @@ if [[ -z $PAGER ]]; then
   PAGER=cat
 fi
 
-diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1") <($IEPARSE "$FILE2") | $PAGER || exit 2
+diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1") <($IEPARSE "$FILE2") | $PAGER
