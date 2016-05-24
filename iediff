@@ -25,6 +25,7 @@ function usage ()
 }
 
 IEPARSE="${IEPARSE:-$(dirname $0)/ieparse.py}"
+BASEDIFFOPTS="-as"
 
 for i in "$@"; do
   if [[ -f $i ]]; then
@@ -46,10 +47,10 @@ if [[ -z $FILE1 || -z $FILE2 ]]; then
   usage
 fi
 if [[ -z $DIFFOPTS ]]; then
-  DIFFOPTS="-aus"
+  DIFFOPTS="-u"
 fi
 if [[ -z $PAGER ]]; then
   PAGER=cat
 fi
 
-diff $DIFFOPTS <($IEPARSE "$FILE1") <($IEPARSE "$FILE2") | $PAGER || exit 2
+diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1") <($IEPARSE "$FILE2") | $PAGER || exit 2
