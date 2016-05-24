@@ -107,7 +107,7 @@ class CHR_V22_Format (Format):
               'off': 0x0098,
               'count': 9,
               'label': 'Quick spell class'},
-        
+
             { 'key': 'unknownA1',
               'type': 'BYTE',
               'off': 0x00A1,
@@ -185,5 +185,5 @@ class CHR_V22_Format (Format):
         self.print_header ()
         self.cre.printme ()
 
-        
+
 register_format (CHR_V22_Format, signature='CHR V2.2')

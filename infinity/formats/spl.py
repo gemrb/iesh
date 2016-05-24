@@ -25,17 +25,17 @@ class SPL_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'spell_name',
               'type': 'STRREF',
               'off': 0x0008,
               'label': 'Spell name'},
-            
+
             { 'key': 'unknown1',
               'type': 'DWORD',
               'off': 0x000C,
@@ -189,7 +189,7 @@ class SPL_Format (Format):
               'label': 'Casting feature count'},
 
             ]
-        
+
     extended_header_desc = (
             { 'key': 'spell_form',
               'type': 'BYTE',
@@ -419,7 +419,7 @@ class SPL_Format (Format):
             self.read_feature (stream, off2, obj2)
             obj['feature_list'].append (obj2)
             off2 = off2 + 48
-            
+
     def print_extended_header (self, obj):
         self.print_struc (obj, self.extended_header_desc)
 
@@ -431,7 +431,7 @@ class SPL_Format (Format):
 
     def read_feature (self, stream, offset, obj):
         self.read_struc (stream,offset, self.feature_desc, obj)
-        
+
     def print_feature (self, obj):
         self.print_struc (obj, self.feature_desc)
 
@@ -447,12 +447,12 @@ class SPL_V20_Format (SPL_Format):
             { 'key': 'duration_modifier_rounds',
               'type': 'BYTE',
               'off': 0x0073,
-              'label': 'Duration modifier (rounds)' }, 
+              'label': 'Duration modifier (rounds)' },
 
             { 'key': 'unknown_73',
               'type': 'BYTES',
               'off': 0x0074,
-              'size': 14, 
+              'size': 14,
               'label': 'Unknown 0x73' },
     ])
 

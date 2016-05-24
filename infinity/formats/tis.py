@@ -31,12 +31,12 @@ class TIS_Format (Format, ImageSequence):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'tile_cnt',
               'type': 'DWORD',
               'off': 0x0008,
@@ -96,7 +96,7 @@ class TIS_Format (Format, ImageSequence):
 
         palette_size = 4 * 256
         tile_size = self.header['size'] ** 2
-        
+
         off = self.header['tile_off']
         for i in range (self.header['tile_cnt']):
             pal = []
@@ -106,7 +106,7 @@ class TIS_Format (Format, ImageSequence):
             #tile_data = struct.unpack ('%dB' %tile_size, bin_data)
             off += tile_size
             obj = {'palette': pal,  'tile_data': bin_data}
-            
+
             self.tile_list.append (obj)
 
         return self
@@ -119,15 +119,15 @@ class TIS_Format (Format, ImageSequence):
 
         tile_size = self.header['size'] ** 2
         palette_size = 4 * 256
-        
-        off = self.header['tile_off'] 
-        
+
+        off = self.header['tile_off']
+
         for tile in self.tile_list:
             self.write_palette (stream, off, tile['palette'])
             off += palette_size
             #bin_data = struct.pack ('%dB' %tile_size, *tile['tile_data'])
             stream.write_blob (tile['tile_data'], off)
-            
+
             off += tile_size
 
 
@@ -177,12 +177,12 @@ class TIS_Format (Format, ImageSequence):
 #        bin_data = stream.read_blob (obj['offset'], size)
 #        obj['tile_data'] = struct.unpack ('%dB' %size, bin_data)
 #
-# 
+#
     def frame_to_image (self, obj):
         pal = obj['palette']
         data = [ '%c%c%c\xff' %(pal[ord(p)]['r'], pal[ord(p)]['g'], pal[ord(p)]['b'])  for p in obj['tile_data']]
         pixels = ''.join(data)
-        # FIXME: not needed 
+        # FIXME: not needed
         obj['x'] = 0
         obj['y'] = 0
         sz = self.header['size']
@@ -226,11 +226,11 @@ class TIS_Format (Format, ImageSequence):
 #        for line in range (self.header['height']):
 #            row = line / self.header['block_size']
 #            scanline = line % self.header['block_size']
-#            
+#
 #            for i in range (self.header['columns']):
 #                tile = self.tile_list[(row * self.header['columns']) + i]
 #                pal = tile['palette']
-#            
+#
 #                o = scanline * tile['width']
 #                for x in range (tile['width']):
 #                    pix = tile['tile_data'][o + x]
@@ -244,24 +244,24 @@ class TIS_Format (Format, ImageSequence):
     def from_mos (self, mos):
         self.tile_list = []
         size = self.header['size'] = mos.header['block_size']
-        
+
         for obj in mos.tile_list:
             # FIXME: this destroys original tiles in the MOS_Format object
             width = obj['width']
             height = obj['height']
-            
+
             if width < size:
                 pad = [ obj['tile_data'][size - 1] ] * (size - width)
             else:
                 pad = []
-            
+
             #print 'Pad:', pad
             start = 0
             data = []
             for i in range (obj['height']):
                 row = list (obj['tile_data'][start:start+width]) + pad
                 data.extend (row)
-                
+
                 start += width
 
 
@@ -269,7 +269,7 @@ class TIS_Format (Format, ImageSequence):
                 pad = data[-size:] * (size - height)
             else:
                 pad = []
-            
+
             #print 'Pad:', pad
             data.extend (pad)
             data = struct.pack ("%dB" %(size*size), *data)
@@ -283,7 +283,7 @@ class TIS_Format (Format, ImageSequence):
 class UTIS_Format (TIS_Format):
     def __init__ (self):
         TIS_Format.__init__ (self)
-        
+
         self.header = {}
         self.reset_struc (self.header_desc, self.header)
         self.header['size'] = 64
@@ -294,7 +294,7 @@ class UTIS_Format (TIS_Format):
 
         palette_size = 4 * 256
         tile_size = self.header['size'] ** 2
-        
+
         off = 0
         while True:
             pal = []
@@ -302,14 +302,14 @@ class UTIS_Format (TIS_Format):
                 self.read_palette (stream,  off,  pal)
             except: # FIXME: ugly hack
                 break
-            
+
             off += palette_size
             bin_data = stream.read_blob (off, tile_size)
             if len (bin_data) != tile_size:
                 break
             off += tile_size
             obj = {'palette': pal,  'tile_data': bin_data}
-            
+
             self.tile_list.append (obj)
 
         self.header['tile_cnt'] = len (self.tile_list)

@@ -59,7 +59,7 @@ class BCS_Format (Format):
 
         if c == '':
             return None
-            
+
         elif c == '[':
             #res = c
             res = ''
@@ -75,7 +75,7 @@ class BCS_Format (Format):
                     raise ValueError ("[]  len")
             res = [ int (n) for n in res2 ]
             return res
-            
+
         elif c == '"':
             res = c
             while True:
@@ -84,14 +84,14 @@ class BCS_Format (Format):
                 if c == '"':
                     break
             return res
-            
+
         elif c.isdigit () or (c == '-' and nextc ().isdigit ()):
             if c == '-':
                 signum = -1
                 c = getc ()
             else:
                 signum = 1
-                
+
             res = c
             while nextc ().isdigit ():
                 res = res + getc ()
@@ -140,7 +140,7 @@ class BCS_Format (Format):
         ### <SCtail> -> SC
 
         obj = []
-        
+
         obj.append (self.expect_token (stream, 'SC'))
         while self.next_token (stream) == 'CR':
             obj.append (self.read_condition_response_block (stream))
@@ -154,15 +154,15 @@ class BCS_Format (Format):
         ### <CR> -> CR <CRtail>
         ### <CRtail> -> <CO> <RS> <CRtail>
         ### <CRtail> -> CR
-        
+
         obj = []
-        
+
         obj.append (self.expect_token (stream, 'CR'))
         while self.next_token (stream) == 'CO':
             obj.append (self.read_condition (stream))
             obj.append (self.read_response_set (stream))
         self.expect_token (stream, 'CR')
-    
+
         return obj
 
 
@@ -172,19 +172,19 @@ class BCS_Format (Format):
         ### <COtail> -> CO
 
         obj = []
-        
+
         obj.append (self.expect_token (stream, 'CO'))
         while self.next_token (stream) == 'TR':
             obj.append (self.read_trigger (stream))
         self.expect_token (stream, 'CO')
-        
+
         return obj
 
     def read_trigger (self, stream):
         # pst:  id, 4*I, point, 2*S, O
         # FIXME: not correct, one of the ints is flags field
         obj = []
-        
+
         obj.append (self.expect_token (stream, 'TR'))
         obj.append (self.get_token (stream))
         obj.append (self.get_token (stream))
@@ -199,7 +199,7 @@ class BCS_Format (Format):
 
         obj.append (self.read_object (stream))
         self.expect_token (stream, 'TR')
-        
+
         self.add_ids_code('TRIGGER', obj[1])
         #print core.id_to_symbol ('TRIGGER', obj[1])
         return obj
@@ -214,25 +214,25 @@ class BCS_Format (Format):
         while self.next_token (stream) == 'RE':
             obj.append (self.read_response (stream))
         self.expect_token (stream, 'RS')
-        
+
         return obj
-    
+
     def read_response (self, stream):
         ### <RE> -> RE int <AC> <REtail>
         ### <REtail> -> <AC> <REtail>
         ### <REtail> -> RE
         # FIXME: this is different from what is described in IESDP, where
         #   each response has only one action, but e.g. look at PST's 0202FD1.BCS
-        
+
         obj = []
         obj.append (self.expect_token (stream, 'RE'))
         obj.append (self.get_token (stream))
         while self.next_token (stream) == 'AC':
             obj.append (self.read_action (stream))
         self.expect_token (stream, 'RE')
-        
+
         return obj
-    
+
     def read_action (self, stream):
         #pst:  id, 3*O, 5*I, 2*S
         obj = []
@@ -251,11 +251,11 @@ class BCS_Format (Format):
         self.expect_token (stream, 'AC')
         self.add_ids_code('ACTION', obj[1])
         return obj
-    
-    
+
+
     def read_object (self, stream):
         obj = []
-        # PST: id, 13*I, rect, S 
+        # PST: id, 13*I, rect, S
         obj.append (self.expect_token (stream, 'OB'))
         obj.append (self.get_token (stream))
         obj.append (self.get_token (stream))
@@ -275,14 +275,14 @@ class BCS_Format (Format):
         #    print "short object"
         #    self.get_token (stream)
         #    return obj
-            
+
         if self.type == 'pst':
             obj.append (self.get_token (stream))
             obj.append (self.get_token (stream))
             obj.append (self.get_token (stream))
 
         self.expect_token (stream, 'OB')
-        
+
         #print core.id_to_symbol ('OBJECT', obj[10])
         return obj
 
@@ -311,11 +311,11 @@ class BCS_Format (Format):
                            'S': (9, 10),
                            },
                 }
-        
+
         # FIXME: globalsetglobal, globalorglobal, ...
-        split_string_fns = ('global', 
-                                    'globalgt', 
-                                    'globallt', 
+        split_string_fns = ('global',
+                                    'globalgt',
+                                    'globallt',
                                     'globalband',
                                     'globalbor',
                                     'globalmin',
@@ -323,15 +323,15 @@ class BCS_Format (Format):
                                     'globalshl',
                                     'globalshr',
                                     'globalxor',
-                                    'bitcheck', 
+                                    'bitcheck',
                                     'bitcheckexact',
-                                    
-                                    'globalset', 
-                                    'setglobal', 
-                                    'incrementglobal', 
-                                    'bitset', 
+
+                                    'globalset',
+                                    'setglobal',
+                                    'incrementglobal',
+                                    'bitset',
                                     'bitclear')
-        
+
         def resolve_object (obj):
             res = []
             if self.type == 'pst':
@@ -397,7 +397,7 @@ class BCS_Format (Format):
                     res2 = core.id_to_symbol ('OBJECT', obj[11]) + '(' + res2 +')'
                 if obj[12] != 0:
                     res2 = core.id_to_symbol ('OBJECT', obj[12]) + '(' + res2 +')'
-                
+
             # FIXME: what about area?? [-1.-1.-1.-1] (15)
             res3 = None
             if self.type == 'pst':
@@ -409,7 +409,7 @@ class BCS_Format (Format):
 
             if (res and res2) or (res and res3) or (res2 and res3):
                 raise ValueError ("Error: More values for object: " + repr (res) + '//' + repr (res2) + '//' + repr (res3))
-                
+
             if res:
                 return res
             elif res2:
@@ -426,7 +426,7 @@ class BCS_Format (Format):
             args = mo.groups ()[1].split (",")
             arg_indices = {}
             res_args = []
-            
+
             split_string_arg = fn_name.lower () in  split_string_fns
 
             for arg in args:
@@ -435,7 +435,7 @@ class BCS_Format (Format):
                     break
                 type, name = arg.split (':')
                 name, file = name.split ('*')
-                
+
                 if arg_indices.has_key (type):
                     arg_indices[type] = index = arg_indices[type] + 1
                 else:
@@ -446,8 +446,8 @@ class BCS_Format (Format):
                     aindex = odef[self.type + '_' + obj_type][type][index] + 1
                 else:
                     aindex = odef[self.type + '_' + obj_type][type][index-1] + 1
-                    
-                
+
+
                 if type == 'I':
                     v = str (obj[aindex])
                     #print 'Lookup', file, tr[index + 1]
@@ -469,7 +469,7 @@ class BCS_Format (Format):
                             res_args.append (obj[aindex])
                     else:
                         res_args.append (obj[aindex])
-    
+
                 elif type == 'O':
                     res_args.append (resolve_object (obj[aindex]))
 
@@ -485,7 +485,7 @@ class BCS_Format (Format):
             for tr in co[1:]:
                 fn_spec = core.id_to_symbol ('TRIGGER', tr[1])
                 neg = ('!', '')[not tr[3]] # FIXME: hack, use odef[]
-                
+
                 print fn_spec, tr
                 fn_name, res_args = resolve_args (fn_spec, 'tr', tr)
                 print('    ' + neg + fn_name + '(' + ','.join (res_args) + ')')

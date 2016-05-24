@@ -7,10 +7,10 @@ from infinity.formats import *
 
 while len (sys.argv) > 1:
     if sys.argv[1] == '-v':
-        core.set_option ('format.print_offset', True) 
-        core.set_option ('format.print_size', True) 
-        core.set_option ('format.print_type', True) 
-        core.set_option ('format.mos.print_tiles', True) 
+        core.set_option ('format.print_offset', True)
+        core.set_option ('format.print_size', True)
+        core.set_option ('format.print_type', True)
+        core.set_option ('format.mos.print_tiles', True)
         core.set_option ('format.mos.print_palettes', True)
         core.set_option ('format.tis.print_tiles', True)
         core.set_option ('format.tis.print_palettes', True)

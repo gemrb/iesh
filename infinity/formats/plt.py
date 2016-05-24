@@ -89,13 +89,13 @@ class PLT_Format (Format, Image):
         size = self.header['width'] * self.header['height']
         data = [ '\0\0\0\0' ] * size
         pixels = self.raw_pixels
-        
+
         for i in range (size):
             intensity = ord (pixels[2*i])
             palindex = ord (pixels[2*i+1])
             a = (255, 0)[intensity == 255]
             # FIXME: shadows have full alpha
-            
+
             if self.palettes:
                 (r, g, b) = self.palettes[palindex][intensity]
                 pix = '%c%c%c%c' %(r, g, b, a)
@@ -105,9 +105,9 @@ class PLT_Format (Format, Image):
             x = i % self.header['width']
             y = self.header['height'] - i / self.header['width'] -1
             data[y * self.header['width'] + x] = pix
-            
+
         self.pixels = ''.join (data)
-        
+
 
     def write (self, stream):
         self.write_header (stream)
@@ -117,7 +117,7 @@ class PLT_Format (Format, Image):
 
     def printme (self):
         self.print_header ()
-        
+
         if self.get_option ('format.plt.print_bitmap'):
             self.print_bitmap ()
             print()

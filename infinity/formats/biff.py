@@ -28,50 +28,50 @@ class BIFF_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'num_of_files',
               'type': 'DWORD',
               'off': 0x0008,
               'label': '# of files'},
-            
+
             { 'key': 'num_of_tilesets',
               'type': 'DWORD',
               'off': 0x000C,
               'label': '# of tilesets'},
-            
+
             { 'key': 'files_offset',
               'type': 'DWORD',
               'off': 0x0010,
               'label': 'First file record offset'},
             )
-        
+
 
     file_record_desc = (
             { 'key': 'locator',
               'type': 'DWORD',
               'off': 0x0000,
               'label': 'File resource locator' },
-            
+
             { 'key': 'data_offset',
               'type': 'DWORD',
               'off': 0x0004,
               'label': 'File data offset' },
-            
+
             { 'key': 'data_size',
               'type': 'DWORD',
               'off': 0x0008,
               'label': 'File data size' },
-            
+
             { 'key': 'type',
               'type': 'RESTYPE',
               'off': 0x000C,
               'label': 'File res type' },
-            
+
             { 'key': 'unknown_0E',
               'type': 'WORD',
               'off': 0x000E,
@@ -83,22 +83,22 @@ class BIFF_Format (Format):
               'type': 'DWORD',
               'off': 0x0000,
               'label': 'Tileset resource locator' },
-            
+
             { 'key': 'data_offset',
               'type': 'DWORD',
               'off': 0x0004,
               'label': 'Tileset data offset' },
-            
+
             { 'key': 'tile_cnt',
               'type': 'DWORD',
               'off': 0x0008,
               'label': 'Number of tiles' },
-            
+
             { 'key': 'tile_size',
               'type': 'DWORD',
               'off': 0x000C,
               'label': 'Size of tile' },
-            
+
             { 'key': 'type',
               'type': 'RESTYPE',
               'off': 0x0010,
@@ -146,7 +146,7 @@ class BIFF_Format (Format):
             print('File #%d' %i)
             self.print_file_record (obj)
             i = i + 1
-            
+
         i = 0
         for obj in self.tileset_list:
             print('Tileset #%d' %i)
@@ -156,21 +156,21 @@ class BIFF_Format (Format):
 
     def read_file_record (self, stream, offset, obj):
         self.read_struc (stream, offset, self.file_record_desc, obj)
-        
+
     def print_file_record (self, obj):
         self.print_struc (obj, self.file_record_desc)
 
 
     def read_tileset_record (self, stream, offset, obj):
         self.read_struc (stream, offset, self.tileset_record_desc, obj)
-        
+
     def print_tileset_record (self, obj):
         self.print_struc (obj, self.tileset_record_desc)
 
     def read_all_data (self, stream):
         for obj in self.file_list:
             self.read_ntset_data (stream, obj)
-                
+
         for obj in self.tileset_list:
             self.read_tileset_data (stream, obj)
 
@@ -189,7 +189,7 @@ class BIFF_Format (Format):
         #   in the case of a CBF file
         if obj.has_key ('data'):
             return obj['data']
-            
+
         if obj.has_key ('tile_cnt'):
             return self.read_tileset_data (stream, obj)
         else:
@@ -203,7 +203,7 @@ class BIFF_Format (Format):
         fh = open (filename, 'w')
         fh.write (obj['data'])
         fh.close ()
-        
+
 
 class BIFC_V1_Format (BIFF_Format):
     envelope_desc = (
@@ -211,32 +211,32 @@ class BIFC_V1_Format (BIFF_Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
            { 'key': 'filename_len',
               'type': 'DWORD',
               'off': 0x0008,
               'label': 'Filename length'},
-            
+
            { 'key': 'filename',
               'type': 'STRSIZED',
               'off': 0x0008,
               'label': 'Filename'},
-            
+
            { 'key': 'uncompressed_size',
               'type': 'DWORD',
               'off': 0x0000,
               'label': 'Uncompressed size'},
-            
+
            { 'key': 'compressed_size',
               'type': 'DWORD',
               'off': 0x0000,
               'label': 'Compressed size'},
-            
+
              )
 
     def __init__ (self):
@@ -255,7 +255,7 @@ class BIFC_V1_Format (BIFF_Format):
         # read the data with uncompressed stream while we have it
         self.read_all_data (stream2)
         return res
-        
+
 
     def printme (self):
         self.print_envelope ()
@@ -265,10 +265,10 @@ class BIFC_V1_Format (BIFF_Format):
     def read_envelope (self, stream):
         self.envelope = {}
         self.read_struc (stream, 0x0000, self.envelope_desc, self.envelope)
-        
+
     def print_envelope (self):
         self.print_struc (self.envelope, self.envelope_desc)
-        
+
 
 
 register_format (BIFF_Format, signature='BIFFV1  ', extension='BIF', name=('BIF', 'BIFF'))

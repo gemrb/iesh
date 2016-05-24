@@ -92,9 +92,9 @@ def help_on_shell ():
       load_object ("AGOODY")
           tries to find and load object from a file or resources.
           Returns format object, so the object type has to be supported
-    
+
       load_object ("AGOODY").printme ()
-        
+
       export_object ("GUICG", "GUICG.chu")
           Try to find resource GUICG and export it to file GUICG.chu.
           If the name is not unique, add third parameter,
@@ -103,7 +103,7 @@ def help_on_shell ():
       find_str ("^(?i)gemrb")
           List strrefs for all strings starting with word GemRB, regardless
           of case
-          
+
 
       c = chui.CHUI_Format ("GUISAVE.chu")
       c.read ()
@@ -126,7 +126,7 @@ def help_on_shell ():
       core.keys.print_bif_record (core.keys.bif_list[0])
       core.strrefs.print_strref_record (core.strrefs.strref_list[0])
            print first records from chitin.key or dialog.tlk file
-    
+
       help (__name__)
       help (infinity)
       help (infinity.builtins)
@@ -184,7 +184,7 @@ def read_command (prompt):
                     quit = True
         except KeyboardInterrupt:
             pass
-        except EOFError: 
+        except EOFError:
             quit = True
 
     return s
@@ -212,7 +212,7 @@ def _readline_hook ():
 ###################################################
 def save (name = ''):
     """Saves some core variables (especially keys and strrefs), so that they
-    can be later loaded faster than from IE data files. if `name' is specified, 
+    can be later loaded faster than from IE data files. if `name' is specified,
     it's added to filename where the data is stored, thus allowing more
     save files than just one."""
     if name != '':
@@ -222,7 +222,7 @@ def save (name = ''):
 ###################################################
 def restore (name = ''):
     """Loads some core variables (especially keys and strrefs) saved
-    by save() function, much faster than from IE data files. if `name' 
+    by save() function, much faster than from IE data files. if `name'
     is specified, it's added to filename where the data is stored, thus
     allowing more save files than just one."""
     if name != '':
@@ -272,14 +272,14 @@ while True:
         current_command = compound_command
         compound_command = ''
 
-        
+
     if current_command in ('q', 'quit'):
         break
-        
+
     if current_command in ('?', 'help'):
         help_on_shell ()
         continue
-    
+
     if current_command.startswith ('?'):
         eval ('help(%s)' %current_command[1:])
         continue
@@ -300,15 +300,15 @@ while True:
     #   That makes problems with e.g. help(), which runs pager as well, so
     #   try to avoid the situation. Ugly hack, there might be other such commands
     #    and moreover it's too easily fooled.
-    
+
     save_stdout = sys.stdout
     save_stderr = sys.stdout
-    
+
     if sys.stdin.isatty() and core.get_option ('pager') and not current_command.startswith ('help') and not current_command.startswith ('load_game') and not current_command.startswith ('~'):
         pager = subprocess.Popen (core.get_option ('pager'),  shell = True,  stdin=subprocess.PIPE)
         sys.stdout = pager.stdin
         sys.stderr = pager.stdin
-    
+
     try:
         if not current_command.startswith ('~'):
             exec (current_command)
@@ -338,7 +338,7 @@ while True:
         sys.stdout = save_stdout
         sys.stderr = save_stderr
         pager = None
-    
+
 
 ###################################################
 # End of file iesh

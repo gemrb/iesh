@@ -29,55 +29,55 @@ class KEY_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off': 0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'num_of_bifs',
               'type': 'DWORD',
               'off': 0x0008,
               'label': '# of BIFs'},
-            
+
             { 'key': 'num_of_resrefs',
               'type': 'DWORD',
               'off': 0x000C,
               'label': '# of resref entries'},
-            
+
             { 'key': 'bif_offset',
               'type': 'DWORD',
               'off': 0x0010,
               'label': 'First BIF offset'},
-            
+
             { 'key': 'resref_offset',
               'type': 'DWORD',
               'off': 0x0014,
               'label': 'First resref offset'},
             )
-        
+
 
     bif_record_desc = (
             { 'key': 'file_len',
               'type': 'DWORD',
               'off': 0x0000,
               'label': 'BIF file len' },
-            
+
             { 'key': 'file_name',
               'type': 'STROFF',
               'off': 0x0004,
               'label': 'BIF file name' },
-            
+
             { 'key': 'file_name_offset',
               'type': 'DWORD',
               'off': 0x0004,
               'label': 'BIF file name offset' },
-            
+
             { 'key': 'file_name_len',
               'type': 'WORD',
               'off': 0x0008,
               'label': 'BIF file name len' },
-            
+
             { 'key': 'location',
               'type': 'WORD',
               'off': 0x000A,
@@ -97,29 +97,29 @@ class KEY_Format (Format):
               'type': 'RESREF',
               'off': 0x0000,
               'label': 'resref name' },
-            
+
             { 'key': 'type',
               'type': 'RESTYPE',
               'off': 0x0008,
               'label': 'resref type' },
-            
+
             { 'key': 'locator',
               'type': 'DWORD',
               'off': 0x000A,
               'label': 'resref locator' },
-            
+
             { 'key': 'locator_src_ndx',
               'type': 'DWORD',
               'off': 0x000A,
               'bits': '31-20',
               'label': 'resref locator (source index)' },
-            
+
             { 'key': 'locator_tset_ndx',
               'type': 'DWORD',
               'off': 0x000A,
               'bits': '19-14',
               'label': 'resref locator (tileset index)' },
-            
+
             { 'key': 'locator_ntset_ndx',
               'type': 'DWORD',
               'off': 0x000A,
@@ -157,14 +157,14 @@ class KEY_Format (Format):
         max_read_resrefs = self.header['num_of_resrefs']
         if self.get_option ('format.key.max_read_resrefs'):
             max_read_resrefs = min (max_read_resrefs, self.get_option ('format.key.max_read_resrefs'))
-        
+
         resref_record_size = self.get_struc_size (self.resref_record_desc)
         tick_size = self.get_option ('format.key.tick_size')
         tack_size = self.get_option ('format.key.tack_size')
         for i in range (max_read_resrefs):
             #if i == 1000:
             #    break
-            
+
             obj = {}
             self.read_resref_record (stream, off, obj)
             self.resref_list.append (obj)
@@ -184,24 +184,24 @@ class KEY_Format (Format):
         header_size = self.get_struc_size (self.header_desc)
         bif_record_size = self.get_struc_size (self.bif_record_desc)
         resref_record_size = self.get_struc_size (self.resref_record_desc)
-        
+
         self.header['num_of_bifs'] = len (self.bif_list)
         self.header['num_of_resrefs'] = len (self.resref_list)
         self.header['bif_offset'] = header_size
         self.header['resref_offset'] = header_size + len (self.bif_list) * bif_record_size
-        
+
         self.write_struc (stream, 0x0000, self.header_desc, self.header)
 
         off2 = self.header['bif_offset']
         for obj in self.bif_list:
             self.write_struc (stream, off2, self.bif_record_desc, obj)
             off2 += bif_record_size
-            
+
         off2 = self.header['resref_offset']
         for obj in self.resref_list:
             self.write_struc (stream, off2, self.resref_record_desc, obj)
             off2 += resref_record_size
-            
+
 
     def printme (self):
         self.print_header ()
@@ -211,7 +211,7 @@ class KEY_Format (Format):
             print('#%d' %i)
             self.print_bif_record (obj)
             i = i + 1
-            
+
         i = 0
         for obj in self.resref_list:
             print('#%d' %i)
@@ -221,14 +221,14 @@ class KEY_Format (Format):
 
     def read_bif_record (self, stream, offset, obj):
         self.read_struc (stream, offset, self.bif_record_desc, obj)
-        
+
     def print_bif_record (self, obj):
         self.print_struc (obj, self.bif_record_desc)
 
 
     def read_resref_record (self, stream, offset, obj):
         self.read_struc (stream, offset, self.resref_record_desc, obj)
-        
+
     def print_resref_record (self, obj):
         self.print_struc (obj, self.resref_record_desc)
 

@@ -16,10 +16,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-"""Built-in functions for the iesh shell. 
+"""Built-in functions for the iesh shell.
 
 Functions which are ``built-into'' the iesh shell, meaning that this
-module contents are automatically imported directly into iesh's 
+module contents are automatically imported directly into iesh's
 namespace on startup."""
 
 import cPickle
@@ -50,7 +50,7 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
     core.override_dir = core.locate_override ()
     core.chitin_file = chitin_file
     core.dialog_file = dialog_file
-    
+
     # Load data from the override
     if core.override_dir is not None:
         core.override = core.load_override ()
@@ -168,7 +168,7 @@ def load_object (name, type = None, index = 0, ignore_override = False):
 ###################################################
 def print_object (name, type = None,  index = 0):
     """Load and print named object. See `load_object()' for details."""
-    
+
     obj = load_object (name,  type,  index)
     obj.printme ()
 
@@ -196,14 +196,14 @@ def export_object (name, filename, type = None, index = 0, ignore_override=False
     fh.write (stream.buffer)
     fh.close ()
     stream.close ()
-    
+
 
 ###################################################
 class ObjectIterator:
     """Iterate over specified resrefs, load them as objects and generate pairs (resref, object).
 
     Parameters:
-    
+
     type=[num|name] - select resrefs specified by type id or type name
     filter - ref to function taking resref as a parameter and returning True for
              resrefs which should be selected
@@ -219,7 +219,7 @@ class ObjectIterator:
 
     def __init__ (self, **kw):
         self.resrefs = core.keys.resref_list[:]
-    
+
         if 'type' in kw and type (kw['type']) == type (1):
             self.resrefs = filter (lambda r, t=kw['type']: r['type'] == t, self.resrefs)
         elif 'type' in kw:
@@ -228,21 +228,21 @@ class ObjectIterator:
 
         if 'filter' in kw and callable (kw['filter']):
             self.resrefs = filter (kw['filter'], self.resrefs)
-        
+
         if 'sort' in kw and callable (kw['sort']):
             self.resrefs.sort (kw['sort'])
-    
+
         if 'error' in kw:
             self.error_fn = kw['error']
         else:
             self.error_fn = None
-    
+
         if 'names' in kw:
             self.print_names = kw['names']
         else:
             self.print_names = 'all'
 
-    
+
     def __iter__ (self):
         return self
 
@@ -250,7 +250,7 @@ class ObjectIterator:
     def next (self):
         if not self.resrefs:
             raise StopIteration
-        
+
         res = self.resrefs.pop (0)
 
         if self.print_names == 'all':
@@ -275,17 +275,17 @@ class ObjectIterator:
             else:
                 #traceback.print_exc ()
                raise
-        
+
         return res, obj
 
 
 ###################################################
 def find_str (regexp):
     """Find all strings in core.strrefs matching regular expression.
-    
+
     Find all strings in loaded DIALOG.TLK file matching regular
     expression 'regexp' and prints the STRREFs and strings to stdout."""
-    
+
     for o in core.strrefs.get_strref_by_str_re(regexp):
         print(core.strrefs.strref_list.index(o), o['string'])
 
@@ -306,7 +306,7 @@ def load_ids ():
         obj.read ()
         print(obj.stream.resref)
         #obj.print_file ()
-        
+
     iterate_objects_by_type (0x03f0, p)
 
 
@@ -315,7 +315,7 @@ def print_restype_stats ():
     """Print list of RESREFs with count of objects of each type."""
 
     stats = {}
-    
+
     for o in core.keys.resref_list:
         if not stats.has_key (o['type']):
             stats[o['type']] = 1
@@ -334,7 +334,7 @@ def print_restype_stats ():
 ###################################################
 def print_formats ():
     """List recognized/implemented IE file formats"""
-    
+
     flist = filter (lambda a: a[1] is not None,  core.fmt_signatures.items ())
     flist.sort (lambda a, b: cmp (a[0], b[0]))
 

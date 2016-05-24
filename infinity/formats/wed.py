@@ -26,12 +26,12 @@ class WED_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'overlay_cnt',
               'type': 'DWORD',
               'off': 0x0008,
@@ -96,7 +96,7 @@ class WED_Format (Format):
               'label': 'Offset to tile index lookup'},
 
             )
-        
+
     secondary_header_desc = (
             { 'key': 'polygon_cnt',
               'type': 'DWORD',
@@ -264,7 +264,7 @@ class WED_Format (Format):
               'type': 'WORD',
               'off': 0x0010,
               'label': 'Bounding box Y max'},
-            
+
             )
 
         # Polygon index LUT desc
@@ -279,7 +279,7 @@ class WED_Format (Format):
               'type': 'WORD',
               'off': 0x0002,
               'label': 'Y'},
-            
+
             )
 
     def __init__ (self):
@@ -333,7 +333,7 @@ class WED_Format (Format):
 
     def read_secondary_header (self, stream, offset, obj):
         self.read_struc (stream, offset, self.secondary_header_desc, obj)
-        
+
         self.read_list (stream, 'polygon',  self.secondary_header,)
         # vertices
         # wallgroups
@@ -346,7 +346,7 @@ class WED_Format (Format):
         # wallgroups
         # polygon indices LUT
 
-        
+
     def read_overlay (self, stream, offset, obj):
         self.read_struc (stream, offset, self.overlay_desc, obj)
         obj['tilemap_list'] = []
@@ -355,7 +355,7 @@ class WED_Format (Format):
 
         off2 = obj['tilemap_off']
         tile_index_cnt = 0
-        
+
         for i in range (cnt):
             obj2 = {}
             self.read_tilemap (stream, off2, obj2,  obj)
@@ -366,7 +366,7 @@ class WED_Format (Format):
         obj['tile_index_list'] = []
         size = 2 # FIXME: don't hardwire the size
         off2 = obj['tile_index_lookup_off']
-        
+
         for i in range (tile_index_cnt):
             tile_index = stream.read_word (off2)
             obj['tile_index_list'].append (tile_index)
@@ -405,7 +405,7 @@ class WED_Format (Format):
             obj['closed_door_poly_list'].append (obj2)
             off = off + 34
 
-        
+
     def print_door (self, obj):
         self.print_struc (obj, self.door_desc)
 
@@ -421,34 +421,34 @@ class WED_Format (Format):
             self.print_polygon (obj2)
             i = i + 1
 
-        
+
     def read_tilemap (self, stream, offset, obj, overlay):
         self.read_struc (stream, offset, self.tilemap_desc, obj)
-        
+
     def print_tilemap (self, obj):
         self.print_struc (obj, self.tilemap_desc)
-        
+
     def read_wallgroup (self, stream, offset, obj):
         self.read_struc (stream, offset, self.wallgroup_desc, obj)
-        
+
     def print_wallgroup (self, obj):
         self.print_struc (obj, self.wallgroup_desc)
 
 
     def read_polygon (self, stream, offset, obj):
         self.read_struc (stream, offset, self.polygon_desc, obj)
-        
+
     def print_polygon (self, obj):
         self.print_struc (obj, self.polygon_desc)
 
-        
+
     def read_vertex (self, stream, offset, obj):
         self.read_struc (stream, offset, self.vertex_desc, obj)
-        
+
     def print_vertex (self, obj):
         self.print_struc (obj, self.vertex_desc)
 
-        
-        
+
+
 
 register_format (WED_Format, signature='WED V1.3', extension='WED', name='WED', type=0x3e9)

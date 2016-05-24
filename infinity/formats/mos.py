@@ -33,18 +33,18 @@ class MOS_Format (Format, Image):
               'off': 0x0000,
               'default': 'MOS ',
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'default': 'V1  ',
               'label': 'Version'},
-            
+
             { 'key': 'width',
               'type': 'WORD',
               'off': 0x0008,
               'label': 'Width (pixels)'},
-            
+
             { 'key': 'height',
               'type': 'WORD',
               'off': 0x000A,
@@ -121,7 +121,7 @@ class MOS_Format (Format, Image):
         tile_cnt = self.header['columns'] * self.header['rows']
         off = self.header['palette_off']
         offset_tiles = self.header['palette_off'] + tile_cnt * (256 * 4 + 4)
-        
+
         for i in range (tile_cnt):
             obj = {}
             palette = []
@@ -137,7 +137,7 @@ class MOS_Format (Format, Image):
                 obj['width'] = min (self.header['width'] - x * self.header['block_size'], self.header['block_size'])
                 obj['height'] = min (self.header['height'] - y * self.header['block_size'], self.header['block_size'])
                 obj['offset'] = offset_tiles + stream.read_dword (off)
-                
+
                 self.read_tile (stream, obj)
                 off += 4
                 i += 1
@@ -206,7 +206,7 @@ class MOS_Format (Format, Image):
                 ndx = ndx + 1
             print()
         print()
-    
+
 #    # FIXME: use stream instead of fh?
 #    def write_ppm (self, fh):
 #        fh.write ("P6\n")
@@ -217,11 +217,11 @@ class MOS_Format (Format, Image):
 #        for line in range (self.header['height']):
 #            row = line / self.header['block_size']
 #            scanline = line % self.header['block_size']
-#            
+#
 #            for i in range (self.header['columns']):
 #                tile = self.tile_list[(row * self.header['columns']) + i]
 #                pal = tile['palette']
-#            
+#
 #                o = scanline * tile['width']
 #                for x in range (tile['width']):
 #                    pix = tile['tile_data'][o + x]
@@ -234,11 +234,11 @@ class MOS_Format (Format, Image):
         for line in range (self.header['height']):
             row = line / self.header['block_size']
             scanline = line % self.header['block_size']
-            
+
             for i in range (self.header['columns']):
                 tile = self.tile_list[(row * self.header['columns']) + i]
                 pal = tile['palette']
-            
+
                 o = scanline * tile['width']
                 for x in range (tile['width']):
                     pix = tile['tile_data'][o + x]
@@ -255,18 +255,18 @@ class MOSC_Format (MOS_Format):
               'off': 0x0000,
               'default': 'MOSC',
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'default': 'V1  ',
               'label': 'Version'},
-            
+
             { 'key': 'uncompressed_size',
               'type': 'DWORD',
               'off': 0x0008,
               'label': 'Uncompressed size'},
-            
+
             )
 
     def __init__ (self):
@@ -291,10 +291,10 @@ class MOSC_Format (MOS_Format):
     def read_envelope (self, stream):
         self.envelope = {}
         self.read_struc (stream, 0x0000, self.envelope_desc, self.envelope)
-        
+
     def print_envelope (self):
         self.print_struc (self.envelope, self.envelope_desc)
-        
+
 
 
 

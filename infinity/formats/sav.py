@@ -28,20 +28,20 @@ class SAV_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
           { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
           )
 
-    file_desc = ( 
+    file_desc = (
             { 'key': 'filename',
               'type': 'STRSIZED',
               'off': 0x0000,
               'label': 'Filename'},
             )
-    
+
     file2_desc = (
             { 'key': 'uncompressed_size',
               'type': 'DWORD',
@@ -57,7 +57,7 @@ class SAV_Format (Format):
 #              'type': '_BYTE',
 #              'off': 0x0000,
 #              'label': 'Data offset'},
-#              
+#
 #            { 'key': 'data',
 #              'type': '_BYTE',
 #              'off': 0x000C,
@@ -76,7 +76,7 @@ class SAV_Format (Format):
         self.read_header (stream)
 
         off = self.get_struc_size (self.header_desc)
-        
+
         while True:
             obj = {}
             try:
@@ -89,7 +89,7 @@ class SAV_Format (Format):
             off += self.get_struc_size (self.file2_desc)
             obj['data_offset'] = off
             off += obj['compressed_size']
-            
+
             self.file_list.append (obj)
 
         if self.get_option ('format.sav.read_data'):
@@ -102,7 +102,7 @@ class SAV_Format (Format):
         self.header['version'] = 'V1.0'
         self.write_header (stream)
         off = self.get_struc_size (self.header_desc)
-        
+
         for obj in self.file_list:
             self.write_struc (stream, off, self.file_desc, obj)
             off += len (obj['filename']) + 1
@@ -110,7 +110,7 @@ class SAV_Format (Format):
             off += self.get_struc_size (self.file2_desc)
             stream.write_blob (obj['data'], off, obj['compressed_size'])
             off += obj['compressed_size']
-            
+
 
     def printme (self):
         self.print_header ()
@@ -121,7 +121,7 @@ class SAV_Format (Format):
             self.print_struc (obj, self.file_desc)
             self.print_struc (obj, self.file2_desc)
             i = i + 1
-            
+
     def append_file (self, filename, data):
         obj = {}
         obj['filename'] = filename
@@ -130,11 +130,11 @@ class SAV_Format (Format):
         obj['compressed_size'] = len (data)
         obj['data'] = data
         self.file_list.append (obj)
-        
 
 
 
-        
+
+
     def read_all_data (self, stream):
         for obj in self.file_list:
             self.read_data (stream, obj)
@@ -147,7 +147,7 @@ class SAV_Format (Format):
         return obj['data']
 
     # FIXME: there should be a fn, which would just return a stream. That stream
-    #   would (if read) on-demand read the original file and uncompress it on the fly 
+    #   would (if read) on-demand read the original file and uncompress it on the fly
     #   to minimize memory consumption
 
     # FIXME: the following API is ugly
@@ -157,7 +157,7 @@ class SAV_Format (Format):
         #   in the case of a CBF file
         if obj.has_key ('data'):
             return obj['data']
-            
+
         return self.read_data (stream, obj)
 
     # FIXME: this is ugly
@@ -168,9 +168,9 @@ class SAV_Format (Format):
         fh = open (filename, 'w')
         fh.write (obj['data'])
         fh.close ()
-        
 
-        
+
+
 
 
 register_format (SAV_Format, signature='SAV V1.0', extension='SAV', name=('SAV', 'SAVE'))

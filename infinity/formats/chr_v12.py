@@ -52,8 +52,8 @@ class CHR_V12_Format (Format):
             { 'key': 'quick_weapon',
               'type': 'WORD',
               'off': 0x0030,
-              'enum': 'SLOTS', 
-              'count': 4, 
+              'enum': 'SLOTS',
+              'count': 4,
               'label': 'Quick weapon'},
 
             { 'key': 'unknown_38',
@@ -69,20 +69,20 @@ class CHR_V12_Format (Format):
             { 'key': 'quick_spell',
               'type': 'RESREF',
               'off': 0x0040,
-              'count': 3, 
+              'count': 3,
               'label': 'Quick spell resref'},
 
             { 'key': 'quick_item',
               'type': 'WORD',
               'off': 0x0058,
               'enum': 'SLOT',
-              'count': 3, 
+              'count': 3,
               'label': 'Quick item'},
 
             { 'key': 'quick_item_related',
               'type': 'WORD',
               'off': 0x005E,
-              'count': 3, 
+              'count': 3,
               'label': 'Related to quick item'},
     )
 
@@ -104,5 +104,5 @@ class CHR_V12_Format (Format):
         self.print_header ()
         self.cre.printme ()
 
-        
+
 register_format (CHR_V12_Format, signature='CHR V1.2')

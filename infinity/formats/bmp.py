@@ -30,17 +30,17 @@ class BMP_Format (Format, Image):
               'type': 'STR2',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'size',
               'type': 'DWORD',
               'off':0x0002,
               'label': 'File size'},
-            
+
             { 'key': 'reserved',
               'type': 'DWORD',
               'off': 0x0006,
               'label': 'Reserved(=0)'},
-            
+
             { 'key': 'data_off',
               'type': 'DWORD',
               'off': 0x000A,
@@ -163,7 +163,7 @@ class BMP_Format (Format, Image):
             padded_len = width >> 1
         else:
             raise ValueError ("Bpp %d not supported" %bpp)
-        
+
         if padded_len & 3:
             padded_len += (4 - (padded_len & 3))
 
@@ -171,7 +171,7 @@ class BMP_Format (Format, Image):
         self.pixels_raw = stream.read_blob (self.header['data_off'], size)
 
         data = [ '\0\0\0\0' ] * (width * height)
-        
+
         if bpp == 32:
             self.decode_32bit_uncompressed (width, height, padded_len, data)
         elif bpp == 24:
@@ -195,7 +195,7 @@ class BMP_Format (Format, Image):
                     nib = ord (self.pixels_raw[src+x/2]) & 15
                 else:
                     nib = (ord (self.pixels_raw[src+x/2]) >> 4) & 15
-                    
+
                 c = self.palette_entry_list[nib]
                 pix = '%c%c%c\xff' %(c['r'], c['g'], c['b'])
                 data[(height-y-1) * width + x] = pix
@@ -216,7 +216,7 @@ class BMP_Format (Format, Image):
     def decode_24bit_uncompressed (self, width, height, padded_len, data):
         src = 0
         p = self.pixels_raw
-        
+
         for y in range (height):
             for x in range (width):
                 pix = '%c%c%c\xff' %(p[src+3*x+2], p[src+3*x+1], p[src+3*x])
@@ -227,7 +227,7 @@ class BMP_Format (Format, Image):
     def decode_32bit_uncompressed (self, width, height, padded_len, data):
         src = 0
         p = self.pixels_raw
-        
+
         for y in range (height):
             for x in range (width):
                 pix = '%c%c%c%c' %(p[src+4*x+2], p[src+4*x+1], p[src+4*x], p[src+4*x+3])
@@ -254,7 +254,7 @@ class BMP_Format (Format, Image):
             numcolors = 256
         else:
             numcolors = 16
-                    
+
         for i in range (numcolors):
             obj = {}
             self.read_struc (stream, offset, self.palette_entry_desc, obj)
@@ -266,7 +266,7 @@ class BMP_Format (Format, Image):
     def print_palette (self):
         for i, obj in enumerate (self.palette_entry_list):
             print("%3d: %3d %3d %3d %3d (#%02x%02x%02x%02x)" %(i, obj['r'], obj['g'], obj['b'], obj['a'], obj['r'], obj['g'], obj['b'], obj['a']))
-        
+
 
 
 register_format (BMP_Format, signature='BM', extension='BMP', name='BMP', type=0x0001)

@@ -57,7 +57,7 @@ class BAF_Format (Format):
 
         if c == '':
             return None
-            
+
         elif c == '[':
             res = c
             while True:
@@ -66,7 +66,7 @@ class BAF_Format (Format):
                 if c == ']':
                     break
             return res
-            
+
         elif c == '"':
             res = c
             while True:
@@ -75,17 +75,17 @@ class BAF_Format (Format):
                 if c == '"':
                     break
             return res
-            
+
         elif c in ['#', '(', ')', ',']:
             return c
-    
+
         elif c.isdigit () or (c == '-' and nextc ().isdigit ()):
             if c == '-':
                 signum = -1
                 c = getc ()
             else:
                 signum = 1
-                
+
             res = c
             while nextc ().isdigit ():
                 res = res + getc ()
@@ -141,21 +141,21 @@ class BAF_Format (Format):
         ### <CR> -> CR <CRtail>
         ### <CRtail> -> <CO> <RS> <CRtail>
         ### <CRtail> -> CR
-        
+
         obj = []
-        
+
         self.expect_token (stream, 'IF')
         obj.append (self.read_condition (stream))
         self.expect_token (stream, 'THEN')
         obj.append (self.read_response_set (stream))
         self.expect_token (stream, 'END')
-        
+
 #        obj.append (self.expect_token (stream, 'CR'))
 #        while self.next_token (stream) == 'CO':
 #            obj.append (self.read_condition (stream))
 #            obj.append (self.read_response_set (stream))
 #        self.expect_token (stream, 'CR')
-    
+
         return obj
 
 
@@ -174,12 +174,12 @@ class BAF_Format (Format):
 #        while self.next_token (stream) == 'TR':
 #            obj.append (self.read_trigger (stream))
 #        self.expect_token (stream, 'CO')
-        
+
         return obj
 
     def read_trigger (self, stream):
         obj = []
-        
+
         obj.append (self.get_token (stream))
         self.expect_token (stream, '(')
         args = self.read_action_args (stream)
@@ -189,7 +189,7 @@ class BAF_Format (Format):
 
 #        # pst:  id, 4*I, point, 2*S, O
 #        # FIXME: not correct, one of the ints is flags field
-#        
+#
 #        obj.append (self.expect_token (stream, 'TR'))
 #        obj.append (self.get_token (stream))
 #        obj.append (self.get_token (stream))
@@ -201,7 +201,7 @@ class BAF_Format (Format):
 #        obj.append (self.get_token (stream))
 #        obj.append (self.read_object (stream))
 #        self.expect_token (stream, 'TR')
-#        
+#
 #        self.add_ids_code('TRIGGER', obj[1])
 #        #print core.id_to_symbol ('TRIGGER', obj[1])
         return obj
@@ -212,41 +212,41 @@ class BAF_Format (Format):
         ### <RStail> -> RS
 
         obj = []
-        
+
         while self.next_token (stream) == 'RESPONSE':
             obj.append (self.read_response (stream))
 
-                
+
 #        obj.append (self.expect_token (stream, 'RS'))
 #        while self.next_token (stream) == 'RE':
 #            obj.append (self.read_response (stream))
 #        self.expect_token (stream, 'RS')
-        
+
         return obj
-    
+
     def read_response (self, stream):
         ### <RE> -> RE int <AC> <REtail>
         ### <REtail> -> <AC> <REtail>
         ### <REtail> -> RE
         # FIXME: this is different from what is described in IESDP, where
         #   each response has only one action, but e.g. look at PST's 0202FD1.BCS
-        
+
         obj = []
         self.expect_token (stream, 'RESPONSE')
         self.expect_token (stream, '#')
         obj.append (self.get_token (stream))
-        
+
         while self.next_token (stream) != 'RESPONSE' and self.next_token (stream) != 'END':
             obj.append (self.read_action (stream))
-                
+
 #        obj.append (self.expect_token (stream, 'RE'))
 #        obj.append (self.get_token (stream))
 #        while self.next_token (stream) == 'AC':
 #            obj.append (self.read_action (stream))
 #        self.expect_token (stream, 'RE')
-        
+
         return obj
-    
+
     def read_action (self, stream):
         obj = []
 
@@ -272,7 +272,7 @@ class BAF_Format (Format):
 #        self.expect_token (stream, 'AC')
 #        self.add_ids_code('ACTION', obj[1])
         return obj
-    
+
     def read_action_args (self, stream):
         obj = []
         while self.next_token (stream) != ')':
@@ -288,13 +288,13 @@ class BAF_Format (Format):
             elif self.next_token (stream) == ')':
                 pass
             else:
-                raise ValueError ("Expected ) or ,") 
+                raise ValueError ("Expected ) or ,")
         return obj
-                
-    
+
+
 #    def read_object (self, stream):
 #        obj = []
-#        # PST: id, 13*I, rect, S 
+#        # PST: id, 13*I, rect, S
 #        obj.append (self.expect_token (stream, 'OB'))
 #        obj.append (self.get_token (stream))
 #        obj.append (self.get_token (stream))
@@ -314,12 +314,12 @@ class BAF_Format (Format):
 #        #    print "short object"
 #        #    self.get_token (stream)
 #        #    return obj
-#            
+#
 #        obj.append (self.get_token (stream))
 #        obj.append (self.get_token (stream))
 #        obj.append (self.get_token (stream))
 #        self.expect_token (stream, 'OB')
-#        
+#
 #        #print core.id_to_symbol ('OBJECT', obj[10])
 #        return obj
 
@@ -341,11 +341,11 @@ class BAF_Format (Format):
                            'S': (9, 10),
                            },
                 }
-        
+
         # FIXME: globalsetglobal, globalorglobal, ...
-        split_string_fns = ('global', 
-                                    'globalgt', 
-                                    'globallt', 
+        split_string_fns = ('global',
+                                    'globalgt',
+                                    'globallt',
                                     'globalband',
                                     'globalbor',
                                     'globalmin',
@@ -353,15 +353,15 @@ class BAF_Format (Format):
                                     'globalshl',
                                     'globalshr',
                                     'globalxor',
-                                    'bitcheck', 
+                                    'bitcheck',
                                     'bitcheckexact',
-                                    
-                                    'globalset', 
-                                    'setglobal', 
-                                    'incrementglobal', 
-                                    'bitset', 
+
+                                    'globalset',
+                                    'setglobal',
+                                    'incrementglobal',
+                                    'bitset',
                                     'bitclear')
-        
+
         game_type = 'pst'
 
         def resolve_object (obj):
@@ -401,7 +401,7 @@ class BAF_Format (Format):
                 res2 = core.id_to_symbol ('OBJECT', obj[13]) + '(' + res2 +')'
             if obj[14] != 0:
                 res2 = core.id_to_symbol ('OBJECT', obj[14]) + '(' + res2 +')'
-                
+
             # FIXME: what about area?? [-1.-1.-1.-1] (15)
             res3 = None
             if obj[16] != '""':
@@ -409,7 +409,7 @@ class BAF_Format (Format):
 
             if (res and res2) or (res and res3) or (res2 and res3):
                 raise ValueError ("Error: More values for object: " + repr (res) + '//' + repr (res2) + '//' + repr (res3))
-                
+
             if res:
                 return res
             elif res2:
@@ -426,7 +426,7 @@ class BAF_Format (Format):
             args = mo.groups ()[1].split (",")
             arg_indices = {}
             res_args = []
-            
+
             split_string_arg = fn_name.lower () in  split_string_fns
 
             for arg in args:
@@ -435,7 +435,7 @@ class BAF_Format (Format):
                     break
                 type, name = arg.split (':')
                 name, file = name.split ('*')
-                
+
                 if arg_indices.has_key (type):
                     arg_indices[type] = index = arg_indices[type] + 1
                 else:
@@ -446,8 +446,8 @@ class BAF_Format (Format):
                     aindex = odef[game_type + '_' + obj_type][type][index] + 1
                 else:
                     aindex = odef[game_type + '_' + obj_type][type][index-1] + 1
-                    
-                
+
+
                 if type == 'I':
                     v = str (obj[aindex])
                     #print 'Lookup', file, tr[index + 1]
@@ -469,7 +469,7 @@ class BAF_Format (Format):
                             res_args.append (obj[aindex])
                     else:
                         res_args.append (obj[aindex])
-    
+
                 elif type == 'O':
                     res_args.append (resolve_object (obj[aindex]))
 
@@ -493,7 +493,7 @@ class BAF_Format (Format):
                 continue
                 fn_spec = core.id_to_symbol ('TRIGGER', tr[1])
                 neg = ('!', '')[not tr[3]] # FIXME: hack, use odef[]
-                
+
                 #print tr_decl
                 fn_name, res_args = resolve_args (fn_spec, 'tr', tr)
                 print('    ' + neg + fn_name + '(' + ','.join (res_args) + ')')
@@ -534,7 +534,7 @@ class BAF_Format (Format):
             # FIXME: can there be really conditions with more than one CO+RS pair?
             CO = CR[0]
             RS = CR[1]
-            
+
             obj.append ('CO\n')
             for TR in CO:
                 obj.append ('TR\n')
@@ -553,7 +553,7 @@ class BAF_Format (Format):
                 obj.append ('RE\n')
             obj.append ('RS\n')
             obj.append ('CR\n')
-            
+
         obj.append ('SC\n')
         return obj
 

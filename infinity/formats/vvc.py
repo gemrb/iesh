@@ -27,12 +27,12 @@ class VVC_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'animation',
               'type': 'RESREF',
               'off': 0x0008,
@@ -265,5 +265,5 @@ class VVC_Format (Format):
         self.print_header ()
 
 
-        
+
 register_format (VVC_Format, signature='VVC V1.0', extension='VVC', name='VVC', type=0x3fb)

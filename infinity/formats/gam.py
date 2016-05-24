@@ -141,13 +141,13 @@ class GAM_V20_Format (Format):
             { 'key': 'gui_flags',
               'type': 'DWORD',
               'off': 0x0060,
-              'mask': {0x01: 'party_ai_enabled', 
-                       0x02: 'text_window_size1', 
-                       0x04: 'text_window_size2', 
-                       0x08: 'unknown bit3', 
-                       0x10: 'hide_gui', 
-                       0x20: 'hide_options', 
-                       0x40: 'hide_portraits', 
+              'mask': {0x01: 'party_ai_enabled',
+                       0x02: 'text_window_size1',
+                       0x04: 'text_window_size2',
+                       0x08: 'unknown bit3',
+                       0x10: 'hide_gui',
+                       0x20: 'hide_options',
+                       0x40: 'hide_portraits',
                        0x80: 'hide_automap_notes' },
               'label': 'GUI flags'},
 
@@ -325,7 +325,7 @@ class GAM_V20_Format (Format):
               'size': 8,
               'label': 'Voice set' },
     )
-    
+
     pc_desc = npc_desc
 
     global_desc = (
@@ -905,20 +905,20 @@ class GAM_V20_Format (Format):
         self.header['pc_cnt'] = len (self.pc_list)
         self.header['pc_off'] = off
         off += self.size_struc (self.pc_desc) * len (self.pc_list)
-        
+
         pass
 
 
     def write (self, stream):
         self.write_header (stream)
-        
+
         off = self.write_list (stream, off, 'actor')
         raise RuntimeError ("Not implemented")
 
 
     def printme (self):
         self.print_header ()
-        
+
         self.print_list ('pc')
         self.print_list ('npc')
         self.print_list ('global')
@@ -928,5 +928,5 @@ class GAM_V20_Format (Format):
 
         self.print_struc (self.familiar_info, self.familiar_info_desc)
 
-        
+
 register_format (GAM_V20_Format, signature='GAMEV2.0', extension='GAM', name=('GAM', 'GAME'), type=0x3f5)

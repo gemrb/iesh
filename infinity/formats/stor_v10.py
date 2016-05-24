@@ -28,7 +28,7 @@ class STOR_V10_Format (Format):
                 'type': 'STR4',
                 'off': 0x0000,
                 'label': 'Signature' },
-            
+
             { 'key': 'version',
                 'type': 'STR4',
                 'off':0x0004,
@@ -91,83 +91,83 @@ class STOR_V10_Format (Format):
                 'type': 'DWORD',
                 'off': 0x0030,
                 'label': 'Count of items bought here' },
-  
+
               { 'key': 'sold_item_off',
                 'type': 'DWORD',
                 'off': 0x0034,
                 'label': 'Offset of items for sale' },
-  
+
             { 'key': 'sold_item_cnt',
                 'type': 'DWORD',
                 'off': 0x0038,
                 'label': 'Count of items for sale' },
-  
+
             { 'key': 'lore',
                 'type': 'DWORD',
                 'off': 0x003C,
                 'label': 'Lore' },
-  
+
             { 'key': 'id_price',
                 'type': 'DWORD',
                 'off': 0x0040,
                 'label': 'ID price' },
-  
+
             { 'key': 'rumours_tavern',
                 'type': 'RESREF',
                 'off': 0x0044,
                 'label': 'Rumours (tavern)' },
-  
+
             { 'key': 'drink_off',
                 'type': 'DWORD',
                 'off': 0x004C,
                 'label': 'Offset to drinks' },
-  
+
             { 'key': 'drink_cnt',
                 'type': 'DWORD',
                 'off': 0x0050,
                 'label': 'Count of drinks' },
-  
+
             { 'key': 'rumours_temple',
                 'type': 'RESREF',
                 'off': 0x0054,
                 'label': 'Rumours (temple)' },
-  
+
             { 'key': 'room_flags',
                 'type': 'DWORD',
                 'off': 0x005C,
                 'mask': { 0x01: 'Peasant', 0x02: 'Merchant', 0x04: 'Noble', 0x08: 'Royal' },
                 'label': 'Room type flags' },
-  
+
             { 'key': 'price_peasant_room',
                 'type': 'DWORD',
                 'off': 0x0060,
                 'label': 'Price of a peasant room' },
-  
+
             { 'key': 'price_merchant_room',
                 'type': 'DWORD',
                 'off': 0x0064,
                 'label': 'Price of a merchant room' },
-  
+
             { 'key': 'price_noble_room',
                 'type': 'DWORD',
                 'off': 0x0068,
                 'label': 'Price of a noble room' },
-  
+
             { 'key': 'price_royal_room',
                 'type': 'DWORD',
                 'off': 0x006C,
                 'label': 'Price of a royal room' },
-  
+
             { 'key': 'cure_off',
                 'type': 'DWORD',
                 'off': 0x0070,
                 'label': 'Offset to cures' },
-  
+
             { 'key': 'cure_cnt',
                 'type': 'DWORD',
                 'off': 0x0074,
                 'label': 'Count of cures' },
-  
+
             { 'key': 'unknown_78',
                 'type': 'BYTES',
                 'off': 0x0078,
@@ -276,7 +276,7 @@ class STOR_V10_Format (Format):
 
     def read (self, stream):
         self.read_header (stream)
-        
+
         self.read_list (stream, 'bought_item')
         self.read_list (stream, 'sold_item')
         self.read_list (stream, 'drink')
@@ -301,5 +301,5 @@ class STOR_V10_Format (Format):
         self.print_list ('cure')
 
 
-        
+
 register_format (STOR_V10_Format, signature='STORV1.0')
