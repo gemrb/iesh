@@ -9,7 +9,7 @@ If you are installing from the source package, type
 # python ./setup.py install
 
 Package contents:
-  iesh - simple Python interactive shell with history, tab completion, pager 
+  iesh - simple Python interactive shell with history, tab completion, pager
   infinity/ - python module package
   infinity/formats/*.py - modules for reading and writing specific IE file formats
 
@@ -17,7 +17,7 @@ Package contents:
   infinity/format.py
   infinity/core.py
   infinity/builtins.py
-  
+
   data/ - directory for storing exported data, provided for convenience
   examples/ - some example code snippets
 
@@ -27,7 +27,7 @@ Running:
 --------
 iesh is a simple shell for execution of Python statements.
 In fact, it's not that much different from ipython or even python's
-built-in shell itself, it's just slightly tweaked to ease 
+built-in shell itself, it's just slightly tweaked to ease
 working with infinity package and you could easily use
 the python package without it.
 
@@ -46,7 +46,7 @@ To start iesh, just run ./iesh or python ./iesh and you
 get to Cmd: prompt where you can type python statements.
 
 Up and down arrows are used to browse command history, Ctrl-R
-searches history for a command and TAB completes names of 
+searches history for a command and TAB completes names of
 Python objects. See documentation for python readline module
 for more information.
 
@@ -64,9 +64,9 @@ as the second and third parameter to load_game:
 
 !!! This might take *extremely* long time on a slow computer and
 a significant portion of memory. If it's too slow or too big, then
-this proggie just is not for you :( !!! 
+this proggie just is not for you :( !!!
 
-Once the files are loaded, you get Cmd: prompt, 
+Once the files are loaded, you get Cmd: prompt,
 Now you can load files, inspect their contents, search them and export
 objects out of them.
 
@@ -121,7 +121,7 @@ To write object back to disk:
 
 To directly export an object to a file:
 
-    export_object("STONEBIG", "data/tmp.tmp")  
+    export_object("STONEBIG", "data/tmp.tmp")
 
 
 Encoding support:
@@ -159,11 +159,11 @@ Configuration:
 
   $HOME/.iesh_profile
 
-game_dir 
+game_dir
     - directory where the game you are interested in is installed
 
 chitin_file
-dialog_file 
+dialog_file
     - names of RESREF and STRREF index files, located in game_dir.
       Edit the names if the case does not match
 
@@ -171,7 +171,7 @@ dialog_file
 
 Almost all resource formats from before the introduction of EE versions are recognized.
 Type print_formats() to print a list of recognized file signatures (formats).
-  
+
 Type `?' or `help' to get some online help and `q', `quit' or ^D
 to exit the program.
 
@@ -179,8 +179,8 @@ to exit the program.
 Struc format:
 -------------
 Many of the *_Format classes used for processing IE files use
-description of their respective file format specified as one or 
-several *_desc lists. Each item in a list defines one data field, 
+description of their respective file format specified as one or
+several *_desc lists. Each item in a list defines one data field,
 presumably a member of a struct originally used by IE to create
 the file.
 

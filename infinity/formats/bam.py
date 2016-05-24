@@ -33,17 +33,17 @@ class BAM_Format (Format, ImageSequence):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'frame_cnt',
               'type': 'WORD',
               'off': 0x0008,
               'label': 'Frame count'},
-            
+
             { 'key': 'cycle_cnt',
               'type': 'BYTE',
               'off': 0x000A,
@@ -197,13 +197,13 @@ class BAM_Format (Format, ImageSequence):
         cycle_size = self.get_struc_size (self.cycle_desc)
 
         # FIXME: conver pixels
-        
+
         self.header['frame_cnt'] = len (self.frame_list)
         self.header['cycle_cnt'] = len (self.cycle_list)
         self.header['frame_off'] = self.get_struc_size (self.header_desc)
         self.header['palette_off'] = self.header['frame_off'] + frame_size * len (self.frame_list) + cycle_size * len (self.cycle_list)
         self.header['frame_lut_off'] = self.header['palette_off'] + 4 * 256
-        
+
         # NOTE: if self.frame_lut is None, we construct a new one from frames in cycles.
         #   If it is not None, we assume the LUT has already been constructed and that
         #   the frame_cnt and frame_lut_ndx data are valid as well
@@ -213,14 +213,14 @@ class BAM_Format (Format, ImageSequence):
                 obj['frame_cnt'] = len (obj['frame_list'])
                 obj['frame_lut_ndx'] = len (self.frame_lut)
                 self.frame_lut.extend (obj['frame_list'])
-        
+
         frame_data_off = self.header['frame_lut_off'] + 2 * len (self.frame_lut)
 
         self.write_header (stream)
-        
+
         off = self.header['frame_off']
         off2 = frame_data_off
-        
+
         for obj in self.frame_list:
             # FIXME: RLE is encoded in the offset
             obj['frame_data_off'] = off2
@@ -228,7 +228,7 @@ class BAM_Format (Format, ImageSequence):
             # FIXME: rle
             off2 += self.write_frame_data (stream, off2, obj)
             off += frame_size
-        
+
         for obj in self.cycle_list:
             self.write_struc (stream, off, self.cycle_desc, obj)
             off += cycle_size
@@ -236,11 +236,11 @@ class BAM_Format (Format, ImageSequence):
         for obj in self.palette_entry_list:
             self.write_struc (stream, off, self.palette_entry_desc, obj)
             off += 4 # FIXME
-        
+
         for l in self.frame_lut:
             stream.write_word (l,  off)
             off += 2
-            
+
 
 
     def printme (self):
@@ -271,7 +271,7 @@ class BAM_Format (Format, ImageSequence):
             else:
                 self.read_rle_frame_data (stream, obj)
 
-    
+
     def print_frame (self, obj):
         self.print_struc (obj, self.frame_desc)
 
@@ -282,7 +282,7 @@ class BAM_Format (Format, ImageSequence):
     def read_cycle (self, stream, offset, obj):
         self.read_struc (stream, offset, self.cycle_desc, obj)
         obj['frame_list'] = []
-        
+
         off2 = self.header['frame_lut_off'] + 2 * obj['frame_lut_ndx']
         obj2 = {}
         for i in range (obj['frame_cnt']):
@@ -297,7 +297,7 @@ class BAM_Format (Format, ImageSequence):
 
     def read_palette (self, stream, offset):
         transp_color = None
-        
+
         for i in range (256):
             obj = {}
             self.read_struc (stream, offset, self.palette_entry_desc, obj)
@@ -325,7 +325,7 @@ class BAM_Format (Format, ImageSequence):
         bin_data = stream.read_blob (obj['frame_data_off'], size)
         obj['frame_data'] = struct.unpack ('%dB' %size, bin_data)
 
-        
+
     def read_rle_frame_data (self, stream, obj):
         off = obj['frame_data_off']
         size = obj['width'] * obj['height']
@@ -345,7 +345,7 @@ class BAM_Format (Format, ImageSequence):
                 data.append (pix)
 
             off = off + 1
-            
+
         obj['frame_data'] = data
 
 
@@ -386,7 +386,7 @@ class BAM_Format (Format, ImageSequence):
         comp_data = []
         last_pixel = obj['frame_data'][0]
         count = 0
-        
+
         for pixel in obj['frame_data']:
             if pixel == last_pixel:
                 count += 1
@@ -398,11 +398,11 @@ class BAM_Format (Format, ImageSequence):
                 count = 1
             else:
                 comp_data.extend ([])
-                
+
         data = struct.pack ('%dB' %len (obj['frame_data']), *obj['frame_data'])
         stream.write_blob (data,  off)
         return len (data)
-    
+
 
     def compress_frame_data (self, obj):
         comp_data = []
@@ -416,7 +416,7 @@ class BAM_Format (Format, ImageSequence):
                     comp_data.append (count - 1)
                     count = 0
                 comp_data.append(pixel)
-                
+
             else:
                 count += 1
                 if count == 256:
@@ -430,7 +430,7 @@ class BAM_Format (Format, ImageSequence):
 
 
         return comp_data
-        
+
 
     def print_frame_data (self, obj):
         ndx = 0
@@ -448,17 +448,17 @@ class BAMC_Format (BAM_Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'uncompressed_size',
               'type': 'DWORD',
               'off': 0x0008,
               'label': 'Uncompressed size'},
-            
+
             )
 
     def __init__ (self):
@@ -490,13 +490,13 @@ class BAMC_Format (BAM_Format):
     def read_envelope (self, stream):
         self.envelope = {}
         self.read_struc (stream, 0x0000, self.envelope_desc, self.envelope)
-        
+
     def write_envelope (self, stream):
         self.write_struc (stream, 0x0000, self.envelope_desc, self.envelope)
-        
+
     def print_envelope (self):
         self.print_struc (self.envelope, self.envelope_desc)
-        
+
 
 
 

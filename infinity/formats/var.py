@@ -30,12 +30,12 @@ class VAR_Format (Format):
               'type': 'STR8',
               'off': 0x0000,
               'label': 'Scope' },
-            
+
             { 'key': 'name',
               'type': 'STR32',
               'off':0x0008,
               'label': 'Name'},
-            
+
             { 'key': 'value',
               'type': 'DWORD',
               'off': 0x0028,
@@ -60,7 +60,7 @@ class VAR_Format (Format):
                 break
             self.variable_list.append (obj)
             off += size
-            
+
 
     def printme (self):
         for obj in self.variable_list:
@@ -68,5 +68,5 @@ class VAR_Format (Format):
 
 
 
-        
+
 register_format (VAR_Format, signature='902     ', extension='VAR', name='VAR')

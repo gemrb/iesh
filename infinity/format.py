@@ -20,8 +20,8 @@
 """
 Implements Format, abstract class representing  IE file type.
 
-This modules implements Format, abstract base class 
-representing IE file types. This class is futher subclassed 
+This modules implements Format, abstract base class
+representing IE file types. This class is futher subclassed
 in infinity.formats package to the various IE file formats
 like 2DA, BAM, TLK etc."""
 
@@ -34,13 +34,13 @@ import types
 
 from infinity import core
 from infinity.stream import Stream, FileStream, ResourceStream
- 
+
 
 def ResolveFilePath (filename):
     if os.path.isfile (filename):
         return filename
 
-    
+
 
 
 class Format (object):
@@ -98,7 +98,7 @@ class Format (object):
 
         off = header[name + '_off']
         size = self.get_struc_size (desc)
-        
+
         for i in range (header[name + '_cnt']):
             obj = {}
             self.read_struc (stream, off, desc, obj)
@@ -171,16 +171,16 @@ class Format (object):
 
         for d in desc:
             self.reset_datum(d, obj)
-            
+
         return obj
 
-            
+
     def read_struc (self, stream, offset, desc, obj):
         obj['_offset'] = offset
         for d in desc:
             self.read_datum(stream, offset, d, obj)
 
-                
+
     def print_struc (self, obj, desc):
         for d in desc:
             self.print_datum (obj, d)
@@ -194,7 +194,7 @@ class Format (object):
 
     def get_struc_size (self, desc, obj = None):
         total_size = 0
-        
+
         for d in desc:
             size = self.get_datum_size(d, obj)
             try:
@@ -210,10 +210,10 @@ class Format (object):
 
     def reset_datum (self, d, obj):
         type = d['type']
-        
+
         if type == '_LABEL' or type == '_INDENT' or type == '_DEDENT':
             return
-        
+
         key = d['key']
         try: count = d['count']
         except KeyError: count = 1
@@ -235,14 +235,14 @@ class Format (object):
 
             if count > 1:
                 value = [ value for i in range(count) ]
-                
+
         # FIXME: bit masks
         obj[key] = value
 
 
     def read_datum (self, stream, offset, d, obj):
         type = d['type']
-        
+
         if type == '_LABEL' or type == '_INDENT' or type == '_DEDENT':
             return
 
@@ -250,7 +250,7 @@ class Format (object):
         local_offset = d['off']
         try: count = d['count']
         except: count = 1
-        
+
         size = self.get_datum_size (d)
 
         if self.get_option ('format.debug_read'):
@@ -334,7 +334,7 @@ class Format (object):
 
     def write_datum (self, stream, offset, d, obj):
         type = d['type']
-        
+
         if type.startswith ('_'):
             return
 
@@ -342,14 +342,14 @@ class Format (object):
         local_offset = d['off']
         try: count = d['count']
         except: count = 1
-        
+
         size = self.get_datum_size (d)
 
         if self.get_option ('format.debug_write'):
             print('%05d' %(offset + local_offset), d, obj[key])
-            
+
         for index in range (count):
-            if count > 1: 
+            if count > 1:
                 value = obj[key][index]
             else:
                 value = obj[key]
@@ -401,7 +401,7 @@ class Format (object):
                 value = stream.write_blob (value, offset + local_offset)
             else:
                 raise ValueError ("Unknown data type: " + type)
-            
+
             local_offset += size
 
 
@@ -409,7 +409,7 @@ class Format (object):
         # NOTE: d['count'] is ignored!
         key = d['key']
         type = d['type']
-        
+
         if type == 'BYTE':
             size = 1
         elif type == 'WORD':
@@ -466,27 +466,27 @@ class Format (object):
         p_offset = self.get_option ('format.print_offset')
         p_type = self.get_option ('format.print_type')
         p_size = self.get_option ('format.print_size')
-        
+
         rec_type = d['type']
         label = d['label']
-        
+
         if rec_type == '_LABEL':
             print(self.indent + label)
             return
-        
+
         if rec_type == '_INDENT':
             self.indents.append (label)
-            self.indent = ''.join (self.indents) 
+            self.indent = ''.join (self.indents)
             return
 
         if rec_type == '_DEDENT':
             self.indents.pop()
-            self.indent = ''.join (self.indents) 
+            self.indent = ''.join (self.indents)
             return
-        
+
         key = d['key']
         off = d['off']
-        
+
         try: base_offset = obj['_offset']
         except: base_offset = 0
 
@@ -508,9 +508,9 @@ class Format (object):
                 value = obj[key][index]
             else:
                 value = obj[key]
-    
+
             value2 = ''
-    
+
             if rec_type == 'RESTYPE':
                 try: value2 = '(' + core.restype_hash[value] + ')'
                 except: pass
@@ -527,7 +527,7 @@ class Format (object):
                 if type (enum) == types.DictType:
                     try: value2 = '(' + enum[value] + ')'
                     except: pass
-    
+
                 elif type (enum) == types.StringType:
                     if not core.ids.has_key (enum):
                         try:
@@ -536,11 +536,11 @@ class Format (object):
                             core.ids[enum] = ids
                         except:
                             pass
-    
+
                     try: value2 = '(' + core.ids[enum].ids[value] + ')'
                     except: pass
-                        
-                    
+
+
             elif mask is not None:
                 value2 = '(' + string.join (map (lambda m, mask=mask: mask[m], filter (lambda m, v=value: (m & v) == m, mask.keys ())), '|') + ')'
 
@@ -550,7 +550,7 @@ class Format (object):
                 print("%-6s" %rec_type, end=' ')
             if p_size:
                 print("%3d" %size, end=' ')
-                
+
             if count > 1:
                 print(self.indent + label + '[%d]:' %index, value, value2)
             else:

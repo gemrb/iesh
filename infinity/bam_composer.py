@@ -56,7 +56,7 @@ class BAMComposer (object):
 		self.palette = None
 		self.transparent = 0
 
-	
+
 	def read_project (self, filename):
 		"""Read project file"""
 		fh = open (filename)
@@ -66,7 +66,7 @@ class BAMComposer (object):
 
 			if line == '':
 				break
-			
+
 			line = line.strip()
 			if line == '' or line[0] == '#':
 				continue
@@ -90,7 +90,7 @@ class BAMComposer (object):
 				fnames = re.split (r'\s+', mo.group(2).strip())
 				self.cycle_lines.append ((mo.group(1), fnames))
 				continue
-						
+
 			mo = self.palette_re.match (line)
 			if mo:
 				self.palette_file = mo.group(1)
@@ -114,7 +114,7 @@ class BAMComposer (object):
 		for f in self.frames:
 			frame = self.create_frame (f)
 			b.frame_list.append (frame)
-		
+
 		for c in self.cycle_lines:
 			cycle = self.create_cycle(c[1])
 			b.cycle_list.append (cycle)
@@ -146,10 +146,10 @@ class BAMComposer (object):
 
 		# set transparent the same rgb as another color entry
 
-		
+
 	def find_transparent(self, im):
 		p = im.getpalette()
-		
+
 		for i in range(256):
 			if p[3*i] == 0 and p[3*i+1] == 255 and p[3*i+2] == 0:
 				return i
@@ -164,7 +164,7 @@ class BAMComposer (object):
 			if im.mode != 'P':
 				raise ValueError ("Palette image is not indexed color mode: " + filename)
 			return im, self.find_transparent(im)
-			
+
 		f = open (filename)
 		buf = f.read(768)
 		f.close()
@@ -172,7 +172,7 @@ class BAMComposer (object):
 		if len(buf) != (3 * 256): # FIXME: 255 or 256?
 			# FIXME:allow smaller palettes
 			print("Palette size should be  255", file=sys.stderr)
-		
+
 		im = pi.new ('P', (1, 1))
 		im.putpalette (struct.unpack ('768B', buf))
 
@@ -184,15 +184,15 @@ class BAMComposer (object):
 		for f in self.frames:
 			w = max (w, f['image'].size[0])
 			h += f['image'].size[1]
-		
+
 		im = pi.new ('RGB', (w, h), color=(0, 255, 0))
 
-		h = 0			
+		h = 0
 		for f in self.frames:
 			im2 = f['image']
 			im.paste (im2, (0, h))
 			h += im2.size[1]
-		
+
 		#im.show()
 
 		im2 = im.quantize (colors=256)
@@ -201,7 +201,7 @@ class BAMComposer (object):
 		if transparent is None:
 			im2 = im.quantize (colors=255)
 			transparent = 255
-			
+
 		return im2.crop((0, 0, 1, 1)), transparent
 
 
@@ -219,7 +219,7 @@ class BAMComposer (object):
 
 	def convert_frame (self, frame):
 		im = frame['image']
-		
+
 		data = []
 
 		if im.mode == 'P' and (self.palette_file == 'same' or (self.palette_file == 'first' and frame == self.frames[0])):
@@ -230,7 +230,7 @@ class BAMComposer (object):
 
 		elif im.mode == 'P':
 			im2 = im.convert('RGB').quantize(palette=self.palette)
-			
+
 			for i in range (im.size[1]):
 				for j in range (im.size[0]):
 					pix = im.getpixel ((j, i))
@@ -241,10 +241,10 @@ class BAMComposer (object):
 						pix= pix2
 					data.append (pix)
 
-			
+
 		elif im.mode == 'RGBA':
 			im2 = im.convert('RGB').quantize(palette=self.palette)
-			
+
 			for i in range (im.size[1]):
 				for j in range (im.size[0]):
 					pix = im.getpixel ((j, i))
@@ -271,7 +271,7 @@ class BAMComposer (object):
 		else:
 			raise ValueError ("Unsupported mode '%s' for image: %s" %(im.mode, frame['filename']))
 
-		
+
 		frame['data'] = data
 
 
@@ -295,10 +295,10 @@ class BAMComposer (object):
 		f['uncompressed'] = 0
 		f['frame_data_off'] = 0
 		f['frame_data'] = frame['data']
-		
+
 		return f
 
-	
+
 	def create_cycle (self, fnames):
 		c = {}
 		c['frame_cnt'] = len (fnames)
@@ -312,10 +312,10 @@ class BAMComposer (object):
 	def create_palette (self):
 		pal = []
 		p = self.palette.getpalette()
-		
+
 		for i in range (256):
 			pal.append ({ 'r': p[3*i], 'g': p[3*i+1], 'b': p[3*i+2], 'a': 0 })
-			
+
 		return pal
 
 

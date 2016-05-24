@@ -197,17 +197,17 @@ class ITM_V10_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'item_name',
               'type': 'STRREF',
               'off': 0x0008,
               'label': 'Item name (generic)'},
-            
+
             { 'key': 'item_name_identified',
               'type': 'STRREF',
               'off': 0x000C,
@@ -233,7 +233,7 @@ class ITM_V10_Format (Format):
             { 'key': 'usability_mask',
               'type': 'DWORD',
               'off': 0x001E,
-              'mask': { 
+              'mask': {
                        0x00000001: 'Chaotic...',
                        0x00000002: '...Evil',
                        0x00000004: '...Good',
@@ -273,9 +273,9 @@ class ITM_V10_Format (Format):
               'type': 'STR2',
               'off': 0x0022,
               'enum': {
-                    '  ': 'Nothing', 
-                    '2A': 'Leather armor', 
-                    '3A': 'Chainmail', 
+                    '  ': 'Nothing',
+                    '2A': 'Leather armor',
+                    '3A': 'Chainmail',
                     '4A': 'Plate mail',
                     '2W': 'Robe',
                     '3W': 'Robe',
@@ -283,12 +283,12 @@ class ITM_V10_Format (Format):
                     'AX': 'Axe',
                     'BW': 'Bow',
                     'CB': 'Crossbow',
-                    'CL': 'Club', 
+                    'CL': 'Club',
                     'D1': 'Buckler',
                     'D2': 'Shield (small)',
                     'D3': 'Shie;d (medium)',
                     'D4': 'Shield (large)',
-                    'DD': 'Dagger', 
+                    'DD': 'Dagger',
                     'FL': 'Flail',
                     'FS': 'Flame sword',
                     'H0': 'Small vertical horns',
@@ -309,7 +309,7 @@ class ITM_V10_Format (Format):
                     'SL': 'Sling',
                     'SP': 'Spear',
                     'SS': 'Short sword',
-                    'WH': 'War hammer', 
+                    'WH': 'War hammer',
                     },
               'label': 'Item animation'},
 
@@ -473,7 +473,7 @@ class ITM_V10_Format (Format):
               'off': 0x0070,
               'label': 'Equipping feature count'},
             )
-        
+
     extended_header_desc = (
             { 'key': 'attack_type',
               'type': 'BYTE',
@@ -734,7 +734,7 @@ class ITM_V10_Format (Format):
         self.read_header (stream)
         size_extended = self.get_struc_size (self.extended_header_desc)
         size_feature = self.get_struc_size (self.feature_desc)
-        
+
         off = self.header['extended_header_off']
         for i in range (self.header['extended_header_cnt']):
             obj = {}
@@ -752,7 +752,7 @@ class ITM_V10_Format (Format):
     def write (self, stream):
         size_extended = self.get_struc_size (self.extended_header_desc)
         size_feature = self.get_struc_size (self.feature_desc)
-        
+
         self.header['extended_header_off'] = self.get_struc_size (self.header)
         self.header['extended_header_cnt'] = len (self.extended_header_list)
         self.header['feature_block_off'] = len (self.extended_header_list) * size_extended
@@ -766,7 +766,7 @@ class ITM_V10_Format (Format):
             feature_cnt += obj['feature_cnt']
 
         self.write_header (stream)
-        
+
         offset = self.header['feature_block_off']
         for obj in self.equipping_feature_list:
             self.write_feature (stream, offset, obj)
@@ -777,7 +777,7 @@ class ITM_V10_Format (Format):
             # FIXME: recalc feature indices
             self.write_extended_header (stream, offset, obj)
             offset += size_extended
-        
+
 
     def printme (self):
         self.print_header ()
@@ -814,7 +814,7 @@ class ITM_V10_Format (Format):
         for obj2 in obj['feature_list']:
             self.write_feature (stream, off2, obj2)
             off2 += size_feature
-        
+
     def print_extended_header (self, obj):
         self.print_struc (obj, self.extended_header_desc)
 
@@ -826,9 +826,9 @@ class ITM_V10_Format (Format):
 
     def read_feature (self, stream, offset, obj):
         self.read_struc (stream, offset, self.feature_desc, obj)
-        
+
     def print_feature (self, obj):
         self.print_struc (obj, self.feature_desc)
 
-        
+
 register_format (ITM_V10_Format, signature='ITM V1  ')

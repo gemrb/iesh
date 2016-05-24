@@ -233,7 +233,7 @@ class CHUI_Format (Format):
           'off': 0x002E,
           'label': 'Cap position' },
         )
-    
+
     control_slider_record_desc = (
         { 'key': 'background',
           'type': 'RESREF',
@@ -379,7 +379,7 @@ class CHUI_Format (Format):
           'type': 'DWORD',
           'off': 0x002A,
           'label': 'Scrollbar ID' },
-        )            
+        )
 
     control_label_record_desc = (
         { 'key': 'text',
@@ -459,7 +459,7 @@ class CHUI_Format (Format):
 
     def __init__ (self):
         Format.__init__ (self)
-        
+
         self.expect_signature = 'CHUI'
         self.window_list = []
 
@@ -490,9 +490,9 @@ class CHUI_Format (Format):
         for obj in controls:
             offset = obj['control_offset']
             self.read_control_record(stream, offset, obj)
-            
+
         for obj in self.window_list:
-            obj['control_list'] = controls[obj['control_ndx']:obj['control_ndx']+obj['num_of_controls']]          
+            obj['control_list'] = controls[obj['control_ndx']:obj['control_ndx']+obj['num_of_controls']]
 
         return self
 
@@ -511,7 +511,7 @@ class CHUI_Format (Format):
             controls.extend(obj['control_list'])
 
         self.header['control_table_offset'] = offset
-        
+
         # write
         self.write_header (stream)
         offset = self.header['window_offset']
@@ -527,7 +527,7 @@ class CHUI_Format (Format):
             self.write_struc (stream, offset, self.control_table_record_desc, obj)
             control_offset += obj['control_len']
             offset += control_table_record_size
-            
+
         for obj in controls:
             self.write_control_record(stream, obj['control_offset'], obj)
 
@@ -572,7 +572,7 @@ class CHUI_Format (Format):
         self.write_struc (stream, offset, self.control_common_record_desc, obj)
         desc = self.control_type_to_desc (obj['type'])
         self.write_struc (stream, offset, desc, obj)
-        
+
 
     def print_control_record (self, obj):
         self.print_struc (obj, self.control_table_record_desc)
@@ -587,5 +587,5 @@ class CHUI_Format (Format):
         desc = self.control_type_to_desc (obj['type'])
         return self.get_struc_size (desc, obj)
 
-        
+
 register_format (CHUI_Format, signature='CHUIV1  ')

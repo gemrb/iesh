@@ -89,14 +89,14 @@ class IDS_Format (Format):
                 self.ids_re[value2] = ikey
             except:
                 pass
-                
+
 
     def key_to_format (self, key):
         if key.startswith ("0x") or key.startswith ("0X"):
             format = key[0:2] + '%0' + str (len (key)-2) + 'X'
         else:
             format = '%d'
-        
+
     def key_to_int (self, key):
         if key.startswith ("0x") or key.startswith ("0X"):
             return int (key[2:], 16)
@@ -107,7 +107,7 @@ class IDS_Format (Format):
         for key, value in self.ids_list:
 
             print("%s\t%s" %(key, value))
-            
+
     def find (self, key, index=-1):
 	if type (key) == type (0):
             if index is None:

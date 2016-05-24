@@ -31,7 +31,7 @@ class Cache:
         try:
             rec = self.objects[key]
             self.
-            rec[1] = 
+            rec[1] =
         else:
             return None
 

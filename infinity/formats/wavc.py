@@ -30,22 +30,22 @@ class WAVC_Format (Format, Image):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off': 0x0004,
               'label': 'Version' },
-            
+
             { 'key': 'uncompressed_size',
               'type': 'DWORD',
               'off':0x0008,
               'label': 'Uncompressed file size'},
-            
+
             { 'key': 'compressed_size',
               'type': 'DWORD',
               'off':0x000C,
               'label': 'Compressed file size'},
-            
+
             { 'key': 'data_off',
               'type': 'DWORD',
               'off': 0x0010,

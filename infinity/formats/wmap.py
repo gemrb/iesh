@@ -28,50 +28,50 @@ class WMAP_V10_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'wmap_cnt',
               'type': 'DWORD',
               'off': 0x0008,
               'label': '# of wmap entries'},
-            
+
             { 'key': 'wmap_off',
               'type': 'DWORD',
               'off': 0x000C,
               'label': 'First wmap entry offset'},
             )
-        
+
 
     wmap_desc = (
             { 'key': 'background_image',
               'type': 'RESREF',
               'off': 0x0000,
               'label': 'Background image MOS' },
-            
+
             { 'key': 'width',
               'type': 'DWORD',
               'off': 0x0008,
               'label': 'Width' },
-            
+
             { 'key': 'height',
               'type': 'DWORD',
               'off': 0x000C,
               'label': 'Height' },
-            
+
             { 'key': 'map_num',
               'type': 'DWORD',
               'off': 0x0010,
               'label': 'Map number' },
-            
+
             { 'key': 'area_name',
               'type': 'DWORD',
               'off': 0x0014,
               'label': 'Area name' },
-            
+
             { 'key': 'unknown_18',
               'type': 'DWORD',
               'off': 0x0018,
@@ -106,7 +106,7 @@ class WMAP_V10_Format (Format):
               'type': 'RESREF',
               'off': 0x0030,
               'label': 'Map icons BAM resref' },
-            
+
             { 'key': 'unknown_38',
               'type': 'BYTES',
               'off': 0x0038,
@@ -119,33 +119,33 @@ class WMAP_V10_Format (Format):
               'type': 'RESREF',
               'off': 0x0000,
               'label': 'Area resref' },
-            
+
             { 'key': 'area_name',
               'type': 'STR8',
               'off': 0x0008,
               'label': 'Area short name' },
-            
+
             { 'key': 'area_long_name',
               'type': 'STR32',
               'off': 0x0010,
               'label': 'Area long name' },
-            
+
             { 'key': 'area_status',
               'type': 'DWORD',
               'off': 0x0030,
-              'mask': { 0x01: 'Visible',  0x02: 'Visible from adjacent',  0x04: 'Reachable',  0x08: 'Already visited' }, 
+              'mask': { 0x01: 'Visible',  0x02: 'Visible from adjacent',  0x04: 'Reachable',  0x08: 'Already visited' },
               'label': 'Area status flags' },
-            
+
             { 'key': 'icon_seq_ndx',
               'type': 'DWORD',
               'off': 0x0034,
               'label': 'Icon BAM sequence index' },
-            
+
             { 'key': 'xpos',
               'type': 'DWORD',
               'off': 0x0038,
               'label': 'X coordinate on world map' },
-            
+
             { 'key': 'ypos',
               'type': 'DWORD',
               'off': 0x003C,
@@ -155,17 +155,17 @@ class WMAP_V10_Format (Format):
               'type': 'STRREF',
               'off': 0x0040,
               'label': 'Area title for captions' },
-            
+
             { 'key': 'area_name_tooltip',
               'type': 'STRREF',
               'off': 0x0044,
               'label': 'Area title for tooltips' },
-            
+
             { 'key': 'loading_screen',
               'type': 'RESREF',
               'off': 0x0048,
               'label': 'Loading screen MOS file' },
-            
+
 
             { 'key': 'area_link_north_ndx',
               'type': 'DWORD',
@@ -296,7 +296,7 @@ class WMAP_V10_Format (Format):
 
         size_area = self.get_struc_size (self.area_desc)
         size_area_link = self.get_struc_size (self.area_link_desc)
-        
+
         self.read_list (stream,  'wmap')
 
         for wmap in self.wmap_list:

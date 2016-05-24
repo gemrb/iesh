@@ -53,10 +53,10 @@ class ImageSequence (image.Image):
         #print 'bbox', bbox
         cw = bbox[2] - bbox[0]
         ch = bbox[3] - bbox[1]
-        
+
         pad = 2
         font_start = 1
-        
+
         self.width = w = ncols * (cw + pad)
         self.height = h = nrows * (ch + pad)
         #print 'cw', cw, 'ch', ch, 'w', w, 'h', h
@@ -132,7 +132,7 @@ class ImageSequence (image.Image):
         y1 = 0
         x2 = 0
         y2 = 0
-        
+
         for obj in frames:
             x1 = min (x1, - obj['x'])
             y1 = min (y1, - obj['y'])
@@ -148,7 +148,7 @@ class ImageSequence (image.Image):
         y1 = 0
         x2 = 0
         y2 = 0
-        
+
         for obj in frames:
             x2 = max (x2, obj['width'])
             y2 = max (y2, obj['height'])
@@ -163,7 +163,7 @@ class ImageSequence (image.Image):
         y1 = 0
         x2 = 0
         y2 = 0
-        
+
         for obj in frames:
             img = self.get_image (obj)
             y1 = min (y1, - img.y)

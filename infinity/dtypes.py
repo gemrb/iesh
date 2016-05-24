@@ -14,10 +14,10 @@ class IE_Type:
 
     def write (self, stream, offset, value):
         pass
-    
+
     def size (self, value):
         return 0
-        
+
 class IE_WORD (IEType):
     def read (self, stream, offset):
         stream.read ()

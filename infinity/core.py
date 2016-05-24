@@ -267,12 +267,12 @@ def find_res_type (**kw):
         sig - signature, trailing spaces are ignored
         sig4 - signature, trailing spaces must be exact
         ext - filename extension, leading dot is added automagically
-        tag - 
+        tag -
         any -
-    
+
     Example:
         find_res_type (sig='ITM')"""
-        
+
     rtl = restype_list
     for key, value in kw.items ():
         if key == 'type':
@@ -287,13 +287,13 @@ def find_res_type (**kw):
             if value.startswith ('.'):
                 value = value[1:]
             rtl = [ r for r in rtl if r[2] == value ]
-    
+
     return rtl
 
 
 def type_to_ext (type):
     return [ r[2] for r in find_res_type (type=type) ]
-    
+
 def ext_to_type (filetype):
     if type(filetype) == type(''):
         try:
@@ -315,14 +315,14 @@ def register_format (klass, **kw):
     extension - filename extension
     type - numeric type as used in CHITIN.KEY
     name - name used for the format.
-    
+
     Values are specified directly, or as a list of values. Either
         extension='BAM'
     or
         extension=('BIF', 'CBF')
-    
+
     Options:
-    
+
     game - limit the binding to the specified game type (bg1, bg2, iwd, iwd2, pst)"""
 
     def seq (val):
@@ -355,7 +355,7 @@ def register_format (klass, **kw):
     if 'extension' in kw:
         for ext in seq (kw['extension']):
             bind (fmt_extensions, ext.upper(), klass)
-    if 'type' in kw: 
+    if 'type' in kw:
         for typ in seq (kw['type']):
             bind (fmt_types, typ, klass)
     if 'name' in kw:
@@ -368,7 +368,7 @@ def register_format (klass, **kw):
 #def register_format (signature, version, klass,  desc = None):
 #    """Register class `klass' for reading, parsing and (possibly) writing
 #    IE file format with given `signature' and `version'.  `desc' allows
-#    to specify text displayed in format list and should be used to 
+#    to specify text displayed in format list and should be used to
 #    describe status/progress of implementation."""
 #
 #    #core.formats[(signature, version)] = klass
@@ -385,7 +385,7 @@ def get_format (**kw):
             return fmt_signatures[signature][0]
         except KeyError:
             pass
-        
+
         for sig in fmt_signatures.keys():
             if signature.startswith (sig):
                 return fmt_signatures[sig][0]
@@ -394,9 +394,9 @@ def get_format (**kw):
             #print rexp
             if rexpc.match (signature):
                 return fmt_regexps[rexp][0]
-        
+
         return None
-        
+
 
 
 # FIXME: replace with find_res_type()
@@ -428,7 +428,7 @@ def id_to_symbol (idsfile, id):
     except KeyError, e:
         sys.stderr.write ("Warning: No such id %d in %s\n" %(id, idsfile))
         return id
-        
+
     #try:
     #    return core.ids[idsfile.upper ()].ids[id]
     #except:
@@ -457,7 +457,7 @@ def symbol_to_id (idsfile, sym):
         sys.stderr.write ("Warning: No such symbol %s in %s\n" %(sym, idsfile))
         #return sym
         return None
-        
+
 
 def find_file (filename, type = None):
     """Find file in the dirs specified in core.game_data_path and return its path.
@@ -466,7 +466,7 @@ def find_file (filename, type = None):
     # FIXME: use just normal match on case insensitive sysems (e.g. Windows)
 
     # FIXME: what about absolute filenames?
-    
+
     # TODO: If filename has no extension, generate names with extensions allowed by a specified type
     #   (if no type is specified, maybe it could be acquired from keys.resref_hash?)
     #   Possibly try different extension even if one was specified, e.g. wav -> wavc, bif -> cbf

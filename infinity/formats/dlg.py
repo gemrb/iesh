@@ -26,12 +26,12 @@ class DLG_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'state_cnt',
               'type': 'DWORD',
               'off': 0x0008,
@@ -149,7 +149,7 @@ class DLG_Format (Format):
               'label': 'Next state'},
 
             )
-        
+
     script_desc = (
             { 'key': 'script_off',
               'type': 'DWORD',
@@ -160,14 +160,14 @@ class DLG_Format (Format):
               'type': 'DWORD',
               'off': 0x0004,
               'label': 'Script size'},
-            
+
             { 'key': 'code',
               'type': '_STRING',
               'off': 0x0000,
               'label': 'Script code'},
-            
+
             )
-    
+
     state_trigger_desc = script_desc
     transition_trigger_desc = script_desc
     action_desc = script_desc
@@ -190,7 +190,7 @@ class DLG_Format (Format):
 
         self.read_list (stream,  'state')
         self.read_list (stream,  'transition')
-        
+
 #        off = self.header['state_off']
 #        for i in range (self.header['state_cnt']):
 #            obj = {}
@@ -245,20 +245,20 @@ class DLG_Format (Format):
                     + len(self.state_trigger_list) * self.get_struc_size(self.state_trigger_desc) \
                     + len(self.transition_trigger_list) * self.get_struc_size(self.transition_trigger_desc) \
                     + len(self.action_list) * self.get_struc_size(self.action_desc)
-        
+
         scripts = []
-        
+
         for obj in self.state_trigger_list + self.transition_trigger_list + self.action_list:
             s = obj['code']
             l = len (s)
- 
+
             scripts.append(s)
             obj['script_off'] = off
             obj['script_len'] = len (obj['code'])
             off += l
 
         off = self.get_struc_size(self.header_desc)
-        off = self.write_list (stream, off, 'state')        
+        off = self.write_list (stream, off, 'state')
         off = self.write_list (stream, off, 'transition')
         off = self.write_list (stream, off, 'state_trigger')
         off = self.write_list (stream, off, 'transition_trigger')
@@ -275,7 +275,7 @@ class DLG_Format (Format):
 
         self.print_list ('state')
         self.print_list ('transition')
-        
+
 #        i = 0
 #        for obj in self.state_list:
 #            print 'State #%d' %i
@@ -329,7 +329,7 @@ class DLG_Format (Format):
 #             self.decode_feature_block (off2, obj2)
 #             obj['feature_list'].append (obj2)
 #             off2 = off2 + 48
-            
+
 #    def print_state (self, obj):
 #        self.print_struc (obj, self.state_desc)
 #
@@ -358,7 +358,7 @@ class DLG_Format (Format):
                 self.print_transition (transition)
                 print("\n")
                 j = j + 1
-                
+
             i = i + 1
 
     def print_transition (self, transition):
@@ -383,7 +383,7 @@ class DLG_Format (Format):
 
 class DLG_V19_Format (DLG_Format):
     """Referenced in IESDP, but where is it used? And what's the signature???"""
-    
+
     DLG_Format.header_desc.append (
             { 'key': 'flags',
               'type': 'DWORD',
@@ -394,6 +394,6 @@ class DLG_V19_Format (DLG_Format):
 
     def __init__ (self):
         DLG_Format.__init__ (self)
-        
+
 register_format (DLG_Format, signature='DLG V1.0', extension='DLG', name=('DLG', 'DIALOG'), type=0x3f3, game="bg1")
 register_format (DLG_V19_Format, signature='DLG V1.0', extension='DLG', name=('DLG', 'DIALOG'), type=0x3f3)

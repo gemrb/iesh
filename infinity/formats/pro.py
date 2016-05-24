@@ -31,17 +31,17 @@ class PRO_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'projectile_type',
               'type': 'WORD',
               'off': 0x0008,
-              'enum': {1: 'no BAM', 
-                       2: 'single target', 
+              'enum': {1: 'no BAM',
+                       2: 'single target',
                        3: 'aoe target' },
               'label': 'Projectile type' },
 
@@ -54,11 +54,11 @@ class PRO_Format (Format):
             { 'key': 'sparking_flag',
               'type': 'DWORD',
               'off': 0x000C,
-              'mask': {0x01: 'sparks', 
-                       0x02: 'use z coordinate', 
-                       0x04: 'loop sound', 
-                       0x08: 'loop sound2', 
-                       0x10: 'do not affect direct target', 
+              'mask': {0x01: 'sparks',
+                       0x02: 'use z coordinate',
+                       0x04: 'loop sound',
+                       0x08: 'loop sound2',
+                       0x10: 'do not affect direct target',
                        0x20: 'draw below animate objects' },
               'label': 'Sparking flag'},
 
@@ -183,15 +183,15 @@ class PRO_Format (Format):
             { 'key': 'travel_flags',
               'type': 'DWORD',
               'off': 0x0100,
-              'mask': {0x0001: 'fake BAM colors', 
-                       0x0002: 'has smoke', 
-                       0x0004: 'unknown bit 2', 
-                       0x0008: 'use area lighting', 
-                       0x0010: 'use area height', 
-                       0x0020: 'has shadow', 
-                       0x0040: 'has light spot', 
-                       0x0080: 'has brighten flags', 
-                       0x0100: 'low level brighten', 
+              'mask': {0x0001: 'fake BAM colors',
+                       0x0002: 'has smoke',
+                       0x0004: 'unknown bit 2',
+                       0x0008: 'use area lighting',
+                       0x0010: 'use area height',
+                       0x0020: 'has shadow',
+                       0x0040: 'has light spot',
+                       0x0080: 'has brighten flags',
+                       0x0100: 'low level brighten',
                        0x0200: 'high level brighten' },
               'label': 'Travel flags'},
 
@@ -259,9 +259,9 @@ class PRO_Format (Format):
             { 'key': 'face_target',
               'type': 'BYTE',
               'off': 0x0133,
-              'enum': {1: 'dont face', 
-                       5: 'mirrored eastern direction (reduced granularity)', 
-                       9: 'reduced eastern direction (full granularity)', 
+              'enum': {1: 'dont face',
+                       5: 'mirrored eastern direction (reduced granularity)',
+                       9: 'reduced eastern direction (full granularity)',
                        16: 'not mirrored, not reduced' },
               'label': 'Face target'},
 
@@ -315,10 +315,10 @@ class PRO_Format (Format):
     aoe_header_desc = (
             { 'type': '_LABEL',
               'label': '\nAOE section:'},
-              
+
             { 'type': '_INDENT',
               'label': '    '},
-              
+
             { 'key': 'aoe_flags',
               'type': 'DWORD',
               'off': 0x0200,
@@ -483,7 +483,7 @@ class PRO_Format (Format):
         self.print_header ()
         if self.header['projectile_type'] == 3:
             self.print_struc (self.header, self.aoe_header_desc)
-        
 
-        
+
+
 register_format (PRO_Format, signature='PRO V1.0', extension='PRO', name=('PRO', 'PROJECTILE'), type=0x3fd)

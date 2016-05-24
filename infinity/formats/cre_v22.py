@@ -850,9 +850,9 @@ class CRE_V22_Format (Format):
             { 'key': 'specflag_values',
                 'type': 'BYTE',
                 'off': 0x0303,
-                'mask': { 0x01: 'Auto concentration succ, no morale fail', 
-                          0x02: 'Immune to crit hits', 
-                          0x04: 'Disallow paladin in LU', 
+                'mask': { 0x01: 'Auto concentration succ, no morale fail',
+                          0x02: 'Immune to crit hits',
+                          0x04: 'Disallow paladin in LU',
                           0x08: 'Disallow monk in LU' },
                 'label': 'Specflag values' },
 
@@ -1325,7 +1325,7 @@ class CRE_V22_Format (Format):
 
         self.domain_spells = {}
         for key in range(1, 10):
-            cnt, off = self.header['domain%d_spell_count' %key], self.header['domain%d_spell_offset' %key]  
+            cnt, off = self.header['domain%d_spell_count' %key], self.header['domain%d_spell_offset' %key]
             spells = []
             for j in range(cnt):
                 obj = {}
@@ -1340,7 +1340,7 @@ class CRE_V22_Format (Format):
 
         self.abilities = {}
         for key in ('ability', 'song', 'shape'):
-            cnt, off = self.header['%s_cnt' %key], self.header['%s_off' %key]  
+            cnt, off = self.header['%s_cnt' %key], self.header['%s_off' %key]
             spells = []
             for j in range(cnt):
                 obj = {}

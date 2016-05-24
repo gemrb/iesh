@@ -29,20 +29,20 @@ from infinity.format import Format, register_format
 
 
 class TLK_Format (Format):
-    
+
     header_desc = (
         { 'key': 'signature',
           'type': 'STR4',
           'off': 0x0000,
           'default': 'TLK ',
           'label': 'Signature' },
-            
+
         { 'key': 'version',
           'type': 'STR4',
           'off':0x0004,
           'default': 'V1  ',
           'label': 'Version'},
-            
+
         { 'key': 'language_id',
           'type': 'WORD',
           'off': 0x0008,
@@ -52,13 +52,13 @@ class TLK_Format (Format):
           'type': 'DWORD',
           'off': 0x000A,
           'label': '# of strref entries'},
-            
+
         { 'key': 'string_offset',
           'type': 'DWORD',
           'off': 0x000E,
           'label': 'First string data offset'},
        )
-        
+
 
     strref_record_desc = (
         { 'key': 'content_type',
@@ -66,22 +66,22 @@ class TLK_Format (Format):
           'off': 0x0000,
           'enum': { 0: 'No message data', 1: 'Has text', 2: 'Has sound', 3: 'Standard message', 7: 'Has tags in bg2' },
           'label': 'Content of this entry' },
-       
+
         { 'key': 'sound_resref',
           'type': 'RESREF',
           'off': 0x0002,
           'label': 'Sound resref' },
-         
+
         { 'key': 'volume_variance',
           'type': 'DWORD',
           'off': 0x000A,
           'label': 'Volume variance' },
-          
+
         { 'key': 'pitch_variance',
           'type': 'DWORD',
           'off': 0x000E,
           'label': 'Pitch variance' },
-            
+
         { 'key': 'string_offset',
           'type': 'DWORD',
           'off': 0x0012,
@@ -101,25 +101,25 @@ class TLK_Format (Format):
 
     def __init__ (self):
         Format.__init__ (self)
-        
+
         self.expect_signature = 'TLK'
 
         self.strref_list = []
-        
+
 
     def read (self, stream):
         self.read_header (stream)
 
         off = 0x0012
-            
+
         if not self.get_option ('format.tlk.decode_strrefs'):
             return
-        
+
         tick_size = core.get_option ('format.tlk.tick_size')
         tack_size = core.get_option ('format.tlk.tack_size')
 
         for i in range (self.header['num_of_strrefs']):
-            
+
             obj = {}
             obj['_strref'] = i
             self.read_strref_record (stream, off, obj)
@@ -141,7 +141,7 @@ class TLK_Format (Format):
         self.header['num_strings'] = len (self.strref_list)
         self.header['string_offset'] = self.get_struc_size (self.header_desc, self.header) + len (self.strref_list) * self.get_struc_size (self.strref_record_desc, None)
         self.write_struc (stream, 0x0000, self.header_desc, self.header)
-        
+
         strref_offset = self.get_struc_size (self.header_desc, self.header)
         string_offset = 0
         strref_size = self.get_struc_size (self.strref_record_desc, None)
@@ -166,7 +166,7 @@ class TLK_Format (Format):
                     sys.stdout.write('%d' %i)
                 sys.stdout.flush ()
         print()
-        
+
 
     def printme (self):
         self.print_header ()
@@ -183,7 +183,7 @@ class TLK_Format (Format):
         obj['string_raw'] = stream.read_sized_string (self.header['string_offset'] + obj['string_offset'], obj['string_len'])
         self.decode(obj)
 
-        
+
     def print_strref_record (self, obj):
         self.print_struc (obj, self.strref_record_desc)
 
@@ -267,5 +267,5 @@ class TLK_Format (Format):
         return filter (lambda s, rx=rx: rx.search (s['string']), self.strref_list)
 
 
-        
+
 register_format (TLK_Format, signature='TLK V1  ', extension='TLK', name='TLK')

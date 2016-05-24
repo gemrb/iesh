@@ -43,9 +43,9 @@ class D2A_Format (Format):
 
         self.signature = stream.get_line ().strip ()
         # FIXME: check the header
-        
+
         self.default_value = stream.get_line ().strip ()
-        
+
         s = stream.get_line ()
         s = s.strip ()
         # FIXME: canonize the column names
@@ -53,12 +53,12 @@ class D2A_Format (Format):
         self.cols_hash = dict ([ (i, n.upper ()) for i, n in enumerate (self.cols) ])
 
         line_no = 3
-        
+
         while s is not None:
             s = stream.get_line ()
             if s is None:
                 break
-            
+
             line_no = line_no + 1
 
             s = s.strip ()
@@ -135,10 +135,10 @@ class D2A_Format (Format):
 
 #        res = []
 #        row = self.get_row_id (row)
-#        
+#
 #        if include_heading:
 #            res.append (self.get (row, ''))
-#            
+#
 #        for col in self.cols:
 #            res.append (self.get (row, col))
 #
@@ -151,10 +151,10 @@ class D2A_Format (Format):
 
 #        res = []
 #        col = self.get_col_id (col)
-#        
+#
 #        if include_heading:
 #            res.append (self.get ('', col))
-#            
+#
 #        for row in self.rows:
 #            res.append (self.get (row, col))
 #
@@ -190,7 +190,7 @@ class D2A_Format (Format):
                 else:
                     print(val.ljust (size), end=' ')
                 #print "%*s" %(size, val),
-        
+
             print()
 
 

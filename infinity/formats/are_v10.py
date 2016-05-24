@@ -27,12 +27,12 @@ class ARE_V10_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'wed',
               'type': 'RESREF',
               'off': 0x0008,
@@ -294,7 +294,7 @@ class ARE_V10_Format (Format):
               'label': 'Automap notes offset (non PST)'}, # PST has 0xFFFFFFFF here
 
             )
-    
+
     header2_desc = (
             { 'key': 'automap_note_cnt',
               'type': 'DWORD',
@@ -346,110 +346,110 @@ class ARE_V10_Format (Format):
                 'type': 'STR32',
                 'off': 0x0000,
                 'label': 'Actor name (for editors)' },
-        
+
             { 'key': 'position',
                 'type': 'POINT',
                 'off': 0x0020,
                 'label': 'Current actor position' },
-        
+
             { 'key': 'destination',
                 'type': 'POINT',
                 'off': 0x0024,
                 'label': 'Current actor destination' },
-        
+
             { 'key': 'flags',
                 'type': 'DWORD',
                 'off': 0x0028,
                 'mask': { 0x01: 'CRE not attached', 0x02: 'Unknown 0x02', 0x04: 'Unknown 0x04', 0x08: 'Actor name as death var' },
                 'label': 'Flags' },
-        
+
             { 'key': 'spawned_flag',
                 'type': 'DWORD',
                 'off': 0x002C,
                 'label': 'Spawned flag (in memory)' },
-        
+
             { 'key': 'animation',
                 'type': 'DWORD',
                 'off': 0x0030,
                 'label': 'Animation' },
-        
+
             { 'key': 'orientation',
                 'type': 'DWORD',
                 'off': 0x0034,
                 'enum': { 0: 'S', 1: 'SSW', 2: 'SW', 3: 'WSW', 4: 'W', 5: 'WNW', 6: 'NW', 7: 'NNW', 8: 'N', 9: 'NNE', 10: 'NE', 11: 'ENE', 12: 'E', 13: 'ESE', 14: 'SE', 15: 'SSE' },
                 'label': 'Orientation' },
-        
+
             { 'key': 'unknown_38',
                 'type': 'DWORD',
                 'off': 0x0038,
                 'label': 'Unknown 38' },
-        
+
             { 'key': 'unknown_3C',
                 'type': 'DWORD',
                 'off': 0x003C,
                 'label': 'Unknown 3C' },
-        
+
             { 'key': 'appearance_time',
                 'type': 'DWORD',
                 'off': 0x0040,
                 'mask': enums.schedule_mask,
                 'label': 'Actor appearance time' },
-        
+
             { 'key': 'times_spoken_to',
                 'type': 'DWORD',
                 'off': 0x0044,
                 'label': 'Number of times spoken to (in SAV)' },
-        
+
             { 'key': 'dialog',
                 'type': 'RESREF',
                 'off': 0x0048,
                 'label': 'Dialog (overrides CRE dialog)' },
-        
+
             { 'key': 'script_override',
                 'type': 'RESREF',
                 'off': 0x0050,
                 'label': 'Script (override)' },
-        
+
             { 'key': 'script_general',
                 'type': 'RESREF',
                 'off': 0x0058,
                 'label': 'Script (general)' },
-        
+
             { 'key': 'script_class',
                 'type': 'RESREF',
                 'off': 0x0060,
                 'label': 'Script (class)' },
-        
+
             { 'key': 'script_race',
                 'type': 'RESREF',
                 'off': 0x0068,
                 'label': 'Script (race)' },
-        
+
             { 'key': 'script_default',
                 'type': 'RESREF',
                 'off': 0x0070,
                 'label': 'Script (default)' },
-        
+
             { 'key': 'script_specific',
                 'type': 'RESREF',
                 'off': 0x0078,
                 'label': 'Script (specific)' },
-        
+
             { 'key': 'cre_file',
                 'type': 'RESREF',
                 'off': 0x0080,
                 'label': 'CRE file' },
-        
+
             { 'key': 'cre_off',
                 'type': 'DWORD',
                 'off': 0x0088,
                 'label': 'Embedded CRE offset' },
-        
+
             { 'key': 'cre_size',
                 'type': 'DWORD',
                 'off': 0x008C,
                 'label': 'Embedded CRE size' },
-        
+
             { 'key': 'unknown_90',
                 'type': 'BYTES',
                 'off': 0x0090,
@@ -654,7 +654,7 @@ class ARE_V10_Format (Format):
                 'off': 0x0088,
                 'mask': enums.schedule_mask,
                 'label': 'Spawnpoint appearance time' },
-        
+
             { 'key': 'day_chance',
                 'type': 'WORD',
                 'off': 0x008C,
@@ -811,7 +811,7 @@ class ARE_V10_Format (Format):
                 'type': 'RESREF',
                 'off': 0x0000,
                 'label': 'ITM resource Resref' },
-            
+
             { 'key': 'expiration_time',
                 'type': 'WORD',
                 'off': 0x0008,
@@ -821,23 +821,23 @@ class ARE_V10_Format (Format):
                 'type': 'WORD',
                 'off': 0x000A,
                 'label': 'Usage 1 (usually # of items or charges)' },
-                
+
             { 'key': 'usage2',
                 'type': 'WORD',
                 'off': 0x000C,
                 'label': 'Usage 2 (usually # of sec. charges)' },
-                
+
             { 'key': 'usage3',
                 'type': 'WORD',
                 'off': 0x000E,
                 'label': 'Usage 3 (usually # of terc. charges)' },
-                
+
             { 'key': 'flags',
                 'type': 'DWORD',
                 'off': 0x0010,
                 'mask': { 0x1: 'Identified', 0x2: 'Unstealable', 0x4: 'Stolen', 0x8: 'Undroppable' },
                 'label': 'Flags' },
-                
+
             )
 
 
@@ -932,18 +932,18 @@ class ARE_V10_Format (Format):
                 'type': 'STR32',
                 'off': 0x0000,
                 'label': 'Variable name' },
-            
+
             { 'key': 'unknown_20',
                 'type': 'BYTES',
                 'off': 0x0020,
                 'size': 8,
                 'label': 'Unknown 20' },
-            
+
             { 'key': 'value',
                 'type': 'DWORD',
                 'off': 0x0028,
                 'label': 'Variable value' },
-            
+
             { 'key': 'unknown_2C',
                 'type': 'BYTES',
                 'off': 0x002C,
@@ -1115,7 +1115,7 @@ class ARE_V10_Format (Format):
                 'off': 0x00C0,
                 'label': 'Door\'s dialog Resref' },
     )
-    
+
     animation_desc = (
             { 'key': 'name',
                 'type': 'STR32',
@@ -1196,30 +1196,30 @@ class ARE_V10_Format (Format):
                 'type': 'DWORD',
                 'off': 0x0000,
                 'label': 'X coordinate' },
-                
+
             { 'key': 'y',
                 'type': 'DWORD',
                 'off': 0x0004,
                 'label': 'Y coordinate' },
-                
+
             { 'key': 'text',
                 'type': 'BYTES',
                 'off': 0x0008,
                 'size': 500,
                 'label': 'Note text' },
-                
+
             { 'key': 'color',
                 'type': 'DWORD',
                 'off': 0x01FC,
                 'enum': {0 : 'Blue (user)', 1: 'Red (game)' },
                 'label': 'Note pin color / type' },
-                
+
             { 'key': 'unknown_200',
                 'type': 'BYTES',
                 'off': 0x0200,
                 'size': 5 * 4,
                 'label': 'Unknown 200' },
-                
+
             )
 
     automap_note_desc = (
@@ -1227,40 +1227,40 @@ class ARE_V10_Format (Format):
                 'type': 'WORD',
                 'off': 0x0000,
                 'label': 'X coordinate' },
-                
+
             { 'key': 'y',
                 'type': 'WORD',
                 'off': 0x0002,
                 'label': 'Y coordinate' },
-                         
+
             { 'key': 'text',
                 'type': 'STRREF',
                 'off': 0x0004,
                 'label': 'Note text' },
-                
+
             { 'key': 'strref_location',
                 'type': 'WORD',
                 'off': 0x0008,
                 'enum': {0 : 'External (TOH/TOT)', 1: 'Internal (TLK)' },
                 'label': 'STRREF location' },
-                
+
             { 'key': 'color',
                 'type': 'WORD',
                 'off': 0x000A,
                 'enum': {0 : 'Gray', 1: 'Violet', 2: 'Green', 3: 'Orange', 4: 'Red', 5: 'Blue', 6: 'Dark blue', 7: 'Light gray' },
                 'label': 'Note pin color / type' },
-                
+
             { 'key': 'note_count_plus_10',
                 'type': 'DWORD',
                 'off': 0x000C,
                 'label': 'Note count + 10' },
-                
+
             { 'key': 'unknown_10',
                 'type': 'BYTES',
                 'off': 0x0010,
                 'size': 36,
                 'label': 'Unknown 10' },
-                
+
             )
 
 
@@ -1340,7 +1340,7 @@ class ARE_V10_Format (Format):
                 'off': 0x0018,
                 'label': 'Unknown 18' },
     )
-    
+
 
     song_desc = (
             { 'key': 'day_song_ref_no',
@@ -1417,7 +1417,7 @@ class ARE_V10_Format (Format):
                 'label': 'Unknown 54' },
     )
 
-    
+
     rest_interrupt_desc = (
             { 'key': 'name',
                 'type': 'STR32',
@@ -1493,10 +1493,10 @@ class ARE_V10_Format (Format):
     def __init__ (self):
         Format.__init__ (self)
         self.expect_signature = 'AREA'
-        
+
         # pst and bg/bg2/iwd formats differ in automap_note
         self.is_pst = False;
-        
+
         self.actor_list = []
         self.region_list = []
         self.spawnpoint_list = []
@@ -1520,12 +1520,12 @@ class ARE_V10_Format (Format):
     def read (self, stream):
         self.read_header (stream)
         self.is_pst = self.header['automap_note_off'] == 0xffffffff
-        
+
         if self.is_pst:
             self.read_header (stream, self.header2_pst_desc)
         else:
             self.read_header (stream, self.header2_desc)
-        
+
         self.read_list (stream, 'actor')
         self.read_list (stream, 'region')
         self.read_list (stream, 'spawnpoint')
@@ -1537,14 +1537,14 @@ class ARE_V10_Format (Format):
         self.read_list (stream, 'variable')
         self.explored_bitmask = stream.read_blob (self.header['explored_bitmask_off'], self.header['explored_bitmask_size'])
         self.read_list (stream, 'door')
-        self.read_list (stream, 'animation') 
+        self.read_list (stream, 'animation')
         if self.is_pst:
             self.read_list (stream, 'automap_note_pst')
         else:
             self.read_list (stream, 'automap_note')
-            
+
         self.read_list (stream, 'tiled_object')
-        
+
         if not self.is_pst:
             self.read_list (stream, 'projectile_trap')
 
@@ -1607,7 +1607,7 @@ class ARE_V10_Format (Format):
             self.print_header (self.header2_pst_desc)
         else:
             self.print_header (self.header2_desc)
-            
+
         self.print_list ('actor')
         self.print_list ('region')
         self.print_list ('spawnpoint')
@@ -1619,7 +1619,7 @@ class ARE_V10_Format (Format):
         self.print_list ('variable')
         # "Explored" bitmask. We need map width and height to print the mask, though and they're not in the ARE structure
         self.print_list ('door')
-        self.print_list ('animation') 
+        self.print_list ('animation')
         if self.is_pst:
             self.print_list ('automap_note_pst')
         else:

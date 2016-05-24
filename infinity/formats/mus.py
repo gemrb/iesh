@@ -70,7 +70,7 @@ class MUS_Format (Format):
                 else:
                     tag = None
                     loop = None
-                
+
                 tag2 = words.pop(0)
                 end = words.pop(0)
 
@@ -81,7 +81,7 @@ class MUS_Format (Format):
             else:
                 RuntimeError()
 
- 
+
 
     def write (self, stream):
         stream.put_line (self.name)

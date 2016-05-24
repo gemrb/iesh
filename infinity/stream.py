@@ -21,7 +21,7 @@
 Implement *Stream, classes for reading  IE files.
 
 Implement *Stream classes for reading IE data primitives
-from normal files, memory buffers and from files in IE specific 
+from normal files, memory buffers and from files in IE specific
 `filesystem' addressed by RESREFs.
 
 Classes:
@@ -45,13 +45,13 @@ from infinity import core
 
 class Stream (object):
     """
-    Base abstract class for reading and writing IE files. 
-    
+    Base abstract class for reading and writing IE files.
+
     It implements the basic open / read / write / seek / close
     API to be implemented in the subclasses, as well as
     functions for reading primitive IE data types like RESREF or WORD.
     """
-    
+
     def __init__ (self):
         self.is_open = False
         self.name = None
@@ -77,7 +77,7 @@ class Stream (object):
     def close (self):
         if not self.is_open:
             return
-            
+
         if self.get_option ('stream.debug_coverage'):
             self.print_coverage ()
         self.is_open = False
@@ -105,7 +105,7 @@ class Stream (object):
         # offset == None means "current offset" here
         if offset is not None:
             self.seek (offset)
-            
+
         return self.read (1)
         #v = self.read (1)
         #return struct.unpack ('c', v)[0]
@@ -114,9 +114,9 @@ class Stream (object):
         # offset == None means "current offset" here
         if offset is not None:
             self.seek (offset)
-            
+
         self.write (char, 1)
-        
+
     def get_line (self):
         #return self.readline ()
         return self.read_line_string ()
@@ -162,32 +162,32 @@ class Stream (object):
             self.seek (offset)
         v = self.read (size)
         # FIXME: remove the trailing zeros
-        
+
         return struct.unpack ('%ds' %size, v)[0]
 
     def write_sized_string (self, value, offset, size):
         # offset == None means "current offset" here
         if offset is not None:
             self.seek (offset)
-        
+
         # FIXME: pad with zeros
         bytes = struct.pack ('%ds' %size, value)
         self.write (bytes)
 
     def read_asciiz_string (self, off):
         s = ''
-        
+
         while 1:
             c = self.get_char (off)
             if c == '\0': break
             s = s + c
             off = off + 1
-            
+
         return s
 
     def read_line_string (self):
         s = ''
-        
+
         while 1:
             c = self.get_char (None)
             if c == '\n': break
@@ -195,9 +195,9 @@ class Stream (object):
                 if s == '':
                     s = None
                 break
-            
+
             s = s + c
-            
+
         return s
 
     def write_line_string (self, value, offset=None):
@@ -269,7 +269,7 @@ class Stream (object):
     def get_format (self, type = 0):
         signature = self.get_signature ()[:8]
         fmt = core.get_format (signature=signature, name=self.name, type=type)
-        
+
 #        if fmt is None and type != 0:
 #            fmt = core.get_format_by_type (type)
 
@@ -308,7 +308,7 @@ class Stream (object):
 
         print("Coverage (%s):" %self.name)
         from_offset = None
-        
+
         for i in range (len (self.coverage)):
             if self.coverage[i] == 0 and from_offset is None:
                 from_offset = i
@@ -323,7 +323,7 @@ class Stream (object):
                 if from_offset is not None:
                     print_range (from_offset,  i - 1,  0)
                     from_offset = None
-                    
+
         if from_offset is not None:
             print_range (from_offset,  i - 1,  0)
             from_offset = None
@@ -356,19 +356,19 @@ class FileStream (Stream):
         else:
             self.filename = filename
             self.fh = open (filename, mode)
-            
+
         Stream.open (self, filename,  mode)
-        
+
         if self.get_option ('stream.debug_coverage'):
             size = os.stat (filename)[6]
             self.coverage = [0] * size
-            
+
         return self
 
     def close (self):
         if not self.is_open:
             return
-            
+
         self.fh.close ()
         Stream.close (self)
 
@@ -551,11 +551,11 @@ class OverrideStream (MemoryStream):
 
 class CompressedStream (MemoryStream):
     """Stream for reading compressed files in memory."""
-    
+
     def open (self, membuffer,  name = '?'):
         if membuffer:
             return MemoryStream.open (self, gzip.zlib.decompress (membuffer),  name)
-    
+
         else:
             ms = MemoryStream.open (self, None,  name)
             #gzip.zlib.compress (ms.buffer)

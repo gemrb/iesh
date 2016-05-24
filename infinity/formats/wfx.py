@@ -26,12 +26,12 @@ class WFX_Format (Format):
               'type': 'STR4',
               'off': 0x0000,
               'label': 'Signature' },
-            
+
             { 'key': 'version',
               'type': 'STR4',
               'off':0x0004,
               'label': 'Version'},
-            
+
             { 'key': 'unknown_08',
               'type': 'DWORD',
               'off': 0x0008,
@@ -68,7 +68,7 @@ class WFX_Format (Format):
 
     def printme (self):
         self.print_header ()
-        
 
-        
+
+
 register_format (WFX_Format, signature='WFX V1.0', extension='WFX', name='WFX')
