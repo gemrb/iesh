@@ -125,12 +125,15 @@ class Stream (object):
         #FIXME
         return self.write_line_string (value)
 
-    def read_word (self, offset):
+    def read_word (self, offset, signed = False):
         # offset == None means "current offset" here
         if offset is not None:
             self.seek (offset)
+
         v = self.read (2)
-        return struct.unpack ('<H', v)[0]
+        fmt = '<h' if signed else '<H'
+
+        return struct.unpack (fmt, v)[0]
 
     def write_word (self, value, offset = None):
         # offset == None means "current offset" here

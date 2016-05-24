@@ -222,7 +222,7 @@ class Format (object):
             # NOTE: default value has to be already an array if count>1
             value = d['default']
         except:
-            if type in ('BYTE', 'WORD', 'DWORD', 'CTLID', 'RGBA', 'STRREF', 'RESTYPE'):
+            if type in ('BYTE', 'WORD', 'SWORD', 'DWORD', 'SDWORD', 'CTLID', 'RGBA', 'STRREF', 'RESTYPE'):
                 value = 0
             elif type in ('STR2', 'STR4', 'STR8', 'STR32', 'RESREF', 'STRSIZED', '_STRING'):
                 value = ''
@@ -262,8 +262,12 @@ class Format (object):
                 value = ord (stream.get_char (offset + local_offset))
             elif type == 'WORD':
                 value = stream.read_word (offset + local_offset)
+            elif type == 'SWORD':
+                value = stream.read_word (offset + local_offset, True)
             elif type == 'DWORD':
                 value = stream.read_dword (offset + local_offset)
+            elif type == 'SDWORD':
+                value = stream.read_dword (offset + local_offset, True)
             elif type == 'POINT':
                 value0 = stream.read_word (offset + local_offset)
                 value1 = stream.read_word (offset + local_offset + 2)
@@ -412,9 +416,9 @@ class Format (object):
 
         if type == 'BYTE':
             size = 1
-        elif type == 'WORD':
+        elif type in ('WORD', 'SWORD'):
             size = 2
-        elif type == 'DWORD':
+        elif type in ('DWORD', 'SDWORD'):
             size = 4
         elif type == 'POINT':
             size = 4
