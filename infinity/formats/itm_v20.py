@@ -19,6 +19,7 @@
 # Conforms to IESDP 4.5.2008
 
 from infinity.format import Format, register_format
+from infinity.formats import enums
 
 class ITM_V20_Format (Format):
     header_desc = (
@@ -50,13 +51,27 @@ class ITM_V20_Format (Format):
             { 'key': 'flags',
               'type': 'DWORD',
               'off': 0x0018,
-              'mask': { 0x0001: 'Critical/Unsellable/Kept on ground', 0x0002: 'TwoHanded', 0x0004: 'Movable', 0x0008: 'Displayable', 0x0010: 'Cursed', 0x0020: 'Unknown bit5', 0x0040: 'Magical', 0x0080: 'Bow', 0x0100: 'Silver', 0x0200: 'ColdIron', 0x0400: 'Stolen/Unsellable', 0x0800: 'Uncarriable', 0x1000: 'Pulsating' },
+              'mask': {
+                      0x0001: 'Critical/Unsellable/Kept on ground',
+                      0x0002: 'TwoHanded',
+                      0x0004: 'Movable',
+                      0x0008: 'Displayable',
+                      0x0010: 'Cursed',
+                      0x0020: 'Unknown bit5',
+                      0x0040: 'Magical',
+                      0x0080: 'Bow',
+                      0x0100: 'Silver',
+                      0x0200: 'ColdIron',
+                      0x0400: 'Stolen/Unsellable',
+                      0x0800: 'Uncarriable',
+                      0x1000: 'Pulsating'
+                      },
               'label': 'Flags'},
 
             { 'key': 'item_type',
               'type': 'WORD',
               'off': 0x001C,
-              #'enum': {0:''}, # FIXME: define the item types
+              'enum': enums.item_types,
               'label': 'Item type'},
 
             { 'key': 'usability_mask',
@@ -314,14 +329,24 @@ class ITM_V20_Format (Format):
               'label': 'THAC0 bonus'},
 
             { 'key': 'dice_sides',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0016,
               'label': 'Dice sides'},
 
+            { 'key': 'primary_type',
+              'type': 'BYTE',
+              'off': 0x0017,
+              'label': 'Primary type'},
+
             { 'key': 'dice_thrown',
-              'type': 'WORD',
+              'type': 'BYTE',
               'off': 0x0018,
               'label': 'Dice thrown'},
+
+            { 'key': 'secondary_type',
+              'type': 'BYTE',
+              'off': 0x0019,
+              'label': 'Secondary type'},
 
             { 'key': 'damage_bonus',
               'type': 'WORD',
