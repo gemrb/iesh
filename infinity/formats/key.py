@@ -253,4 +253,12 @@ class KEY_Format (Format):
     def get_resref_by_type (self, type):
         return filter (lambda s, type=type: s['type'] == type, self.resref_list)
 
+    def get_resref_by_name_and_type (self, name, type):
+        obj = self.get_resref_by_name (name)
+
+        if type is None:
+            return obj
+
+        return filter (lambda o: o['type'] == type, obj)
+
 register_format (KEY_Format, signature='KEY V1  ', extension='KEY', name='KEY')
