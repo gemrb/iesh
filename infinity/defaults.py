@@ -65,7 +65,34 @@ options = {
     #src_enc = 'cp949' # Korean, but some strings are in French
     #src_enc = 'cp932' # Japanese
     #src_enc = 'cp950' # Chinese
+}
 
+# these are borrowed from WeiDU
+# FIXME: when consensus is reached on how to detected SoD, support should be added
+game_types = {
+    'bg1':   ("AR0125",   "ARE"),
+    'bg1ee': ("OH1000",   "ARE"),
+    'bg2':   ("AR0083",   "ARE"),
+    'tob':   ("AR6111",   "ARE"),
+    'bg2ee': ("OH6000",   "ARE"),
+    'iwd':   ("AR2116",   "ARE"),
+    'how':   ("AR9109",   "ARE"),
+    'iwdee': ("HOWPARTY", "2DA"),
+    'iwd2':  ("AR6050",   "ARE"),
+    'pst':   ("AR0104A",  "ARE"),
+}
+
+game_type_weights = {
+    'bg1'  : 90,
+    'bg1ee': 100,
+    'bg2'  : 80,
+    'tob'  : 90,
+    'bg2ee': 100,
+    'iwd'  : 90,
+    'how'  : 100,
+    'iwdee': 100,
+    'iwd2' : 100,
+    'pst'  : 100
 }
 
 # End of file defaults.py

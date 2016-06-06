@@ -72,6 +72,7 @@ override_dir = None
 chitin_file = None
 dialog_file = None
 game_data_path = None
+game_type = None
 
 xor_key = "\x88\xa8\x8f\xba\x8a\xd3\xb9\xf5\xed\xb1\xcf\xea\xaa\xe4\xb5\xfb\xeb\x82\xf9\x90\xca\xc9\xb5\xe7\xdc\x8e\xb7\xac\xee\xf7\xe0\xca\x8e\xea\xca\x80\xce\xc5\xad\xb7\xc4\xd0\x84\x93\xd5\xf0\xeb\xc8\xb4\x9d\xcc\xaf\xa5\x95\xba\x99\x87\xd2\x9d\xe3\x91\xba\x90\xca"
 """Key used to `encrypt' some objects in IE files by XOR"""
@@ -550,6 +551,28 @@ def search_override (name, type = None):
         obj = filter (lambda o: o['type'] == type, obj)
 
     return obj
+
+def detect_game_type ():
+    detected_type = None
+    detected_weight = 0
+
+    for game_type in defaults.game_types:
+        name, ext = defaults.game_types[game_type]
+        weight = defaults.game_type_weights[game_type]
+        type = ext_to_type (ext)
+        obj = keys.get_resref_by_name_and_type(name, type)
+
+        if not obj:
+            continue
+
+        if weight > detected_weight:
+            detected_type = game_type
+            detected_weight = weight
+
+    if detected_type is None:
+        raise RuntimeError ("Unknown game type")
+
+    return detected_type
 
 def get_option (key):
     try:
