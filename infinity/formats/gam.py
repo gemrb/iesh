@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-# Conforms to IESDP 4.2.2009
+# Conforms to IESDP 22.10.2016
 
 from infinity.format import Format, register_format
 
@@ -81,12 +81,12 @@ class GAM_V20_Format (Format):
             { 'key': 'unknown28',
               'type': 'DWORD',
               'off': 0x0028,
-              'label': 'Unknown 28'},
+              'label': '(offset to party inventory)'},
 
             { 'key': 'unknown2C',
               'type': 'DWORD',
               'off': 0x002C,
-              'label': 'Unknown 2C'},
+              'label': '(count of party inventory)'},
 
             { 'key': 'npc_off',
               'type': 'DWORD',
@@ -324,6 +324,7 @@ class GAM_V20_Format (Format):
               'off': 0x0158,
               'size': 8,
               'label': 'Voice set' },
+
     )
 
     pc_desc = npc_desc
@@ -334,22 +335,38 @@ class GAM_V20_Format (Format):
               'off': 0x0000,
               'label': 'Variable name' },
 
-            { 'key': 'unknown20',
-              'type': 'BYTES',
+            { 'key': 'type',
+              'type': 'WORD',
               'off': 0x0020,
-              'size': 8,
-              'label': 'Unknown 20' },
+              # TODO: add mask:  (bit 0: int, bit 1: float, bit 2: script name, bit 3: resref, bit 4: strref, bit 5: dword)
+              'label': 'Type' },
 
-            { 'key': 'value',
+            { 'key': 'refval',
+              'type': 'WORD',
+              'off': 0x0022,
+              'label': 'Ref value' },
+
+            { 'key': 'dwval',
+              'type': 'DWORD',
+              'off': 0x0024,
+              'label': 'DWORD value' },
+
+            { 'key': 'intval',
               'type': 'DWORD',
               'off': 0x0028,
-              'label': 'Variable value' },
+              'label': 'INT value' },
 
-            { 'key': 'unknown2C',
+            { 'key': 'dblval',
               'type': 'BYTES',
-              'off': 0x002C,
-              'size': 40,
-              'label': 'Unknown 2C' },
+              'off': 0x002c,
+              'size': 8,
+              'label': 'DOUBLE value' },
+
+            { 'key': 'scrnameval',
+              'type': 'BYTES',
+              'off': 0x0033,
+              'size': 32,
+              'label': 'Script name value' },
     )
 
     journal_entry_desc = (
