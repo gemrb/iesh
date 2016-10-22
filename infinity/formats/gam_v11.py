@@ -391,7 +391,5 @@ class GAM_V11_Format (Format):
         self.print_list ('global')
         self.print_list ('journal_entry')
 
-        self.print_struc (self.familiar_info, self.familiar_info_desc)
-
 
 register_format (GAM_V11_Format, signature='GAMEV1.1', extension='GAM', name=('GAM', 'GAME'), type=0x3f5)
