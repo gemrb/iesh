@@ -51,6 +51,11 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
     core.chitin_file = chitin_file
     core.dialog_file = dialog_file
 
+    dialog_file = core.find_file (dialog_file)
+    if dialog_file is None:
+        print("Could NOT FIND dialog.tlk or the passed dialog file, aborting load!")
+        return
+
     # Load data from the override
     if core.override_dir is not None:
         core.override = core.load_override ()
@@ -65,7 +70,6 @@ def load_game (game_dir, chitin_file = None, dialog_file = None):
     stream.close ()
 
     # LOAD STRREF index file (DIALOG.TLK)
-    dialog_file = core.find_file (dialog_file)
     stream = FileStream ().open (dialog_file)
     core.strrefs = stream.get_format () ()
     core.strrefs.read_header (stream)
