@@ -148,12 +148,22 @@ restype_list = [
     [ 0x3fd, 'PRO ', 'PRO' ],
     [ None,  None,   'RES' ],
     [ 0x3fe, None,   'BIO' ],
+    [ 0x3ff, None,   'WBM' ],
+    [ 0x400, None,   'FNT' ],
+    [ 0x402, None,   'GUI' ],
+    [ 0x403, None,   'SQL' ],
+    [ 0x404, None,   'PVRZ' ],
+    [ 0x408, None,   'MENU' ],
+    [ 0x409, None,   'LUA' ],
+    [ 0x40a, None,   'TTF' ],
+    [ 0x40b, None,   'PNG' ],
     [ 0x44c, None,   'BA' ],
     [ None,  None,   'BAF' ],
     [ 0x802, 'INI',   'INI' ],
     [ 0x803, None,   'SRC' ],
-    [ None,  'TLK ', 'TOH' ],
-    [ None,  None,   'TOT' ],
+    [ 0x804, None,   'MAZE' ],
+    [ None,  'TLK ', 'TOH' ], # 0x407 in NI
+    [ None,  None,   'TOT' ], # 0x406 in NI
     [ None,  None,   'VAR' ],
     ]
 
