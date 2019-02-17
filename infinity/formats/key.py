@@ -146,9 +146,13 @@ class KEY_Format (Format):
 
         off = self.header['bif_offset']
         bif_record_size = self.get_struc_size (self.bif_record_desc)
+        bad_biffs = [ "data/progtest.bif", "data/ProgTes2.bif" ]
         for i in range (self.header['num_of_bifs']):
             obj = {}
             self.read_bif_record (stream, off, obj)
+            if obj['file_name'] in bad_biffs:
+                # no need to decrease self.header['num_of_bifs']
+                continue
             self.bif_list.append (obj)
             self.bif_hash[obj['file_name']] = obj
             off = off + bif_record_size
@@ -167,8 +171,11 @@ class KEY_Format (Format):
 
             obj = {}
             self.read_resref_record (stream, off, obj)
+            try:
+                obj['file_name'] = self.bif_list[obj['locator_src_ndx']]
+            except IndexError:
+                continue # entries referencing bad_biffs
             self.resref_list.append (obj)
-            obj['file_name'] = self.bif_list[obj['locator_src_ndx']]
             self.resref_hash[obj['resref_name']] = obj
             off = off + resref_record_size
 
