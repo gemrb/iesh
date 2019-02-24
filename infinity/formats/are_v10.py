@@ -107,7 +107,7 @@ class ARE_V10_Format (Format):
                   0x10: 'forest',
                   0x20: 'dungeon',
                   0x40: 'extended night',
-                  0x80: 'can rest inddors',
+                  0x80: 'can rest indoors',
                   },
               'label': 'Flag (AREATYPE.IDS)'},
 
@@ -916,7 +916,7 @@ class ARE_V10_Format (Format):
             { 'key': 'flags',
                 'type': 'DWORD',
                 'off': 0x0090,
-                'mask': { 0x01: 'Ambient enabled', 0x02: 'Reverb', 0x04: 'Global', 0x08: 'Random ambient selection', 0x10: 'Unknown bit4', 0x20: 'Unknown bit5', 0x40: 'Unknown bit6', 0x80: 'Unknown bit7' },
+                'mask': { 0x01: 'Ambient enabled', 0x02: 'Reverb', 0x04: 'Global', 0x08: 'Random ambient selection', 0x10: 'Skip on low mem systems', 0x20: 'Unknown bit5', 0x40: 'Unknown bit6', 0x80: 'Unknown bit7' },
                 'label': 'Flags' },
 
             { 'key': 'unknown_94',
