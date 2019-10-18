@@ -22,6 +22,7 @@ import dlg
 import eff_v20
 import gam
 import gam_v11
+import gam_v22
 import ids
 import ini
 import itm_v1
