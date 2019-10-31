@@ -114,7 +114,7 @@ class DLG_Format (Format):
     transition_desc = (
             { 'key': 'flags',
               'type': 'DWORD',
-              'mask': {0x01:'has text', 0x02:'has trigger', 0x04:'has action', 0x08:'terminates dlg', 0x10:'journal entry', 0x20:'unknown', 0x40:'add quest journal', 0x80:'del quest journal', 0x100:'add done quest journal'},
+              'mask': {0x01:'has text', 0x02:'has trigger', 0x04:'has action', 0x08:'terminates dlg', 0x10:'journal entry', 0x20:'unknown', 0x40:'add quest journal', 0x80:'del quest journal', 0x100:'add done quest journal', 0x200:'immediately execute actions', 0x400:'clear actions'},
               'off': 0x0000,
               'label': 'Flags'},
 
