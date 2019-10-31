@@ -130,8 +130,11 @@ class Stream (object):
         if offset is not None:
             self.seek (offset)
 
-        v = self.read (2)
         fmt = '<h' if signed else '<H'
+        v = self.read (2)
+        if v == "":
+            print("Erorr in read_word: empty value read!")
+            return 0
 
         return struct.unpack (fmt, v)[0]
 
@@ -147,8 +150,11 @@ class Stream (object):
         if offset is not None:
             self.seek (offset)
 
-        v = self.read (4)
         fmt = '<i' if signed else '<I'
+        v = self.read (4)
+        if v == "":
+            print("Erorr in read_dword: empty value read!")
+            return 0
 
         return struct.unpack (fmt, v)[0]
 
