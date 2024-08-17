@@ -196,10 +196,10 @@ class SPL_Format (Format):
               'off': 0x0000,
               'label': 'Spell form'},
 
-            { 'key': 'unknown1',
+            { 'key': 'pst_hostile',
               'type': 'BYTE',
               'off': 0x0001,
-              'label': 'Unknown1'},
+              'label': 'Hostile (PST-only)'},
 
             { 'key': 'location',
               'type': 'BYTE',

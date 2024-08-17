@@ -529,9 +529,14 @@ class ARE_V91_Format (Format):
                 'off': 0x0084,
                 'label': 'Alternative use point' },
 
+            { 'key': 'alternative_use_point2',
+                'type': 'RECT',
+                'off': 0x0088,
+                'label': 'Alternative use point2' },
+
             { 'key': 'unknown_88',
                 'type': 'DWORD',
-                'off': 0x0088,
+                'off': 0x0090,
                 'label': 'Unknown 88' },
 
             { 'key': 'unknown_8C',
