@@ -927,7 +927,7 @@ class ARE_V91_Format (Format):
             { 'key': 'flags',
                 'type': 'DWORD',
                 'off': 0x0028,
-                'mask': { 0x0001: 'Door open', 0x0002: 'Locked', 0x0004: 'Reset trap', 0x0008: 'Trap detectable', 0x0010: 'Broken', 0x0020: 'Can\'t close', 0x0040: 'Linked', 0x0080: 'Door hidden', 0x0100: 'Door found', 0x0200: 'Don\'t block LOS', 0x0400: 'Remove key', 0x0800: 'Slide' },
+                'mask': { 0x0001: 'Door open', 0x0002: 'Locked', 0x0004: 'Reset trap', 0x0008: 'Trap detectable', 0x0010: 'Broken', 0x0020: 'Can\'t close', 0x0040: 'Detected', 0x0080: 'Door secret', 0x0100: 'Secret found', 0x0200: 'Locked info text', 0x0400: 'See through', 0x0800: 'Warning info text', 0x1000: 'Warning displayed', 0x2000: 'Hidden', 0x4000: 'Remove key' },
                 'label': 'Flags' },
 
             { 'key': 'open_vertex_ndx',
