@@ -18,7 +18,10 @@
 
 import struct
 import sys
-import PIL
+try:
+    import PIL
+except ImportError: # for selfcompiled python2
+    pass
 
 from infinity import core
 from infinity.format import Format, register_format

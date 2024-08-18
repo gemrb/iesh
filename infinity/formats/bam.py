@@ -20,7 +20,10 @@ from __future__ import print_function
 
 import struct
 import sys
-import PIL
+try:
+	import PIL
+except ImportError: # for selfcompiled python2
+	pass
 
 from infinity.format import Format, register_format
 from infinity.stream import CompressedStream
