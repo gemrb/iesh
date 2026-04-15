@@ -56,9 +56,17 @@ if [[ -z $PAGER ]]; then
   PAGER=cat
 fi
 
+# fix use within tests — some files cause problems with process substitution
+tmpName1=$(mktemp)
+tmpName2=$(mktemp)
+$IEPARSE "$FILE1" > "$tmpName1"
+$IEPARSE "$FILE2" > "$tmpName2"
 if [[ $LOWER == 1 ]]; then
-  diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1" | tr '[[:upper:]]' '[[:lower:]]')\
-  <($IEPARSE "$FILE2" | tr '[[:upper:]]' '[[:lower:]]') | $PAGER
-else
-  diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1")  <($IEPARSE "$FILE2") | $PAGER
+  tmpName3=$(mktemp)
+  tr '[[:upper:]]' '[[:lower:]]' < "$tmpName1" >"$tmpName3"
+  mv "$tmpName3" "$tmpName1"
+  tr '[[:upper:]]' '[[:lower:]]' < "$tmpName2" >"$tmpName3"
+  mv "$tmpName3" "$tmpName2"
 fi
+diff $BASEDIFFOPTS $DIFFOPTS "$tmpName1" "$tmpName2" | $PAGER
+rm "$tmpName1" "$tmpName2"
