@@ -26,6 +26,7 @@ function usage ()
 
 IEPARSE="${IEPARSE:-$(dirname $0)/ieparse.py}"
 BASEDIFFOPTS="-as"
+LOWER=0
 
 for i in "$@"; do
   if [[ -f $i ]]; then
@@ -38,6 +39,8 @@ for i in "$@"; do
       continue
     fi
     usage
+  elif [[ $i == "--locase" ]]; then
+    LOWER=1
   else
     DIFFOPTS="$DIFFOPTS $i"
   fi
@@ -53,5 +56,9 @@ if [[ -z $PAGER ]]; then
   PAGER=cat
 fi
 
-diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1" | tr '[[:upper:]]' '[[:lower:]]')\
+if [[ $LOWER == 1 ]]; then
+  diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1" | tr '[[:upper:]]' '[[:lower:]]')\
   <($IEPARSE "$FILE2" | tr '[[:upper:]]' '[[:lower:]]') | $PAGER
+else
+  diff $BASEDIFFOPTS $DIFFOPTS <($IEPARSE "$FILE1")  <($IEPARSE "$FILE2") | $PAGER
+fi
