@@ -308,7 +308,8 @@ class Format (object):
             elif type == 'STRSIZED':
                 length = stream.read_dword (offset + local_offset)
                 # FIXME: asciiz or sized???
-                value = stream.read_asciiz_string (offset + local_offset + 4)
+                if length > 0:
+                    value = stream.read_asciiz_string (offset + local_offset + 4)
             elif type == 'BYTES':
                 value = stream.read_blob (offset + local_offset, d['size'])
             elif type == '_STRING':
