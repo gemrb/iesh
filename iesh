@@ -153,7 +153,7 @@ def read_command_file (filename):
     """Read commands to be executed from a file."""
 
     try: fh = open (filename)
-    except: return False
+    except IOError: return False
 
     commands.extend (map (lambda s: s.rstrip ("\n\r"), fh.readlines ()))
 
